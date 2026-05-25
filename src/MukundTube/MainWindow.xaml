@@ -7,7 +7,7 @@
         Height="800"
         MinWidth="980"
         MinHeight="620"
-        Background="White">
+        Background="#0F0F0F">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="56" />
@@ -15,8 +15,8 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="White"
-                BorderBrush="#E5E5E5"
+                Background="#0F0F0F"
+                BorderBrush="#303030"
                 BorderThickness="0,0,0,1"
                 Padding="24,0">
             <DockPanel LastChildFill="True">
@@ -24,19 +24,19 @@
                         MinWidth="88"
                         Height="36"
                         Padding="16,0"
-                        Background="#0F0F0F"
-                        Foreground="White"
+                        Background="#F1F1F1"
+                        Foreground="#0F0F0F"
                         BorderThickness="0"
                         Click="Refresh_Click"
                         Content="Refresh" />
                 <StackPanel Orientation="Vertical"
                             VerticalAlignment="Center">
                     <TextBlock Text="MukundTube"
-                               Foreground="#0F0F0F"
+                               Foreground="#F1F1F1"
                                FontSize="20"
                                FontWeight="Bold" />
                     <TextBlock Text="{Binding StatusText}"
-                               Foreground="#606060"
+                               Foreground="#AAAAAA"
                                FontSize="12"
                                TextTrimming="CharacterEllipsis" />
                 </StackPanel>
@@ -75,7 +75,7 @@
                     <TextBlock Grid.Row="0"
                                Text="Channels"
                                Margin="0,0,0,18"
-                               Foreground="#0F0F0F"
+                               Foreground="#F1F1F1"
                                FontSize="22"
                                FontWeight="Bold" />
 
@@ -97,10 +97,10 @@
                                     <ColumnDefinition Width="18" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="132" Height="132" Background="#EEEEEE" CornerRadius="66" />
+                                <Border Width="132" Height="132" Background="#2A2A2A" CornerRadius="66" />
                                 <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <Border Height="18" Width="240" HorizontalAlignment="Left" Background="#EEEEEE" CornerRadius="9" />
-                                    <Border Height="13" Width="140" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#EEEEEE" CornerRadius="7" />
+                                    <Border Height="18" Width="240" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
+                                    <Border Height="13" Width="140" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
                             <Grid MinHeight="132" Margin="0,0,0,18">
@@ -109,10 +109,10 @@
                                     <ColumnDefinition Width="18" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="132" Height="132" Background="#EEEEEE" CornerRadius="66" />
+                                <Border Width="132" Height="132" Background="#2A2A2A" CornerRadius="66" />
                                 <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <Border Height="18" Width="220" HorizontalAlignment="Left" Background="#EEEEEE" CornerRadius="9" />
-                                    <Border Height="13" Width="120" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#EEEEEE" CornerRadius="7" />
+                                    <Border Height="18" Width="220" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
+                                    <Border Height="13" Width="120" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
                             <Grid MinHeight="132" Margin="0,0,0,18">
@@ -121,10 +121,10 @@
                                     <ColumnDefinition Width="18" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="132" Height="132" Background="#EEEEEE" CornerRadius="66" />
+                                <Border Width="132" Height="132" Background="#2A2A2A" CornerRadius="66" />
                                 <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <Border Height="18" Width="260" HorizontalAlignment="Left" Background="#EEEEEE" CornerRadius="9" />
-                                    <Border Height="13" Width="150" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#EEEEEE" CornerRadius="7" />
+                                    <Border Height="18" Width="260" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
+                                    <Border Height="13" Width="150" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -134,7 +134,7 @@
                                  SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
                                  SelectionChanged="ChannelList_SelectionChanged"
                                  BorderThickness="0"
-                                 Background="White"
+                                 Background="#0F0F0F"
                                  ScrollViewer.CanContentScroll="True"
                                  VirtualizingPanel.IsVirtualizing="True"
                                  VirtualizingPanel.VirtualizationMode="Recycling">
@@ -172,7 +172,7 @@
                                         <Border Width="132"
                                                 Height="132"
                                                 HorizontalAlignment="Center"
-                                                Background="#EEEEEE"
+                                                Background="#272727"
                                                 CornerRadius="66"
                                                 ClipToBounds="True">
                                             <Image Source="{Binding ThumbnailUrl}"
@@ -182,13 +182,13 @@
                                         <StackPanel Grid.Column="2"
                                                     VerticalAlignment="Center">
                                             <TextBlock Text="{Binding Title}"
-                                                       Foreground="#0F0F0F"
+                                                       Foreground="#F1F1F1"
                                                        FontSize="18"
                                                        FontWeight="Bold"
                                                        TextWrapping="Wrap" />
                                             <TextBlock Text="Approved channel"
                                                        Margin="0,6,0,0"
-                                                       Foreground="#606060"
+                                                       Foreground="#AAAAAA"
                                                        FontSize="13" />
                                         </StackPanel>
                                     </Grid>
@@ -221,15 +221,15 @@
                         <Button MinWidth="92"
                                 Height="36"
                                 Padding="14,0"
-                                Background="#F2F2F2"
-                                Foreground="#0F0F0F"
+                                Background="#272727"
+                                Foreground="#F1F1F1"
                                 BorderThickness="0"
                                 Click="Back_Click"
                                 Content="Channels" />
                         <TextBlock Text="{Binding SelectedChannelTitle}"
                                    Margin="14,0,0,0"
                                    VerticalAlignment="Center"
-                                   Foreground="#0F0F0F"
+                                   Foreground="#F1F1F1"
                                    FontSize="22"
                                    FontWeight="Bold" />
                     </StackPanel>
@@ -271,10 +271,10 @@
                                     <ColumnDefinition Width="14" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="224" Height="126" Background="#EEEEEE" CornerRadius="10" />
+                                <Border Width="224" Height="126" Background="#2A2A2A" CornerRadius="10" />
                                 <StackPanel Grid.Column="2">
-                                    <Border Height="17" Width="420" HorizontalAlignment="Left" Background="#EEEEEE" CornerRadius="9" />
-                                    <Border Height="13" Width="180" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#EEEEEE" CornerRadius="7" />
+                                    <Border Height="17" Width="420" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
+                                    <Border Height="13" Width="180" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
                             <Grid Height="130" Margin="0,0,0,18">
@@ -283,10 +283,10 @@
                                     <ColumnDefinition Width="14" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="224" Height="126" Background="#EEEEEE" CornerRadius="10" />
+                                <Border Width="224" Height="126" Background="#2A2A2A" CornerRadius="10" />
                                 <StackPanel Grid.Column="2">
-                                    <Border Height="17" Width="360" HorizontalAlignment="Left" Background="#EEEEEE" CornerRadius="9" />
-                                    <Border Height="13" Width="160" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#EEEEEE" CornerRadius="7" />
+                                    <Border Height="17" Width="360" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
+                                    <Border Height="13" Width="160" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
                             <Grid Height="130" Margin="0,0,0,18">
@@ -295,10 +295,10 @@
                                     <ColumnDefinition Width="14" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="224" Height="126" Background="#EEEEEE" CornerRadius="10" />
+                                <Border Width="224" Height="126" Background="#2A2A2A" CornerRadius="10" />
                                 <StackPanel Grid.Column="2">
-                                    <Border Height="17" Width="390" HorizontalAlignment="Left" Background="#EEEEEE" CornerRadius="9" />
-                                    <Border Height="13" Width="150" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#EEEEEE" CornerRadius="7" />
+                                    <Border Height="17" Width="390" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
+                                    <Border Height="13" Width="150" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -307,7 +307,7 @@
                                  ItemsSource="{Binding Videos}"
                                  SelectedItem="{Binding SelectedVideo, Mode=TwoWay}"
                                  BorderThickness="0"
-                                 Background="White"
+                                 Background="#0F0F0F"
                                  SelectionChanged="VideoList_SelectionChanged"
                                  ScrollViewer.CanContentScroll="True"
                                  VirtualizingPanel.IsVirtualizing="True"
@@ -339,8 +339,8 @@
                                         </Grid.ColumnDefinitions>
 
                                         <Border Width="224"
-                                                Height="126"
-                                                Background="#EEEEEE"
+                                            Height="126"
+                                            Background="#272727"
                                                 CornerRadius="10"
                                                 ClipToBounds="True">
                                             <Image Source="{Binding ThumbnailUrl}"
@@ -351,13 +351,13 @@
                                             <TextBlock Text="{Binding Title}"
                                                        FontWeight="Bold"
                                                        FontSize="15"
-                                                       Foreground="#0F0F0F"
+                                                       Foreground="#F1F1F1"
                                                        MaxHeight="44"
                                                        TextWrapping="Wrap"
                                                        TextTrimming="CharacterEllipsis" />
                                             <TextBlock Text="{Binding PublishedAtText}"
                                                        Margin="0,6,0,0"
-                                                       Foreground="#606060"
+                                                       Foreground="#AAAAAA"
                                                        FontSize="13"
                                                        TextTrimming="CharacterEllipsis" />
                                         </StackPanel>

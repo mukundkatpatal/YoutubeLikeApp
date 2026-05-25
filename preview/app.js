@@ -315,6 +315,8 @@ async function showChannelVideos(channel) {
   state.selectedChannelId = channel.channelId;
   stopPlayer();
   elements.refreshButton.disabled = true;
+  elements.channelSection.classList.add("hidden");
+  elements.videoSection.classList.remove("hidden");
   showVideoSkeleton(true);
   setStatus(`Loading videos from ${channel.title}...`);
 
@@ -322,12 +324,13 @@ async function showChannelVideos(channel) {
     const videos = await loadChannelVideos(channel, state.config, state.settings.youTubeApiKey);
     state.allowedVideoIds = new Set(videos.map(video => video.videoId));
     elements.channelTitle.textContent = channel.title || "Videos";
-    renderVideos(videos);
-    elements.channelSection.classList.add("hidden");
-    elements.videoSection.classList.remove("hidden");
+    state.visibleVideos = videos;
+    elements.videoVirtualList.scrollTop = 0;
     setStatus(`${videos.length} approved videos loaded from ${channel.title}.`);
   } finally {
     showVideoSkeleton(false);
+    renderVirtualVideos();
+    requestAnimationFrame(renderVirtualVideos);
     elements.refreshButton.disabled = false;
   }
 }

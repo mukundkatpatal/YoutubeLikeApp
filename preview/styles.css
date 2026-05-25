@@ -1,9 +1,21 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   font-family: Roboto, Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.35;
-  color: #0f0f0f;
-  background: #ffffff;
+  color: #f1f1f1;
+  background: #0f0f0f;
+  --bg: #0f0f0f;
+  --surface: #181818;
+  --surface-hover: #272727;
+  --border: #303030;
+  --text: #f1f1f1;
+  --muted: #aaa;
+  --button: #f1f1f1;
+  --button-text: #0f0f0f;
+  --thumb-bg: #272727;
+  --skeleton: #2a2a2a;
+  --skeleton-sheen: rgba(255, 255, 255, 0.12);
+  --accent: #ff0033;
 }
 
 * {
@@ -17,7 +29,7 @@ body {
 
 body {
   margin: 0;
-  background: #ffffff;
+  background: var(--bg);
 }
 
 .topbar {
@@ -30,8 +42,8 @@ body {
   gap: 16px;
   height: 56px;
   padding: 0 24px;
-  background: rgba(255, 255, 255, 0.96);
-  border-bottom: 1px solid #e5e5e5;
+  background: rgba(15, 15, 15, 0.96);
+  border-bottom: 1px solid var(--border);
 }
 
 h1,
@@ -41,7 +53,7 @@ p {
 }
 
 h1 {
-  color: #0f0f0f;
+  color: var(--text);
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 0;
@@ -51,7 +63,7 @@ h1 {
   margin-top: 2px;
   max-width: min(760px, 60vw);
   overflow: hidden;
-  color: #606060;
+  color: var(--muted);
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -61,8 +73,8 @@ button {
   height: 36px;
   border: 0;
   border-radius: 18px;
-  background: #0f0f0f;
-  color: #ffffff;
+  background: var(--button);
+  color: var(--button-text);
   font-weight: 700;
   cursor: pointer;
 }
@@ -75,8 +87,8 @@ button:disabled {
 .plain-button {
   min-width: 92px;
   padding: 0 14px;
-  background: #f2f2f2;
-  color: #0f0f0f;
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
 .app-shell {
@@ -113,7 +125,7 @@ button:disabled {
 }
 
 .video-details h2 {
-  color: #0f0f0f;
+  color: var(--text);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.3;
@@ -121,7 +133,7 @@ button:disabled {
 
 .video-details p {
   margin-top: 8px;
-  color: #606060;
+  color: var(--muted);
   font-size: 14px;
 }
 
@@ -138,7 +150,7 @@ button:disabled {
 }
 
 .section-heading h2 {
-  color: #0f0f0f;
+  color: var(--text);
   font-size: 22px;
   font-weight: 700;
 }
@@ -183,7 +195,7 @@ button:disabled {
 
 .channel-card:hover .card-title,
 .video-card:hover .card-title {
-  color: #065fd4;
+  color: var(--accent);
 }
 
 .channel-thumb-wrap {
@@ -197,7 +209,7 @@ button:disabled {
   height: 156px;
   border-radius: 50%;
   object-fit: cover;
-  background: #eeeeee;
+  background: var(--thumb-bg);
 }
 
 .video-thumb {
@@ -205,14 +217,14 @@ button:disabled {
   aspect-ratio: 16 / 9;
   border-radius: 10px;
   object-fit: cover;
-  background: #eeeeee;
+  background: var(--thumb-bg);
 }
 
 .card-title {
   display: -webkit-box;
   margin-top: 10px;
   overflow: hidden;
-  color: #0f0f0f;
+  color: var(--text);
   font-size: 15px;
   font-weight: 700;
   line-height: 1.25;
@@ -223,7 +235,7 @@ button:disabled {
 .card-meta {
   margin-top: 6px;
   overflow: hidden;
-  color: #606060;
+  color: var(--muted);
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -231,7 +243,7 @@ button:disabled {
 
 .empty {
   padding: 36px 0;
-  color: #606060;
+  color: var(--muted);
   font-size: 14px;
 }
 
@@ -247,7 +259,7 @@ button:disabled {
 .skeleton-line {
   position: relative;
   overflow: hidden;
-  background: #eeeeee;
+  background: var(--skeleton);
 }
 
 .skeleton-thumb::after,
@@ -256,7 +268,7 @@ button:disabled {
   inset: 0;
   content: "";
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  background: linear-gradient(90deg, transparent, var(--skeleton-sheen), transparent);
   animation: shimmer 1.25s infinite;
 }
 
