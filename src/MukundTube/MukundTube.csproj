@@ -5,8 +5,9 @@
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
-    <AssemblyName>MukundTube</AssemblyName>
+    <AssemblyName>sneakyTube</AssemblyName>
     <RootNamespace>MukundTube</RootNamespace>
+    <Product>sneakyTube</Product>
     <Version>0.1.0</Version>
     <FileVersion>0.1.0.0</FileVersion>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>

@@ -37,5 +37,5 @@ createServer((request, response) => {
   });
   createReadStream(filePath).pipe(response);
 }).listen(port, () => {
-  console.log(`MukundTube preview: http://localhost:${port}/preview/`);
+  console.log(`sneakyTube preview: http://localhost:${port}/preview/`);
 });

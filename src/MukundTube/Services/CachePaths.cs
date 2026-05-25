@@ -2,7 +2,7 @@ namespace MukundTube.Services;
 
 public static class CachePaths
 {
-    public const string AppFolderName = "MukundTube";
+    public const string AppFolderName = "sneakyTube";
 
     public static string AppDataDirectory
     {

@@ -1,8 +1,8 @@
-# MukundTube Setup
+# sneakyTube Setup
 
 ## What This App Does
 
-MukundTube is a curated YouTube viewer. It shows only videos allowed by a remote JSON config and plays them through the official YouTube embedded player.
+sneakyTube is a curated YouTube viewer. It shows only videos allowed by a remote JSON config and plays them through the official YouTube embedded player.
 
 It is not a full parental-control system. Qustodio, Windows Family Safety, a child Windows account, and blocking alternate browsers still matter. If `youtube.com` is blocked only inside Chrome and Edge, WebView2 may still work, but test it on the actual Windows machine before trusting that assumption.
 
@@ -22,8 +22,8 @@ Use YouTube channel IDs that start with `UC...`, not handles like `@channelname`
 
 Create a YouTube Data API v3 key in Google Cloud and restrict it as tightly as Google allows for your deployment. Then put it in either:
 
-- `%LocalAppData%\MukundTube\settings.json`
-- `settings.local.json` beside `MukundTube.exe`
+- `%LocalAppData%\sneakyTube\settings.json`
+- `settings.local.json` beside `sneakyTube.exe`
 - Environment variable `MUKUND_TUBE_YOUTUBE_API_KEY`
 
 Example:
@@ -98,7 +98,7 @@ http://localhost:4173/preview/
 
 The preview uses the same config shape and feed filtering. Without a YouTube Data API key it shows local sample videos. With a key it reads the remote config and YouTube Data API. Playback in the preview uses a direct official YouTube embed; the Windows app adds the WebView2 playback guard.
 
-For real data in the Mac preview, create `preview/settings.local.json` from `preview/settings.local.sample.json` and paste the API key there. That local settings file is ignored by Git. The production Windows app reads the API key from `settings.local.json`, `%LocalAppData%\MukundTube\settings.json`, or the `MUKUND_TUBE_YOUTUBE_API_KEY` environment variable.
+For real data in the Mac preview, create `preview/settings.local.json` from `preview/settings.local.sample.json` and paste the API key there. That local settings file is ignored by Git. The production Windows app reads the API key from `settings.local.json`, `%LocalAppData%\sneakyTube\settings.json`, or the `MUKUND_TUBE_YOUTUBE_API_KEY` environment variable.
 
 `maxVideosPerChannel` controls how many approved uploads are fetched per channel. YouTube returns at most 50 playlist items per request, so the app paginates up to the configured limit. Keep this number reasonable, such as 50-100, unless you are comfortable spending more API quota during every refresh.
 
