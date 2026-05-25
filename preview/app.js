@@ -8,7 +8,8 @@ const elements = {
   channelSection: document.querySelector("#channelSection"),
   videoSection: document.querySelector("#videoSection"),
   channelGrid: document.querySelector("#channelGrid"),
-  videoGrid: document.querySelector("#videoGrid"),
+  videoVirtualList: document.querySelector("#videoVirtualList"),
+  videoVirtualSpacer: document.querySelector("#videoVirtualSpacer"),
   backButton: document.querySelector("#backButton"),
   channelTitle: document.querySelector("#channelTitle"),
   player: document.querySelector("#player"),
@@ -25,6 +26,7 @@ const state = {
   channels: [],
   videosByChannelId: new Map(),
   allowedVideoIds: new Set(),
+  visibleVideos: [],
   selectedChannelId: "",
   selectedVideoId: ""
 };
@@ -40,6 +42,9 @@ elements.backButton.addEventListener("click", () => {
   elements.channelSection.classList.remove("hidden");
   setStatus(`${state.channels.length} approved channels loaded.`);
 });
+
+elements.videoVirtualList.addEventListener("scroll", renderVirtualVideos);
+window.addEventListener("resize", renderVirtualVideos);
 
 await refresh();
 
@@ -93,7 +98,7 @@ async function loadConfig(configUrl) {
     version: config.version,
     updatedAt: config.updatedAt,
     refreshIntervalMinutes: config.refreshIntervalMinutes ?? 60,
-    maxVideosPerChannel: Math.min(Math.max(config.maxVideosPerChannel ?? 25, 1), 50),
+    maxVideosPerChannel: Math.min(Math.max(config.maxVideosPerChannel ?? 25, 1), 200),
     channels: Array.isArray(config.channels) ? config.channels : [],
     blockedVideoIds: Array.isArray(config.blockedVideoIds) ? config.blockedVideoIds : [],
     pinnedVideoIds: Array.isArray(config.pinnedVideoIds) ? config.pinnedVideoIds : []
@@ -185,12 +190,12 @@ async function loadChannelVideos(channel, config, apiKey) {
     return [];
   }
 
-  const response = await fetchJson(`${apiBaseUrl}/playlistItems?part=snippet,contentDetails&playlistId=${encodeURIComponent(channel.uploadsPlaylistId)}&maxResults=${config.maxVideosPerChannel}&key=${encodeURIComponent(apiKey)}`);
+  const responseItems = await getPlaylistItems(channel.uploadsPlaylistId, config.maxVideosPerChannel, apiKey);
   const blockedVideoIds = new Set(config.blockedVideoIds);
   const pinnedVideoIds = new Set(config.pinnedVideoIds);
   const pinnedOrder = new Map(config.pinnedVideoIds.map((videoId, index) => [videoId, index]));
 
-  const videos = (response.items || [])
+  const videos = responseItems
     .map(item => ({
       videoId: item.contentDetails?.videoId || item.snippet?.resourceId?.videoId || "",
       title: item.snippet?.title || "",
@@ -221,6 +226,29 @@ async function loadChannelVideos(channel, config, apiKey) {
 
   state.videosByChannelId.set(channel.channelId, videos);
   return videos;
+}
+
+async function getPlaylistItems(playlistId, maxResults, apiKey) {
+  const requestedResults = Math.min(Math.max(maxResults || 25, 1), 200);
+  let remaining = requestedResults;
+  let pageToken = "";
+  const items = [];
+
+  while (remaining > 0) {
+    const pageSize = Math.min(remaining, 50);
+    const pageTokenParameter = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : "";
+    const response = await fetchJson(`${apiBaseUrl}/playlistItems?part=snippet,contentDetails&playlistId=${encodeURIComponent(playlistId)}&maxResults=${pageSize}${pageTokenParameter}&key=${encodeURIComponent(apiKey)}`);
+    items.push(...(response.items || []));
+
+    remaining = requestedResults - items.length;
+    if (!response.nextPageToken || !(response.items || []).length) {
+      break;
+    }
+
+    pageToken = response.nextPageToken;
+  }
+
+  return items;
 }
 
 function renderChannels() {
@@ -268,6 +296,9 @@ function renderChannelCard(channel) {
 }
 
 async function showChannelVideos(channel) {
+  state.visibleVideos = [];
+  elements.videoVirtualSpacer.innerHTML = "";
+  elements.videoVirtualSpacer.style.height = "0px";
   state.selectedChannelId = channel.channelId;
   stopPlayer();
   elements.refreshButton.disabled = true;
@@ -287,16 +318,54 @@ async function showChannelVideos(channel) {
 }
 
 function renderVideos(videos) {
-  elements.videoGrid.innerHTML = "";
+  state.visibleVideos = videos;
+  elements.videoVirtualList.scrollTop = 0;
+  renderVirtualVideos();
+}
+
+function renderVirtualVideos() {
+  const videos = state.visibleVideos;
+  const layout = getVideoGridLayout();
+  const rowCount = Math.ceil(videos.length / layout.columns);
+  elements.videoVirtualSpacer.style.height = `${rowCount * layout.rowHeight}px`;
+  elements.videoVirtualSpacer.innerHTML = "";
 
   if (!videos.length) {
-    elements.videoGrid.append(emptyMessage("No approved videos are available for this channel."));
+    elements.videoVirtualSpacer.style.height = "auto";
+    elements.videoVirtualSpacer.append(emptyMessage("No approved videos are available for this channel."));
     return;
   }
 
-  for (const video of videos) {
-    elements.videoGrid.append(renderVideoCard(video));
+  const scrollTop = elements.videoVirtualList.scrollTop;
+  const viewportHeight = elements.videoVirtualList.clientHeight;
+  const startRow = Math.max(Math.floor(scrollTop / layout.rowHeight) - 2, 0);
+  const endRow = Math.min(Math.ceil((scrollTop + viewportHeight) / layout.rowHeight) + 2, rowCount);
+  const startIndex = startRow * layout.columns;
+  const endIndex = Math.min(endRow * layout.columns, videos.length);
+
+  for (let index = startIndex; index < endIndex; index++) {
+    const row = Math.floor(index / layout.columns);
+    const column = index % layout.columns;
+    const card = renderVideoCard(videos[index]);
+    card.classList.add("virtual-video-card");
+    card.style.width = `${layout.cardWidth}px`;
+    card.style.left = `${column * (layout.cardWidth + layout.columnGap)}px`;
+    card.style.top = `${row * layout.rowHeight}px`;
+    elements.videoVirtualSpacer.append(card);
   }
+}
+
+function getVideoGridLayout() {
+  const width = elements.videoVirtualList.clientWidth;
+  const columnGap = window.matchMedia("(max-width: 760px)").matches ? 14 : 18;
+  const rowGap = window.matchMedia("(max-width: 760px)").matches ? 22 : 26;
+  const minCardWidth = window.matchMedia("(max-width: 760px)").matches ? 170 : 230;
+  const columns = Math.max(1, Math.floor((width + columnGap) / (minCardWidth + columnGap)));
+  const cardWidth = Math.floor((width - columnGap * (columns - 1)) / columns);
+  const thumbnailHeight = cardWidth * 9 / 16;
+  const rowHeight = Math.ceil(thumbnailHeight + 82 + rowGap);
+
+  return { cardWidth, columnGap, columns, rowHeight };
 }
 
 function renderVideoCard(video) {

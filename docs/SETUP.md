@@ -79,6 +79,8 @@ The preview uses the same config shape and feed filtering. Without a YouTube Dat
 
 For real data in the Mac preview, create `preview/settings.local.json` from `preview/settings.local.sample.json` and paste the API key there. That local settings file is ignored by Git. The production Windows app reads the API key from `settings.local.json`, `%LocalAppData%\MukundTube\settings.json`, or the `MUKUND_TUBE_YOUTUBE_API_KEY` environment variable.
 
+`maxVideosPerChannel` controls how many approved uploads are fetched per channel. YouTube returns at most 50 playlist items per request, so the app paginates up to the configured limit. Keep this number reasonable, such as 50-100, unless you are comfortable spending more API quota during every refresh.
+
 ## Compliance Notes
 
 - The app uses YouTube Data API for metadata and the official IFrame player for playback.

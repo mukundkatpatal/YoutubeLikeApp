@@ -2,7 +2,7 @@
   "version": 1,
   "updatedAt": "2026-05-25T00:00:00Z",
   "refreshIntervalMinutes": 60,
-  "maxVideosPerChannel": 25,
+  "maxVideosPerChannel": 100,
   "channels": [
     {
       "channelId": "UCxxxxxxxxxxxxxxxxxxxxxx",
@@ -17,4 +17,3 @@
     "VIDEOID5678"
   ]
 }
-

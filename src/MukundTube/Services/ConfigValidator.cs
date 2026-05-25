@@ -23,9 +23,9 @@ public static class ConfigValidator
             errors.Add("refreshIntervalMinutes must be between 1 and 1440.");
         }
 
-        if (config.MaxVideosPerChannel is < 1 or > 50)
+        if (config.MaxVideosPerChannel is < 1 or > 200)
         {
-            errors.Add("maxVideosPerChannel must be between 1 and 50.");
+            errors.Add("maxVideosPerChannel must be between 1 and 200.");
         }
 
         var channelIds = new HashSet<string>(StringComparer.Ordinal);
@@ -79,4 +79,3 @@ public static class ConfigValidator
         return char.IsAsciiLetterOrDigit(value) || value is '-' or '_';
     }
 }
-

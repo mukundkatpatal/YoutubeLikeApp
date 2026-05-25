@@ -28,11 +28,10 @@ public sealed class YouTubeDataApiClient
             return [];
         }
 
-        var url =
-            $"{ApiBaseUrl}/playlistItems?part=snippet,contentDetails&playlistId={Uri.EscapeDataString(uploadsPlaylistId)}&maxResults={maxResults}&key={Uri.EscapeDataString(apiKey)}";
-        var response = await SendAsync<PlaylistItemsResponse>(url, cancellationToken).ConfigureAwait(false);
+        var response = await GetPlaylistItemsAsync(uploadsPlaylistId, maxResults, apiKey, cancellationToken)
+            .ConfigureAwait(false);
 
-        return response.Items
+        return response
             .Select(ToVideoItem)
             .Where(video => !string.IsNullOrWhiteSpace(video.VideoId))
             .Where(video => !IsPlaceholderTitle(video.Title))
@@ -101,6 +100,41 @@ public sealed class YouTubeDataApiClient
             $"{ApiBaseUrl}/channels?part=contentDetails&id={Uri.EscapeDataString(channelId)}&key={Uri.EscapeDataString(apiKey)}";
         var response = await SendAsync<ChannelsResponse>(url, cancellationToken).ConfigureAwait(false);
         return response.Items.FirstOrDefault()?.ContentDetails?.RelatedPlaylists?.Uploads;
+    }
+
+    private async Task<IReadOnlyList<PlaylistItemResource>> GetPlaylistItemsAsync(
+        string playlistId,
+        int maxResults,
+        string apiKey,
+        CancellationToken cancellationToken)
+    {
+        var requestedResults = Math.Clamp(maxResults, 1, 200);
+        var remaining = requestedResults;
+        var pageToken = "";
+        var results = new List<PlaylistItemResource>();
+
+        while (remaining > 0)
+        {
+            var pageSize = Math.Min(remaining, 50);
+            var pageTokenParameter = string.IsNullOrWhiteSpace(pageToken)
+                ? ""
+                : $"&pageToken={Uri.EscapeDataString(pageToken)}";
+            var url =
+                $"{ApiBaseUrl}/playlistItems?part=snippet,contentDetails&playlistId={Uri.EscapeDataString(playlistId)}&maxResults={pageSize}{pageTokenParameter}&key={Uri.EscapeDataString(apiKey)}";
+            var response = await SendAsync<PlaylistItemsResponse>(url, cancellationToken).ConfigureAwait(false);
+
+            results.AddRange(response.Items);
+            remaining = requestedResults - results.Count;
+
+            if (string.IsNullOrWhiteSpace(response.NextPageToken) || response.Items.Count == 0)
+            {
+                break;
+            }
+
+            pageToken = response.NextPageToken;
+        }
+
+        return results;
     }
 
     private static ChannelItem ToChannelItem(ChannelResource item, IReadOnlyDictionary<string, string> configuredTitles)
@@ -230,6 +264,8 @@ public sealed class YouTubeDataApiClient
     private sealed record PlaylistItemsResponse
     {
         public IReadOnlyList<PlaylistItemResource> Items { get; init; } = [];
+
+        public string? NextPageToken { get; init; }
     }
 
     private sealed record PlaylistItemResource
