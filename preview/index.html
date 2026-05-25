@@ -26,17 +26,23 @@
     </label>
   </section>
 
-  <main class="workspace">
+  <main class="watch-page">
+    <section class="watch-main" aria-label="Selected video">
+      <div class="player-frame">
+        <div id="player" class="player"></div>
+      </div>
+      <div class="video-details">
+        <h2 id="selectedTitle">Choose an approved video</h2>
+        <p id="selectedMeta">The list stays scrollable without resizing the player.</p>
+      </div>
+    </section>
     <aside class="feed" aria-label="Approved videos">
       <div id="virtualList" class="virtual-list" role="listbox" aria-label="Approved videos">
         <div id="virtualSpacer" class="virtual-spacer"></div>
       </div>
     </aside>
-    <section class="player-shell" aria-label="Player">
-      <div id="player" class="player"></div>
-    </section>
   </main>
 
-  <script type="module" src="./app.js?v=7"></script>
+  <script type="module" src="./app.js?v=9"></script>
 </body>
 </html>

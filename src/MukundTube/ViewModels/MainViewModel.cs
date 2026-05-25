@@ -43,10 +43,23 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public VideoItem? SelectedVideo
     {
         get => _selectedVideo;
-        set => SetField(ref _selectedVideo, value);
+        set
+        {
+            if (SetField(ref _selectedVideo, value))
+            {
+                OnPropertyChanged(nameof(SelectedVideoTitle));
+                OnPropertyChanged(nameof(SelectedVideoMeta));
+            }
+        }
     }
 
     public bool HasVideos => Videos.Count > 0;
+
+    public string SelectedVideoTitle => SelectedVideo?.Title ?? "Choose an approved video";
+
+    public string SelectedVideoMeta => SelectedVideo is null
+        ? "The video list scrolls independently without resizing the player."
+        : $"{SelectedVideo.ChannelTitle} - {SelectedVideo.PublishedAtText}";
 
     public async Task RefreshAsync(CancellationToken cancellationToken)
     {
@@ -126,4 +139,3 @@ public sealed class MainViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
-

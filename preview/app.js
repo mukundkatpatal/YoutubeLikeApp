@@ -9,7 +9,9 @@ const elements = {
   configUrlInput: document.querySelector("#configUrlInput"),
   virtualList: document.querySelector("#virtualList"),
   virtualSpacer: document.querySelector("#virtualSpacer"),
-  player: document.querySelector("#player")
+  player: document.querySelector("#player"),
+  selectedTitle: document.querySelector("#selectedTitle"),
+  selectedMeta: document.querySelector("#selectedMeta")
 };
 
 const state = {
@@ -232,6 +234,8 @@ function renderRow(video, index) {
 
 async function playVideo(video) {
   state.selectedVideoId = video.videoId;
+  elements.selectedTitle.textContent = video.title;
+  elements.selectedMeta.textContent = `${video.channelTitle} • ${formatDate(video.publishedAt)}`;
   renderVirtualRows();
   setStatus(`Opening approved video: ${video.title}`);
 
@@ -280,9 +284,21 @@ function renderFallbackIframe(video, playerVars) {
 async function fetchJson(url) {
   const response = await fetch(url, { cache: "no-store" });
   if (!response.ok) {
-    throw new Error(`${url} returned HTTP ${response.status}`);
+    throw new Error(`${redactApiKey(url)} returned HTTP ${response.status}`);
   }
   return response.json();
+}
+
+function redactApiKey(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.searchParams.has("key")) {
+      parsed.searchParams.set("key", "REDACTED");
+    }
+    return parsed.toString();
+  } catch {
+    return url.replace(/([?&]key=)[^&]+/i, "$1REDACTED");
+  }
 }
 
 function pickThumbnail(thumbnails) {

@@ -3,50 +3,80 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="MukundTube"
-        Width="1200"
-        Height="760"
-        MinWidth="900"
-        MinHeight="560"
-        Background="#F5F7FA">
+        Width="1280"
+        Height="800"
+        MinWidth="980"
+        MinHeight="620"
+        Background="White">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="56" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="#102033"
-                Padding="18,14">
+                Background="White"
+                BorderBrush="#E5E5E5"
+                BorderThickness="0,0,0,1"
+                Padding="24,0">
             <DockPanel LastChildFill="True">
                 <Button DockPanel.Dock="Right"
-                        MinWidth="96"
-                        Height="34"
-                        Padding="14,0"
+                        MinWidth="88"
+                        Height="36"
+                        Padding="16,0"
+                        Background="#0F0F0F"
+                        Foreground="White"
+                        BorderThickness="0"
                         Click="Refresh_Click"
                         Content="Refresh" />
-                <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Vertical"
+                            VerticalAlignment="Center">
                     <TextBlock Text="MukundTube"
-                               Foreground="White"
-                               FontSize="21"
-                               FontWeight="SemiBold" />
+                               Foreground="#0F0F0F"
+                               FontSize="20"
+                               FontWeight="Bold" />
                     <TextBlock Text="{Binding StatusText}"
-                               Foreground="#C7D2E0"
-                               FontSize="13"
+                               Foreground="#606060"
+                               FontSize="12"
                                TextTrimming="CharacterEllipsis" />
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1"
+              Margin="24">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="380" />
                 <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="24" />
+                <ColumnDefinition Width="400" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0"
-                    Background="White"
-                    BorderBrush="#D7DEE8"
-                    BorderThickness="0,0,1,0">
+            <ScrollViewer Grid.Column="0"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <Grid Height="520"
+                          Background="Black"
+                          ClipToBounds="True">
+                        <wv2:WebView2 x:Name="PlayerWebView" />
+                    </Grid>
+
+                    <TextBlock Text="{Binding SelectedVideoTitle}"
+                               Margin="0,14,0,0"
+                               Foreground="#0F0F0F"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding SelectedVideoMeta}"
+                               Margin="0,8,0,0"
+                               Foreground="#606060"
+                               FontSize="14"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <Border Grid.Column="2"
+                    Background="White">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -76,44 +106,44 @@
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="12"
-                                      MinHeight="88">
+                                <Grid Margin="0,0,0,10"
+                                      Height="94">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="128" />
+                                        <ColumnDefinition Width="168" />
+                                        <ColumnDefinition Width="10" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
                                     <Border Grid.Column="0"
-                                            Width="120"
-                                            Height="68"
-                                            Background="#DDE4EE"
-                                            CornerRadius="4"
+                                            Width="168"
+                                            Height="94"
+                                            Background="#EEEEEE"
+                                            CornerRadius="8"
                                             ClipToBounds="True">
                                         <Image Source="{Binding ThumbnailUrl}"
                                                Stretch="UniformToFill" />
                                     </Border>
 
-                                    <StackPanel Grid.Column="1"
-                                                Margin="10,0,0,0">
+                                    <StackPanel Grid.Column="2">
                                         <TextBlock Text="{Binding Title}"
-                                                   FontWeight="SemiBold"
-                                                   FontSize="13"
-                                                   Foreground="#111827"
-                                                   MaxHeight="38"
+                                                   FontWeight="Bold"
+                                                   FontSize="14"
+                                                   Foreground="#0F0F0F"
+                                                   MaxHeight="40"
                                                    TextWrapping="Wrap"
                                                    TextTrimming="CharacterEllipsis" />
                                         <TextBlock Text="{Binding ChannelTitle}"
-                                                   Margin="0,4,0,0"
-                                                   Foreground="#4B5563"
+                                                   Margin="0,5,0,0"
+                                                   Foreground="#606060"
                                                    FontSize="12"
                                                    TextTrimming="CharacterEllipsis" />
-                                        <DockPanel Margin="0,4,0,0">
+                                        <DockPanel Margin="0,5,0,0">
                                             <TextBlock Text="Pinned"
                                                        DockPanel.Dock="Right"
                                                        Margin="8,0,0,0"
-                                                       Foreground="#0F766E"
+                                                       Foreground="#065FD4"
                                                        FontSize="12"
-                                                       FontWeight="SemiBold">
+                                                       FontWeight="Bold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Visibility" Value="Collapsed" />
@@ -126,7 +156,7 @@
                                                 </TextBlock.Style>
                                             </TextBlock>
                                             <TextBlock Text="{Binding PublishedAtText}"
-                                                       Foreground="#6B7280"
+                                                       Foreground="#606060"
                                                        FontSize="12"
                                                        TextTrimming="CharacterEllipsis" />
                                         </DockPanel>
@@ -137,12 +167,6 @@
                     </ListBox>
                 </Grid>
             </Border>
-
-            <Grid Grid.Column="1"
-                  Background="#080808">
-                <wv2:WebView2 x:Name="PlayerWebView" />
-            </Grid>
         </Grid>
     </Grid>
 </Window>
-
