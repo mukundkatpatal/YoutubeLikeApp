@@ -13,6 +13,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private readonly UserSettings _settings;
     private bool _isLoading;
     private string _statusText = "Starting...";
+    private ChannelItem? _selectedChannel;
     private VideoItem? _selectedVideo;
 
     public MainViewModel(ConfigService configService, FeedService feedService, UserSettings settings)
@@ -23,6 +24,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    public ObservableCollection<ChannelItem> Channels { get; } = [];
 
     public ObservableCollection<VideoItem> Videos { get; } = [];
 
@@ -53,7 +56,26 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public ChannelItem? SelectedChannel
+    {
+        get => _selectedChannel;
+        set
+        {
+            if (SetField(ref _selectedChannel, value))
+            {
+                OnPropertyChanged(nameof(SelectedChannelTitle));
+                OnPropertyChanged(nameof(IsChannelSelected));
+            }
+        }
+    }
+
+    public bool IsChannelSelected => SelectedChannel is not null;
+
+    public string SelectedChannelTitle => SelectedChannel?.Title ?? "Channels";
+
     public bool HasVideos => Videos.Count > 0;
+
+    public bool HasChannels => Channels.Count > 0;
 
     public string SelectedVideoTitle => SelectedVideo?.Title ?? "Choose an approved video";
 
@@ -69,13 +91,17 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
 
         IsLoading = true;
-        StatusText = "Loading approved videos...";
+        StatusText = "Loading approved channels...";
 
         try
         {
             if (string.IsNullOrWhiteSpace(_settings.YouTubeApiKey))
             {
+                Channels.Clear();
                 Videos.Clear();
+                SelectedChannel = null;
+                SelectedVideo = null;
+                OnPropertyChanged(nameof(HasChannels));
                 OnPropertyChanged(nameof(HasVideos));
                 StatusText = "Missing YouTube API key. Add settings.local.json beside the app or set MUKUND_TUBE_YOUTUBE_API_KEY.";
                 return;
@@ -86,14 +112,70 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
             if (!configResult.HasUsableConfig)
             {
+                Channels.Clear();
                 Videos.Clear();
+                SelectedChannel = null;
                 SelectedVideo = null;
+                OnPropertyChanged(nameof(HasChannels));
                 OnPropertyChanged(nameof(HasVideos));
                 StatusText = configResult.Message;
                 return;
             }
 
-            var videos = await _feedService.LoadFeedAsync(CurrentConfig, _settings.YouTubeApiKey, cancellationToken)
+            var channels = await _feedService.LoadChannelsAsync(CurrentConfig, _settings.YouTubeApiKey, cancellationToken)
+                .ConfigureAwait(true);
+
+            Channels.Clear();
+            foreach (var channel in channels)
+            {
+                Channels.Add(channel);
+            }
+
+            Videos.Clear();
+            SelectedChannel = null;
+            SelectedVideo = null;
+
+            OnPropertyChanged(nameof(HasChannels));
+            OnPropertyChanged(nameof(HasVideos));
+            StatusText = $"{channels.Count} approved channels loaded. {configResult.Message}";
+        }
+        catch (OperationCanceledException)
+        {
+            StatusText = "Refresh cancelled.";
+        }
+        catch (Exception ex)
+        {
+            Channels.Clear();
+            Videos.Clear();
+            SelectedChannel = null;
+            SelectedVideo = null;
+            OnPropertyChanged(nameof(HasChannels));
+            OnPropertyChanged(nameof(HasVideos));
+            StatusText = $"Could not load channels. {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    public async Task SelectChannelAsync(ChannelItem channel, CancellationToken cancellationToken)
+    {
+        if (IsLoading)
+        {
+            return;
+        }
+
+        IsLoading = true;
+        SelectedChannel = channel;
+        SelectedVideo = null;
+        Videos.Clear();
+        OnPropertyChanged(nameof(HasVideos));
+        StatusText = $"Loading videos from {channel.Title}...";
+
+        try
+        {
+            var videos = await _feedService.LoadChannelVideosAsync(CurrentConfig, channel, _settings.YouTubeApiKey, cancellationToken)
                 .ConfigureAwait(true);
 
             Videos.Clear();
@@ -103,18 +185,17 @@ public sealed class MainViewModel : INotifyPropertyChanged
             }
 
             OnPropertyChanged(nameof(HasVideos));
-            StatusText = $"{videos.Count} approved videos loaded. {configResult.Message}";
+            StatusText = $"{videos.Count} approved videos loaded from {channel.Title}.";
         }
         catch (OperationCanceledException)
         {
-            StatusText = "Refresh cancelled.";
+            StatusText = "Channel load cancelled.";
         }
         catch (Exception ex)
         {
             Videos.Clear();
-            SelectedVideo = null;
             OnPropertyChanged(nameof(HasVideos));
-            StatusText = $"Could not load videos. {ex.Message}";
+            StatusText = $"Could not load channel videos. {ex.Message}";
         }
         finally
         {

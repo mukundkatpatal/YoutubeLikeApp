@@ -77,6 +77,8 @@ http://localhost:4173/preview/
 
 The preview uses the same config shape and feed filtering. Without a YouTube Data API key it shows local sample videos. With a key it reads the remote config and YouTube Data API. Playback in the preview uses a direct official YouTube embed; the Windows app adds the WebView2 playback guard.
 
+For real data in the Mac preview, create `preview/settings.local.json` from `preview/settings.local.sample.json` and paste the API key there. That local settings file is ignored by Git. The production Windows app reads the API key from `settings.local.json`, `%LocalAppData%\MukundTube\settings.json`, or the `MUKUND_TUBE_YOUTUBE_API_KEY` environment variable.
+
 ## Compliance Notes
 
 - The app uses YouTube Data API for metadata and the official IFrame player for playback.

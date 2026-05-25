@@ -9,40 +9,39 @@
 <body>
   <header class="topbar">
     <div>
-      <h1>MukundTube Preview</h1>
+      <h1>MukundTube</h1>
       <p id="status">Ready.</p>
     </div>
     <button id="refreshButton" type="button">Refresh</button>
   </header>
 
-  <section class="settings" aria-label="Preview settings">
-    <label>
-      YouTube Data API key
-      <input id="apiKeyInput" type="password" autocomplete="off" placeholder="Paste key for Mac preview">
-    </label>
-    <label>
-      Config URL
-      <input id="configUrlInput" type="url" autocomplete="off">
-    </label>
-  </section>
-
-  <main class="watch-page">
-    <section class="watch-main" aria-label="Selected video">
+  <main class="app-shell">
+    <section id="playerSection" class="player-section hidden" aria-label="Player">
       <div class="player-frame">
         <div id="player" class="player"></div>
       </div>
       <div class="video-details">
         <h2 id="selectedTitle">Choose an approved video</h2>
-        <p id="selectedMeta">The list stays scrollable without resizing the player.</p>
+        <p id="selectedMeta"></p>
       </div>
     </section>
-    <aside class="feed" aria-label="Approved videos">
-      <div id="virtualList" class="virtual-list" role="listbox" aria-label="Approved videos">
-        <div id="virtualSpacer" class="virtual-spacer"></div>
+
+    <section id="channelSection" class="browse-section" aria-label="Approved channels">
+      <div class="section-heading">
+        <h2>Channels</h2>
       </div>
-    </aside>
+      <div id="channelGrid" class="channel-grid"></div>
+    </section>
+
+    <section id="videoSection" class="browse-section hidden" aria-label="Channel videos">
+      <div class="section-heading">
+        <button id="backButton" class="plain-button" type="button">Channels</button>
+        <h2 id="channelTitle">Videos</h2>
+      </div>
+      <div id="videoGrid" class="video-grid"></div>
+    </section>
   </main>
 
-  <script type="module" src="./app.js?v=9"></script>
+  <script type="module" src="./app.js?v=11"></script>
 </body>
 </html>

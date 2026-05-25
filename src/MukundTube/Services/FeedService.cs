@@ -41,5 +41,27 @@ public sealed class FeedService
 
         return FeedComposer.ApplyPolicy(config, candidateVideos);
     }
-}
 
+    public Task<IReadOnlyList<ChannelItem>> LoadChannelsAsync(
+        AppConfig config,
+        string apiKey,
+        CancellationToken cancellationToken)
+    {
+        return _youTube.GetChannelsAsync(config.Channels, apiKey, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<VideoItem>> LoadChannelVideosAsync(
+        AppConfig config,
+        ChannelItem channel,
+        string apiKey,
+        CancellationToken cancellationToken)
+    {
+        var videos = await _youTube.GetLatestChannelVideosAsync(
+            channel.ChannelId,
+            config.MaxVideosPerChannel,
+            apiKey,
+            cancellationToken).ConfigureAwait(false);
+
+        return FeedComposer.ApplyChannelPolicy(config, channel.ChannelId, videos);
+    }
+}

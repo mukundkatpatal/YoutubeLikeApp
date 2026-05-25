@@ -39,6 +39,37 @@ public sealed class YouTubeDataApiClient
             .ToArray();
     }
 
+    public async Task<IReadOnlyList<ChannelItem>> GetChannelsAsync(
+        IEnumerable<ChannelConfig> configuredChannels,
+        string apiKey,
+        CancellationToken cancellationToken)
+    {
+        var channelConfigs = configuredChannels
+            .Where(channel => channel.Enabled)
+            .Where(channel => !string.IsNullOrWhiteSpace(channel.ChannelId))
+            .ToArray();
+
+        var configuredTitles = channelConfigs.ToDictionary(
+            channel => channel.ChannelId,
+            channel => channel.Title,
+            StringComparer.Ordinal);
+
+        var results = new List<ChannelItem>();
+        foreach (var batch in channelConfigs.Select(channel => channel.ChannelId).Distinct(StringComparer.Ordinal).Chunk(50))
+        {
+            var joinedIds = string.Join(",", batch.Select(Uri.EscapeDataString));
+            var url =
+                $"{ApiBaseUrl}/channels?part=snippet,contentDetails&id={joinedIds}&key={Uri.EscapeDataString(apiKey)}";
+            var response = await SendAsync<ChannelsResponse>(url, cancellationToken).ConfigureAwait(false);
+
+            results.AddRange(response.Items.Select(channel => ToChannelItem(channel, configuredTitles)));
+        }
+
+        return results
+            .Where(channel => !string.IsNullOrWhiteSpace(channel.ChannelId))
+            .ToArray();
+    }
+
     public async Task<IReadOnlyList<VideoItem>> GetVideosByIdsAsync(
         IEnumerable<string> videoIds,
         string apiKey,
@@ -70,6 +101,23 @@ public sealed class YouTubeDataApiClient
             $"{ApiBaseUrl}/channels?part=contentDetails&id={Uri.EscapeDataString(channelId)}&key={Uri.EscapeDataString(apiKey)}";
         var response = await SendAsync<ChannelsResponse>(url, cancellationToken).ConfigureAwait(false);
         return response.Items.FirstOrDefault()?.ContentDetails?.RelatedPlaylists?.Uploads;
+    }
+
+    private static ChannelItem ToChannelItem(ChannelResource item, IReadOnlyDictionary<string, string> configuredTitles)
+    {
+        var snippet = item.Snippet ?? new ChannelSnippet();
+        var channelId = item.Id ?? "";
+
+        return new ChannelItem
+        {
+            ChannelId = channelId,
+            Title = configuredTitles.TryGetValue(channelId, out var configuredTitle) && !string.IsNullOrWhiteSpace(configuredTitle)
+                ? configuredTitle
+                : WebUtility.HtmlDecode(snippet.Title ?? ""),
+            Description = WebUtility.HtmlDecode(snippet.Description ?? ""),
+            ThumbnailUrl = PickThumbnail(snippet.Thumbnails),
+            UploadsPlaylistId = item.ContentDetails?.RelatedPlaylists?.Uploads ?? ""
+        };
     }
 
     private async Task<T> SendAsync<T>(string url, CancellationToken cancellationToken)
@@ -153,7 +201,20 @@ public sealed class YouTubeDataApiClient
 
     private sealed record ChannelResource
     {
+        public string? Id { get; init; }
+
+        public ChannelSnippet? Snippet { get; init; }
+
         public ChannelContentDetails? ContentDetails { get; init; }
+    }
+
+    private sealed record ChannelSnippet
+    {
+        public string? Title { get; init; }
+
+        public string? Description { get; init; }
+
+        public IReadOnlyDictionary<string, Thumbnail>? Thumbnails { get; init; }
     }
 
     private sealed record ChannelContentDetails
@@ -251,4 +312,3 @@ public sealed class YouTubeDataApiClient
         public string? Url { get; init; }
     }
 }
-

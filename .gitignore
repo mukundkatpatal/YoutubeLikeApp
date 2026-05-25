@@ -7,9 +7,9 @@ TestResults/
 *.suo
 *.rsuser
 src/MukundTube/settings.local.json
+preview/settings.local.json
 *.nupkg
 *.msix
 *.appx
 *.appxbundle
 *.msixbundle
-

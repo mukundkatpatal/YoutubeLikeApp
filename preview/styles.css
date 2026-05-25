@@ -12,27 +12,35 @@
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
-  overflow: hidden;
+  background: #ffffff;
 }
 
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   height: 56px;
   padding: 0 24px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid #e5e5e5;
 }
 
-h1 {
+h1,
+h2,
+p {
   margin: 0;
+}
+
+h1 {
   color: #0f0f0f;
   font-size: 20px;
   font-weight: 700;
@@ -40,7 +48,7 @@ h1 {
 }
 
 #status {
-  margin: 2px 0 0;
+  margin-top: 2px;
   max-width: min(760px, 60vw);
   overflow: hidden;
   color: #606060;
@@ -50,7 +58,6 @@ h1 {
 }
 
 button {
-  min-width: 88px;
   height: 36px;
   border: 0;
   border-radius: 18px;
@@ -65,55 +72,32 @@ button:disabled {
   opacity: 0.55;
 }
 
-.settings {
-  display: grid;
-  grid-template-columns: minmax(260px, 420px) minmax(280px, 1fr);
-  gap: 12px;
-  height: 72px;
-  padding: 10px 24px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
-}
-
-label {
-  display: grid;
-  gap: 5px;
-  color: #606060;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-input {
-  width: 100%;
-  height: 34px;
-  border: 1px solid #d9d9d9;
-  border-radius: 17px;
-  padding: 0 12px;
+.plain-button {
+  min-width: 92px;
+  padding: 0 14px;
+  background: #f2f2f2;
   color: #0f0f0f;
-  font: inherit;
 }
 
-.watch-page {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(340px, 30vw, 430px);
-  gap: 24px;
-  height: calc(100vh - 128px);
-  overflow: hidden;
+.app-shell {
   padding: 24px;
 }
 
-.watch-main {
-  min-width: 0;
-  overflow: auto;
-  padding-bottom: 24px;
+.hidden {
+  display: none !important;
+}
+
+.player-section {
+  margin: 0 auto 28px;
+  max-width: 1180px;
 }
 
 .player-frame {
   width: 100%;
-  max-height: min(68vh, calc(100vh - 250px));
+  max-height: min(68vh, 650px);
   aspect-ratio: 16 / 9;
-  background: #000000;
   overflow: hidden;
+  background: #000000;
 }
 
 .player,
@@ -125,11 +109,10 @@ input {
 }
 
 .video-details {
-  padding: 14px 0 0;
+  padding-top: 14px;
 }
 
 .video-details h2 {
-  margin: 0;
   color: #0f0f0f;
   font-size: 20px;
   font-weight: 700;
@@ -137,125 +120,129 @@ input {
 }
 
 .video-details p {
-  margin: 8px 0 0;
+  margin-top: 8px;
   color: #606060;
   font-size: 14px;
 }
 
-.feed {
-  min-width: 0;
-  height: 100%;
-  overflow: hidden;
-  background: #ffffff;
+.browse-section {
+  max-width: 1500px;
+  margin: 0 auto;
 }
 
-.virtual-list {
-  position: relative;
-  height: 100%;
-  overflow: auto;
-  overscroll-behavior: contain;
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
-.virtual-spacer {
-  position: relative;
-  width: 100%;
+.section-heading h2 {
+  color: #0f0f0f;
+  font-size: 22px;
+  font-weight: 700;
 }
 
-.video-row {
-  position: absolute;
-  left: 0;
-  right: 0;
+.channel-grid,
+.video-grid {
   display: grid;
-  grid-template-columns: 168px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 26px 18px;
+}
+
+.channel-card,
+.video-card {
+  display: block;
+  width: 100%;
+  height: auto;
   min-width: 0;
-  height: 104px;
-  min-height: 104px;
-  padding: 0 0 8px;
+  padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   color: inherit;
-  cursor: pointer;
   text-align: left;
 }
 
-.video-row:hover .video-title,
-.video-row.selected .video-title {
+.channel-card:hover .card-title,
+.video-card:hover .card-title {
   color: #065fd4;
 }
 
-.thumb {
-  width: 168px;
-  height: 94px;
+.channel-thumb-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 190px;
+}
+
+.channel-thumb {
+  width: 156px;
+  height: 156px;
+  border-radius: 50%;
   object-fit: cover;
-  border-radius: 8px;
   background: #eeeeee;
 }
 
-.video-title {
+.video-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #eeeeee;
+}
+
+.card-title {
   display: -webkit-box;
-  margin: 0;
-  max-height: 40px;
+  margin-top: 10px;
   overflow: hidden;
   color: #0f0f0f;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.25;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
-.video-meta,
-.video-date {
-  margin-top: 5px;
+.card-meta {
+  margin-top: 6px;
   overflow: hidden;
   color: #606060;
-  font-size: 12px;
+  font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pinned {
-  color: #065fd4;
-  font-weight: 700;
-}
-
 .empty {
-  padding: 24px 0;
+  padding: 36px 0;
   color: #606060;
   font-size: 14px;
 }
 
-@media (max-width: 980px) {
-  body {
-    overflow: auto;
+@media (max-width: 760px) {
+  .topbar {
+    padding: 0 16px;
   }
 
-  .settings {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-
-  .watch-page {
-    grid-template-columns: 1fr;
-    height: auto;
-    min-height: calc(100vh - 184px);
-    overflow: visible;
+  .app-shell {
     padding: 16px;
   }
 
-  .watch-main {
-    overflow: visible;
+  #status {
+    max-width: 58vw;
   }
 
-  .player-frame {
-    max-height: none;
+  .channel-grid,
+  .video-grid {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 22px 14px;
   }
 
-  .feed {
-    height: 52vh;
-    min-height: 380px;
+  .channel-thumb-wrap {
+    min-height: 150px;
+  }
+
+  .channel-thumb {
+    width: 126px;
+    height: 126px;
   }
 }
-

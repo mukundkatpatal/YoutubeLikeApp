@@ -74,6 +74,33 @@ public sealed class FeedComposerTests
         Assert.Collection(result, item => Assert.True(item.IsPinned));
     }
 
+    [Fact]
+    public void ApplyChannelPolicy_returns_only_unblocked_videos_for_selected_channel()
+    {
+        var config = new AppConfig
+        {
+            BlockedVideoIds = ["BBBBBBBBBBB"],
+            PinnedVideoIds = ["AAAAAAAAAAA"]
+        };
+
+        var result = FeedComposer.ApplyChannelPolicy(
+            config,
+            "UC11111111111111111111",
+            [
+                Video("AAAAAAAAAAA", "UC11111111111111111111", 2),
+                Video("BBBBBBBBBBB", "UC11111111111111111111", 1),
+                Video("CCCCCCCCCCC", "UC22222222222222222222", 3)
+            ]);
+
+        Assert.Collection(
+            result,
+            item =>
+            {
+                Assert.Equal("AAAAAAAAAAA", item.VideoId);
+                Assert.True(item.IsPinned);
+            });
+    }
+
     private static VideoItem Video(string videoId, string channelId, int daysAgo)
     {
         return new VideoItem
@@ -86,4 +113,3 @@ public sealed class FeedComposerTests
         };
     }
 }
-

@@ -63,6 +63,22 @@ public partial class MainWindow : Window
         await RefreshFeedAsync().ConfigureAwait(true);
     }
 
+    private async void ChannelList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_viewModel.SelectedChannel is not ChannelItem channel)
+        {
+            return;
+        }
+
+        _refreshCancellation?.Cancel();
+        _refreshCancellation?.Dispose();
+        _refreshCancellation = new CancellationTokenSource();
+
+        await _player.StopAsync().ConfigureAwait(true);
+        await _viewModel.SelectChannelAsync(channel, _refreshCancellation.Token).ConfigureAwait(true);
+        _player.SetAllowedVideos(_viewModel.Videos.Select(video => video.VideoId));
+    }
+
     private async void VideoList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_viewModel.SelectedVideo is not VideoItem video)
@@ -73,6 +89,16 @@ public partial class MainWindow : Window
         await _player.PlayAsync(video).ConfigureAwait(true);
     }
 
+    private async void Back_Click(object sender, RoutedEventArgs e)
+    {
+        await _player.StopAsync().ConfigureAwait(true);
+        _viewModel.SelectedChannel = null;
+        _viewModel.SelectedVideo = null;
+        _viewModel.Videos.Clear();
+        _player.SetAllowedVideos([]);
+        _viewModel.StatusText = $"{_viewModel.Channels.Count} approved channels loaded.";
+    }
+
     private async Task RefreshFeedAsync()
     {
         _refreshCancellation?.Cancel();
@@ -80,7 +106,7 @@ public partial class MainWindow : Window
         _refreshCancellation = new CancellationTokenSource();
 
         await _viewModel.RefreshAsync(_refreshCancellation.Token).ConfigureAwait(true);
-        _player.SetAllowedVideos(_viewModel.Videos.Select(video => video.VideoId));
+        _player.SetAllowedVideos([]);
     }
 
     private void MainWindow_Closed(object? sender, EventArgs e)
@@ -90,4 +116,3 @@ public partial class MainWindow : Window
         _httpClient.Dispose();
     }
 }
-

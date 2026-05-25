@@ -45,51 +45,156 @@
 
         <Grid Grid.Row="1"
               Margin="24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="24" />
-                <ColumnDefinition Width="400" />
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-            <ScrollViewer Grid.Column="0"
-                          VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-                <StackPanel>
-                    <Grid Height="520"
-                          Background="Black"
-                          ClipToBounds="True">
-                        <wv2:WebView2 x:Name="PlayerWebView" />
-                    </Grid>
+            <ProgressBar Grid.Row="0"
+                         Height="3"
+                         IsIndeterminate="True"
+                         Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-                    <TextBlock Text="{Binding SelectedVideoTitle}"
-                               Margin="0,14,0,0"
-                               Foreground="#0F0F0F"
-                               FontSize="20"
-                               FontWeight="Bold"
-                               TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding SelectedVideoMeta}"
-                               Margin="0,8,0,0"
-                               Foreground="#606060"
-                               FontSize="14"
-                               TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-            </ScrollViewer>
-
-            <Border Grid.Column="2"
-                    Background="White">
-                <Grid>
+            <Grid Grid.Row="1">
+                <Grid x:Name="ChannelBrowsePanel">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChannelSelected}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <ProgressBar Grid.Row="0"
-                                 Height="3"
-                                 IsIndeterminate="True"
-                                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <TextBlock Grid.Row="0"
+                               Text="Channels"
+                               Margin="0,0,0,18"
+                               Foreground="#0F0F0F"
+                               FontSize="22"
+                               FontWeight="Bold" />
+
+                    <ListBox x:Name="ChannelList"
+                             Grid.Row="1"
+                             ItemsSource="{Binding Channels}"
+                             SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
+                             SelectionChanged="ChannelList_SelectionChanged"
+                             BorderThickness="0"
+                             Background="White"
+                             ScrollViewer.CanContentScroll="True"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <VirtualizingStackPanel />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,0,0,18" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid MinHeight="132">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="156" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Width="132"
+                                            Height="132"
+                                            HorizontalAlignment="Center"
+                                            Background="#EEEEEE"
+                                            CornerRadius="66"
+                                            ClipToBounds="True">
+                                        <Image Source="{Binding ThumbnailUrl}"
+                                               Stretch="UniformToFill" />
+                                    </Border>
+
+                                    <StackPanel Grid.Column="2"
+                                                VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}"
+                                                   Foreground="#0F0F0F"
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Text="Approved channel"
+                                                   Margin="0,6,0,0"
+                                                   Foreground="#606060"
+                                                   FontSize="13" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+
+                <Grid x:Name="VideoBrowsePanel">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChannelSelected}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0"
+                                Orientation="Horizontal"
+                                Margin="0,0,0,18">
+                        <Button MinWidth="92"
+                                Height="36"
+                                Padding="14,0"
+                                Background="#F2F2F2"
+                                Foreground="#0F0F0F"
+                                BorderThickness="0"
+                                Click="Back_Click"
+                                Content="Channels" />
+                        <TextBlock Text="{Binding SelectedChannelTitle}"
+                                   Margin="14,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Foreground="#0F0F0F"
+                                   FontSize="22"
+                                   FontWeight="Bold" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1"
+                          Margin="0,0,0,24"
+                          Background="Black"
+                          ClipToBounds="True">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Height" Value="520" />
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedVideo}" Value="{x:Null}">
+                                        <Setter Property="Height" Value="0" />
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <wv2:WebView2 x:Name="PlayerWebView" />
+                    </Grid>
 
                     <ListBox x:Name="VideoList"
-                             Grid.Row="1"
+                             Grid.Row="2"
                              ItemsSource="{Binding Videos}"
                              SelectedItem="{Binding SelectedVideo, Mode=TwoWay}"
                              BorderThickness="0"
@@ -102,23 +207,22 @@
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                 <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,0,0,18" />
                             </Style>
                         </ListBox.ItemContainerStyle>
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="0,0,0,10"
-                                      Height="94">
+                                <Grid Height="130">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="168" />
-                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="224" />
+                                        <ColumnDefinition Width="14" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
 
-                                    <Border Grid.Column="0"
-                                            Width="168"
-                                            Height="94"
+                                    <Border Width="224"
+                                            Height="126"
                                             Background="#EEEEEE"
-                                            CornerRadius="8"
+                                            CornerRadius="10"
                                             ClipToBounds="True">
                                         <Image Source="{Binding ThumbnailUrl}"
                                                Stretch="UniformToFill" />
@@ -127,46 +231,23 @@
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="{Binding Title}"
                                                    FontWeight="Bold"
-                                                   FontSize="14"
+                                                   FontSize="15"
                                                    Foreground="#0F0F0F"
-                                                   MaxHeight="40"
+                                                   MaxHeight="44"
                                                    TextWrapping="Wrap"
                                                    TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{Binding ChannelTitle}"
-                                                   Margin="0,5,0,0"
+                                        <TextBlock Text="{Binding PublishedAtText}"
+                                                   Margin="0,6,0,0"
                                                    Foreground="#606060"
-                                                   FontSize="12"
+                                                   FontSize="13"
                                                    TextTrimming="CharacterEllipsis" />
-                                        <DockPanel Margin="0,5,0,0">
-                                            <TextBlock Text="Pinned"
-                                                       DockPanel.Dock="Right"
-                                                       Margin="8,0,0,0"
-                                                       Foreground="#065FD4"
-                                                       FontSize="12"
-                                                       FontWeight="Bold">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsPinned}" Value="True">
-                                                                <Setter Property="Visibility" Value="Visible" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                            <TextBlock Text="{Binding PublishedAtText}"
-                                                       Foreground="#606060"
-                                                       FontSize="12"
-                                                       TextTrimming="CharacterEllipsis" />
-                                        </DockPanel>
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </Grid>
-            </Border>
+            </Grid>
         </Grid>
     </Grid>
 </Window>

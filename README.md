@@ -16,7 +16,15 @@ Open:
 http://localhost:4173/preview/
 ```
 
-Without a YouTube Data API key, the preview shows sample videos. With a key, paste it into the preview and it will use the configured remote JSON URL.
+Without a YouTube Data API key, the preview shows sample channels. With a key in local settings, it uses the configured remote JSON URL and shows the approved channel thumbnails first.
+
+For real channel data, create:
+
+```bash
+cp preview/settings.local.sample.json preview/settings.local.json
+```
+
+Then paste the YouTube Data API key into `preview/settings.local.json`. The file is ignored by Git. The preview has no API-key textbox because the child-facing UI should not expose configuration controls.
 
 ## Windows App
 
@@ -55,4 +63,3 @@ This is a curated viewer, not full device lockdown. If a child can install anoth
 - YouTube API Developer Policies: https://developers.google.com/youtube/terms/developer-policies
 - WebView2 WPF docs: https://learn.microsoft.com/en-us/microsoft-edge/webview2/get-started/wpf
 - .NET support policy: https://dotnet.microsoft.com/en-us/platform/support/policy
-

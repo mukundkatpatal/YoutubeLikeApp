@@ -1,82 +1,94 @@
 const defaultConfigUrl = "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.json";
 const apiBaseUrl = "https://www.googleapis.com/youtube/v3";
-const rowHeight = 104;
 
 const elements = {
   status: document.querySelector("#status"),
   refreshButton: document.querySelector("#refreshButton"),
-  apiKeyInput: document.querySelector("#apiKeyInput"),
-  configUrlInput: document.querySelector("#configUrlInput"),
-  virtualList: document.querySelector("#virtualList"),
-  virtualSpacer: document.querySelector("#virtualSpacer"),
+  playerSection: document.querySelector("#playerSection"),
+  channelSection: document.querySelector("#channelSection"),
+  videoSection: document.querySelector("#videoSection"),
+  channelGrid: document.querySelector("#channelGrid"),
+  videoGrid: document.querySelector("#videoGrid"),
+  backButton: document.querySelector("#backButton"),
+  channelTitle: document.querySelector("#channelTitle"),
   player: document.querySelector("#player"),
   selectedTitle: document.querySelector("#selectedTitle"),
   selectedMeta: document.querySelector("#selectedMeta")
 };
 
 const state = {
-  videos: [],
-  selectedVideoId: "",
-  allowedVideoIds: new Set()
+  settings: {
+    youTubeApiKey: "",
+    configUrl: defaultConfigUrl
+  },
+  config: null,
+  channels: [],
+  videosByChannelId: new Map(),
+  allowedVideoIds: new Set(),
+  selectedChannelId: "",
+  selectedVideoId: ""
 };
-
-elements.apiKeyInput.value = localStorage.getItem("mukundtube.preview.apiKey") || "";
-elements.configUrlInput.value = localStorage.getItem("mukundtube.preview.configUrl") || defaultConfigUrl;
-
-elements.apiKeyInput.addEventListener("change", () => {
-  localStorage.setItem("mukundtube.preview.apiKey", elements.apiKeyInput.value.trim());
-});
-
-elements.configUrlInput.addEventListener("change", () => {
-  localStorage.setItem("mukundtube.preview.configUrl", elements.configUrlInput.value.trim());
-});
 
 elements.refreshButton.addEventListener("click", () => {
   refresh().catch(error => setStatus(`Could not load preview. ${error.message}`));
 });
 
-elements.virtualList.addEventListener("scroll", renderVirtualRows);
-window.addEventListener("resize", renderVirtualRows);
+elements.backButton.addEventListener("click", () => {
+  stopPlayer();
+  state.selectedChannelId = "";
+  elements.videoSection.classList.add("hidden");
+  elements.channelSection.classList.remove("hidden");
+  setStatus(`${state.channels.length} approved channels loaded.`);
+});
 
 await refresh();
 
 async function refresh() {
   elements.refreshButton.disabled = true;
-  setStatus("Loading approved videos...");
+  setStatus("Loading approved channels...");
 
   try {
-    const apiKey = elements.apiKeyInput.value.trim();
+    stopPlayer();
+    state.settings = await loadSettings();
 
-    if (!apiKey) {
-      state.videos = await loadSampleVideos();
-      state.allowedVideoIds = new Set(state.videos.map(video => video.videoId));
-      setStatus("No API key set. Showing local sample data for Mac UI testing.");
-      renderVirtualRows();
+    if (!state.settings.youTubeApiKey) {
+      state.channels = await loadSampleChannels();
+      state.config = null;
+      state.videosByChannelId = new Map();
+      state.allowedVideoIds = new Set();
+      renderChannels();
+      setStatus("No local API key found. Showing sample channels.");
       return;
     }
 
-    const config = await loadConfig();
-    const candidates = [];
-    for (const channel of config.channels.filter(channel => channel.enabled)) {
-      candidates.push(...await getLatestChannelVideos(channel.channelId, config.maxVideosPerChannel, apiKey));
-    }
-
-    if (config.pinnedVideoIds.length) {
-      candidates.push(...await getVideosByIds(config.pinnedVideoIds, apiKey));
-    }
-
-    state.videos = applyPolicy(config, candidates);
-    state.allowedVideoIds = new Set(state.videos.map(video => video.videoId));
-    setStatus(`${state.videos.length} approved videos loaded from remote config.`);
-    renderVirtualRows();
+    state.config = await loadConfig(state.settings.configUrl);
+    state.channels = await loadChannelCards(state.config, state.settings.youTubeApiKey);
+    state.videosByChannelId = new Map();
+    state.allowedVideoIds = new Set();
+    renderChannels();
+    setStatus(`${state.channels.length} approved channels loaded.`);
   } finally {
     elements.refreshButton.disabled = false;
   }
 }
 
-async function loadConfig() {
-  const configUrl = elements.configUrlInput.value.trim() || defaultConfigUrl;
-  const config = await fetchJson(configUrl);
+async function loadSettings() {
+  try {
+    const settings = await fetchJson("/preview/settings.local.json");
+    return {
+      youTubeApiKey: settings.youTubeApiKey || "",
+      configUrl: settings.configUrl || defaultConfigUrl
+    };
+  } catch {
+    return {
+      youTubeApiKey: "",
+      configUrl: defaultConfigUrl
+    };
+  }
+}
+
+async function loadConfig(configUrl) {
+  const config = await fetchJson(configUrl || defaultConfigUrl);
   return {
     version: config.version,
     updatedAt: config.updatedAt,
@@ -88,155 +100,197 @@ async function loadConfig() {
   };
 }
 
-async function loadSampleVideos() {
-  return fetchJson("/preview/sample-videos.json");
+async function loadSampleChannels() {
+  return [
+    {
+      channelId: "UC11111111111111111111",
+      title: "Preview Channel",
+      description: "Sample data for local layout testing.",
+      thumbnailUrl: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+    }
+  ];
 }
 
-async function getLatestChannelVideos(channelId, maxResults, apiKey) {
-  const channelResponse = await fetchJson(`${apiBaseUrl}/channels?part=contentDetails&id=${encodeURIComponent(channelId)}&key=${encodeURIComponent(apiKey)}`);
-  const uploadsPlaylistId = channelResponse.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
-  if (!uploadsPlaylistId) {
+async function loadSampleVideos(channelId) {
+  const videos = await fetchJson("/preview/sample-videos.json");
+  return videos.filter(video => video.channelId === channelId || channelId === "UC11111111111111111111");
+}
+
+async function loadChannelCards(config, apiKey) {
+  const enabledChannels = config.channels.filter(channel => channel.enabled);
+  const channelIds = enabledChannels.map(channel => channel.channelId).filter(Boolean);
+  const channelTitles = new Map(enabledChannels.map(channel => [channel.channelId, channel.title]));
+  const channels = [];
+
+  for (const batch of chunk(channelIds, 50)) {
+    const response = await fetchJson(`${apiBaseUrl}/channels?part=snippet,contentDetails&id=${batch.map(encodeURIComponent).join(",")}&key=${encodeURIComponent(apiKey)}`);
+    channels.push(...(response.items || []).map(item => ({
+      channelId: item.id || "",
+      title: channelTitles.get(item.id) || item.snippet?.title || "",
+      description: item.snippet?.description || "",
+      thumbnailUrl: pickThumbnail(item.snippet?.thumbnails),
+      uploadsPlaylistId: item.contentDetails?.relatedPlaylists?.uploads || ""
+    })));
+  }
+
+  return channels.filter(channel => channel.channelId);
+}
+
+async function loadChannelVideos(channel, config, apiKey) {
+  if (state.videosByChannelId.has(channel.channelId)) {
+    return state.videosByChannelId.get(channel.channelId);
+  }
+
+  if (!apiKey) {
+    const sampleVideos = await loadSampleVideos(channel.channelId);
+    state.videosByChannelId.set(channel.channelId, sampleVideos);
+    return sampleVideos;
+  }
+
+  if (!channel.uploadsPlaylistId) {
+    state.videosByChannelId.set(channel.channelId, []);
     return [];
   }
 
-  const playlistResponse = await fetchJson(`${apiBaseUrl}/playlistItems?part=snippet,contentDetails&playlistId=${encodeURIComponent(uploadsPlaylistId)}&maxResults=${maxResults}&key=${encodeURIComponent(apiKey)}`);
-  return (playlistResponse.items || [])
+  const response = await fetchJson(`${apiBaseUrl}/playlistItems?part=snippet,contentDetails&playlistId=${encodeURIComponent(channel.uploadsPlaylistId)}&maxResults=${config.maxVideosPerChannel}&key=${encodeURIComponent(apiKey)}`);
+  const blockedVideoIds = new Set(config.blockedVideoIds);
+  const pinnedVideoIds = new Set(config.pinnedVideoIds);
+  const pinnedOrder = new Map(config.pinnedVideoIds.map((videoId, index) => [videoId, index]));
+
+  const videos = (response.items || [])
     .map(item => ({
       videoId: item.contentDetails?.videoId || item.snippet?.resourceId?.videoId || "",
       title: item.snippet?.title || "",
-      channelId: item.snippet?.videoOwnerChannelId || item.snippet?.channelId || "",
-      channelTitle: item.snippet?.videoOwnerChannelTitle || item.snippet?.channelTitle || "",
+      channelId: item.snippet?.videoOwnerChannelId || item.snippet?.channelId || channel.channelId,
+      channelTitle: item.snippet?.videoOwnerChannelTitle || item.snippet?.channelTitle || channel.title,
       publishedAt: item.contentDetails?.videoPublishedAt || item.snippet?.publishedAt || "",
       thumbnailUrl: pickThumbnail(item.snippet?.thumbnails),
       isPinned: false
     }))
-    .filter(video => video.videoId && !isPlaceholderTitle(video.title));
-}
+    .filter(video => video.videoId && !blockedVideoIds.has(video.videoId))
+    .filter(video => !isPlaceholderTitle(video.title))
+    .map(video => ({
+      ...video,
+      isPinned: pinnedVideoIds.has(video.videoId)
+    }))
+    .sort((left, right) => {
+      if (left.isPinned !== right.isPinned) {
+        return left.isPinned ? -1 : 1;
+      }
 
-async function getVideosByIds(videoIds, apiKey) {
-  const uniqueIds = [...new Set(videoIds)].filter(Boolean);
-  const videos = [];
+      if (left.isPinned && right.isPinned) {
+        return (pinnedOrder.get(left.videoId) ?? Number.MAX_SAFE_INTEGER)
+          - (pinnedOrder.get(right.videoId) ?? Number.MAX_SAFE_INTEGER);
+      }
 
-  for (let index = 0; index < uniqueIds.length; index += 50) {
-    const batch = uniqueIds.slice(index, index + 50);
-    const response = await fetchJson(`${apiBaseUrl}/videos?part=snippet,status&id=${batch.map(encodeURIComponent).join(",")}&key=${encodeURIComponent(apiKey)}`);
-    videos.push(...(response.items || [])
-      .filter(item => item.status?.embeddable !== false)
-      .filter(item => !item.status?.privacyStatus || item.status.privacyStatus === "public")
-      .map(item => ({
-        videoId: item.id || "",
-        title: item.snippet?.title || "",
-        channelId: item.snippet?.channelId || "",
-        channelTitle: item.snippet?.channelTitle || "",
-        publishedAt: item.snippet?.publishedAt || "",
-        thumbnailUrl: pickThumbnail(item.snippet?.thumbnails),
-        isPinned: false
-      }))
-      .filter(video => video.videoId && !isPlaceholderTitle(video.title)));
-  }
+      return new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime();
+    });
 
+  state.videosByChannelId.set(channel.channelId, videos);
   return videos;
 }
 
-function applyPolicy(config, candidates) {
-  const enabledChannelIds = new Set(config.channels.filter(channel => channel.enabled).map(channel => channel.channelId));
-  const blockedVideoIds = new Set(config.blockedVideoIds);
-  const pinnedVideoIds = new Set(config.pinnedVideoIds);
-  const pinnedOrder = new Map(config.pinnedVideoIds.map((videoId, index) => [videoId, index]));
-  const byVideoId = new Map();
+function renderChannels() {
+  elements.channelGrid.innerHTML = "";
+  elements.videoSection.classList.add("hidden");
+  elements.channelSection.classList.remove("hidden");
 
-  for (const video of candidates) {
-    if (!video.videoId || blockedVideoIds.has(video.videoId)) {
-      continue;
-    }
-
-    if (!enabledChannelIds.has(video.channelId) && !pinnedVideoIds.has(video.videoId)) {
-      continue;
-    }
-
-    byVideoId.set(video.videoId, {
-      ...video,
-      isPinned: pinnedVideoIds.has(video.videoId)
-    });
-  }
-
-  return [...byVideoId.values()].sort((left, right) => {
-    if (left.isPinned !== right.isPinned) {
-      return left.isPinned ? -1 : 1;
-    }
-
-    if (left.isPinned && right.isPinned) {
-      return (pinnedOrder.get(left.videoId) ?? Number.MAX_SAFE_INTEGER)
-        - (pinnedOrder.get(right.videoId) ?? Number.MAX_SAFE_INTEGER);
-    }
-
-    return new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime();
-  });
-}
-
-function renderVirtualRows() {
-  const totalHeight = state.videos.length * rowHeight;
-  elements.virtualSpacer.style.height = `${totalHeight}px`;
-  elements.virtualSpacer.innerHTML = "";
-
-  if (!state.videos.length) {
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    empty.textContent = "No approved videos are available.";
-    elements.virtualSpacer.append(empty);
+  if (!state.channels.length) {
+    elements.channelGrid.append(emptyMessage("No approved channels are available."));
     return;
   }
 
-  const scrollTop = elements.virtualList.scrollTop;
-  const viewportHeight = elements.virtualList.clientHeight;
-  const start = Math.max(Math.floor(scrollTop / rowHeight) - 4, 0);
-  const end = Math.min(Math.ceil((scrollTop + viewportHeight) / rowHeight) + 4, state.videos.length);
-
-  for (let index = start; index < end; index++) {
-    elements.virtualSpacer.append(renderRow(state.videos[index], index));
+  for (const channel of state.channels) {
+    elements.channelGrid.append(renderChannelCard(channel));
   }
 }
 
-function renderRow(video, index) {
-  const row = document.createElement("button");
-  row.type = "button";
-  row.className = `video-row${video.videoId === state.selectedVideoId ? " selected" : ""}`;
-  row.style.top = `${index * rowHeight}px`;
-  row.setAttribute("role", "option");
-  row.setAttribute("aria-selected", video.videoId === state.selectedVideoId ? "true" : "false");
-  row.addEventListener("click", () => playVideo(video));
+function renderChannelCard(channel) {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = "channel-card";
+  card.addEventListener("click", () => showChannelVideos(channel));
+
+  const thumbWrap = document.createElement("div");
+  thumbWrap.className = "channel-thumb-wrap";
 
   const thumbnail = document.createElement("img");
-  thumbnail.className = "thumb";
+  thumbnail.className = "channel-thumb";
   thumbnail.alt = "";
-  thumbnail.src = video.thumbnailUrl || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='68'%3E%3Crect width='120' height='68' fill='%23dde4ee'/%3E%3C/svg%3E";
+  thumbnail.src = channel.thumbnailUrl || placeholderSvg("156", "156");
+  thumbWrap.append(thumbnail);
 
-  const body = document.createElement("div");
   const title = document.createElement("p");
-  title.className = "video-title";
-  title.textContent = video.title;
+  title.className = "card-title";
+  title.textContent = channel.title || "Untitled channel";
 
-  const meta = document.createElement("div");
-  meta.className = "video-meta";
-  meta.textContent = video.channelTitle;
+  const meta = document.createElement("p");
+  meta.className = "card-meta";
+  meta.textContent = "Approved channel";
 
-  const date = document.createElement("div");
-  date.className = "video-date";
-  date.textContent = `${formatDate(video.publishedAt)}${video.isPinned ? "  Pinned" : ""}`;
-  if (video.isPinned) {
-    date.classList.add("pinned");
+  card.append(thumbWrap, title, meta);
+  return card;
+}
+
+async function showChannelVideos(channel) {
+  state.selectedChannelId = channel.channelId;
+  stopPlayer();
+  elements.refreshButton.disabled = true;
+  setStatus(`Loading videos from ${channel.title}...`);
+
+  try {
+    const videos = await loadChannelVideos(channel, state.config, state.settings.youTubeApiKey);
+    state.allowedVideoIds = new Set(videos.map(video => video.videoId));
+    elements.channelTitle.textContent = channel.title || "Videos";
+    renderVideos(videos);
+    elements.channelSection.classList.add("hidden");
+    elements.videoSection.classList.remove("hidden");
+    setStatus(`${videos.length} approved videos loaded from ${channel.title}.`);
+  } finally {
+    elements.refreshButton.disabled = false;
+  }
+}
+
+function renderVideos(videos) {
+  elements.videoGrid.innerHTML = "";
+
+  if (!videos.length) {
+    elements.videoGrid.append(emptyMessage("No approved videos are available for this channel."));
+    return;
   }
 
-  body.append(title, meta, date);
-  row.append(thumbnail, body);
-  return row;
+  for (const video of videos) {
+    elements.videoGrid.append(renderVideoCard(video));
+  }
+}
+
+function renderVideoCard(video) {
+  const card = document.createElement("button");
+  card.type = "button";
+  card.className = `video-card${video.videoId === state.selectedVideoId ? " selected" : ""}`;
+  card.addEventListener("click", () => playVideo(video));
+
+  const thumbnail = document.createElement("img");
+  thumbnail.className = "video-thumb";
+  thumbnail.alt = "";
+  thumbnail.src = video.thumbnailUrl || placeholderSvg("320", "180");
+
+  const title = document.createElement("p");
+  title.className = "card-title";
+  title.textContent = video.title;
+
+  const meta = document.createElement("p");
+  meta.className = "card-meta";
+  meta.textContent = `${formatDate(video.publishedAt)}${video.isPinned ? "  Pinned" : ""}`;
+
+  card.append(thumbnail, title, meta);
+  return card;
 }
 
 async function playVideo(video) {
   state.selectedVideoId = video.videoId;
   elements.selectedTitle.textContent = video.title;
   elements.selectedMeta.textContent = `${video.channelTitle} • ${formatDate(video.publishedAt)}`;
-  renderVirtualRows();
   setStatus(`Opening approved video: ${video.title}`);
 
   if (!state.allowedVideoIds.has(video.videoId)) {
@@ -245,7 +299,8 @@ async function playVideo(video) {
     return;
   }
 
-  const playerVars = {
+  elements.playerSection.classList.remove("hidden");
+  renderFallbackIframe(video, {
     autoplay: 1,
     controls: 1,
     disablekb: 1,
@@ -255,17 +310,16 @@ async function playVideo(video) {
     playsinline: 1,
     rel: 0,
     origin: window.location.origin
-  };
-  setStatus(`Preparing player for approved video: ${video.title}`);
+  });
 
-  setStatus("Mac preview playback uses a direct official YouTube embed. The Windows app adds the playback guard.");
-  renderFallbackIframe(video, playerVars);
+  elements.playerSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  setStatus("Playing approved video.");
 }
 
 function stopPlayer() {
   elements.player.replaceChildren();
+  elements.playerSection.classList.add("hidden");
   state.selectedVideoId = "";
-  renderVirtualRows();
 }
 
 function renderFallbackIframe(video, playerVars) {
@@ -318,9 +372,29 @@ function formatDate(value) {
   if (!value) {
     return "";
   }
+
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
 function setStatus(message) {
   elements.status.textContent = message;
+}
+
+function chunk(values, size) {
+  const chunks = [];
+  for (let index = 0; index < values.length; index += size) {
+    chunks.push(values.slice(index, index + size));
+  }
+  return chunks;
+}
+
+function emptyMessage(text) {
+  const empty = document.createElement("p");
+  empty.className = "empty";
+  empty.textContent = text;
+  return empty;
+}
+
+function placeholderSvg(width, height) {
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}'%3E%3Crect width='${width}' height='${height}' fill='%23eeeeee'/%3E%3C/svg%3E`;
 }
