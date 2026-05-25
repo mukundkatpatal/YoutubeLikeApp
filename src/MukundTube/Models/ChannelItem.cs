@@ -11,5 +11,6 @@ public sealed record ChannelItem
     public string ThumbnailUrl { get; init; } = "";
 
     public string UploadsPlaylistId { get; init; } = "";
-}
 
+    public DateTimeOffset LatestPublishedAt { get; init; }
+}

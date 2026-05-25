@@ -42,12 +42,33 @@ public sealed class FeedService
         return FeedComposer.ApplyPolicy(config, candidateVideos);
     }
 
-    public Task<IReadOnlyList<ChannelItem>> LoadChannelsAsync(
+    public async Task<IReadOnlyList<ChannelItem>> LoadChannelsAsync(
         AppConfig config,
         string apiKey,
         CancellationToken cancellationToken)
     {
-        return _youTube.GetChannelsAsync(config.Channels, apiKey, cancellationToken);
+        var channels = await _youTube.GetChannelsAsync(config.Channels, apiKey, cancellationToken)
+            .ConfigureAwait(false);
+
+        var enrichedChannels = new List<ChannelItem>();
+        foreach (var channel in channels)
+        {
+            var videos = await LoadChannelVideosAsync(config, channel, apiKey, cancellationToken)
+                .ConfigureAwait(false);
+
+            var latestVideo = videos.FirstOrDefault();
+            enrichedChannels.Add(channel with
+            {
+                ThumbnailUrl = string.IsNullOrWhiteSpace(channel.ThumbnailUrl)
+                    ? latestVideo?.ThumbnailUrl ?? ""
+                    : channel.ThumbnailUrl,
+                LatestPublishedAt = latestVideo?.PublishedAt ?? DateTimeOffset.MinValue
+            });
+        }
+
+        return enrichedChannels
+            .OrderByDescending(channel => channel.LatestPublishedAt)
+            .ToArray();
     }
 
     public async Task<IReadOnlyList<VideoItem>> LoadChannelVideosAsync(

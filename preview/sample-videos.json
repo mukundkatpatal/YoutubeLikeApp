@@ -16,6 +16,23 @@
     "publishedAt": "2026-05-18T12:30:00Z",
     "thumbnailUrl": "https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg",
     "isPinned": false
+  },
+  {
+    "videoId": "ysz5S6PUM-U",
+    "title": "Second preview channel recent video",
+    "channelId": "UC33333333333333333333",
+    "channelTitle": "Second Preview Channel",
+    "publishedAt": "2026-05-24T09:00:00Z",
+    "thumbnailUrl": "https://i.ytimg.com/vi/ysz5S6PUM-U/hqdefault.jpg",
+    "isPinned": false
+  },
+  {
+    "videoId": "aqz-KE-bpKQ",
+    "title": "Second preview channel older video",
+    "channelId": "UC33333333333333333333",
+    "channelTitle": "Second Preview Channel",
+    "publishedAt": "2026-05-12T09:00:00Z",
+    "thumbnailUrl": "https://i.ytimg.com/vi/aqz-KE-bpKQ/hqdefault.jpg",
+    "isPinned": false
   }
 ]
-

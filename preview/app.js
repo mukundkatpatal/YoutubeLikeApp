@@ -54,7 +54,6 @@ async function refresh() {
     if (!state.settings.youTubeApiKey) {
       state.channels = await loadSampleChannels();
       state.config = null;
-      state.videosByChannelId = new Map();
       state.allowedVideoIds = new Set();
       renderChannels();
       setStatus("No local API key found. Showing sample channels.");
@@ -62,8 +61,9 @@ async function refresh() {
     }
 
     state.config = await loadConfig(state.settings.configUrl);
-    state.channels = await loadChannelCards(state.config, state.settings.youTubeApiKey);
-    state.videosByChannelId = new Map();
+    const channelLoadResult = await loadChannelCards(state.config, state.settings.youTubeApiKey);
+    state.channels = channelLoadResult.channels;
+    state.videosByChannelId = channelLoadResult.videosByChannelId;
     state.allowedVideoIds = new Set();
     renderChannels();
     setStatus(`${state.channels.length} approved channels loaded.`);
@@ -101,19 +101,38 @@ async function loadConfig(configUrl) {
 }
 
 async function loadSampleChannels() {
-  return [
+  const channels = [
     {
       channelId: "UC11111111111111111111",
       title: "Preview Channel",
       description: "Sample data for local layout testing.",
-      thumbnailUrl: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+      thumbnailUrl: ""
+    },
+    {
+      channelId: "UC33333333333333333333",
+      title: "Second Preview Channel",
+      description: "Shows channel sorting by newest upload.",
+      thumbnailUrl: ""
     }
   ];
+
+  state.videosByChannelId = new Map();
+  for (const channel of channels) {
+    const videos = await loadSampleVideos(channel.channelId);
+    state.videosByChannelId.set(channel.channelId, videos);
+    channel.thumbnailUrl = channel.thumbnailUrl || videos[0]?.thumbnailUrl || "";
+    channel.latestPublishedAt = videos[0]?.publishedAt || "";
+  }
+
+  return channels.sort((left, right) => new Date(right.latestPublishedAt || 0).getTime()
+    - new Date(left.latestPublishedAt || 0).getTime());
 }
 
 async function loadSampleVideos(channelId) {
   const videos = await fetchJson("/preview/sample-videos.json");
-  return videos.filter(video => video.channelId === channelId || channelId === "UC11111111111111111111");
+  return videos
+    .filter(video => video.channelId === channelId)
+    .sort((left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime());
 }
 
 async function loadChannelCards(config, apiKey) {
@@ -133,7 +152,21 @@ async function loadChannelCards(config, apiKey) {
     })));
   }
 
-  return channels.filter(channel => channel.channelId);
+  const videosByChannelId = new Map();
+  for (const channel of channels.filter(channel => channel.channelId)) {
+    const videos = await loadChannelVideos(channel, config, apiKey);
+    videosByChannelId.set(channel.channelId, videos);
+    channel.thumbnailUrl = channel.thumbnailUrl || videos[0]?.thumbnailUrl || "";
+    channel.latestPublishedAt = videos[0]?.publishedAt || "";
+  }
+
+  return {
+    channels: channels
+      .filter(channel => channel.channelId)
+      .sort((left, right) => new Date(right.latestPublishedAt || 0).getTime()
+        - new Date(left.latestPublishedAt || 0).getTime()),
+    videosByChannelId
+  };
 }
 
 async function loadChannelVideos(channel, config, apiKey) {
@@ -226,7 +259,9 @@ function renderChannelCard(channel) {
 
   const meta = document.createElement("p");
   meta.className = "card-meta";
-  meta.textContent = "Approved channel";
+  meta.textContent = channel.latestPublishedAt
+    ? `Latest video ${formatDate(channel.latestPublishedAt)}`
+    : "Approved channel";
 
   card.append(thumbWrap, title, meta);
   return card;
