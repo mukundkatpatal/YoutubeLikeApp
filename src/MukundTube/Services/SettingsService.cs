@@ -24,6 +24,12 @@ public static class SettingsService
             settings = settings with { ConfigUrl = configUrl };
         }
 
+        var updateManifestUrl = Environment.GetEnvironmentVariable("MUKUND_TUBE_UPDATE_MANIFEST_URL");
+        if (!string.IsNullOrWhiteSpace(updateManifestUrl))
+        {
+            settings = settings with { UpdateManifestUrl = updateManifestUrl };
+        }
+
         var referrer = Environment.GetEnvironmentVariable("MUKUND_TUBE_APP_REFERRER");
         if (!string.IsNullOrWhiteSpace(referrer))
         {
@@ -43,6 +49,7 @@ public static class SettingsService
         return current with
         {
             ConfigUrl = string.IsNullOrWhiteSpace(loaded.ConfigUrl) ? current.ConfigUrl : loaded.ConfigUrl,
+            UpdateManifestUrl = string.IsNullOrWhiteSpace(loaded.UpdateManifestUrl) ? current.UpdateManifestUrl : loaded.UpdateManifestUrl,
             YouTubeApiKey = string.IsNullOrWhiteSpace(loaded.YouTubeApiKey) ? current.YouTubeApiKey : loaded.YouTubeApiKey,
             AppReferrer = string.IsNullOrWhiteSpace(loaded.AppReferrer) ? current.AppReferrer : loaded.AppReferrer
         };
@@ -66,4 +73,3 @@ public static class SettingsService
         }
     }
 }
-

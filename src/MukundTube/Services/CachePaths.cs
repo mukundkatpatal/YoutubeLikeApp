@@ -22,4 +22,3 @@ public static class CachePaths
 
     public static string UserSettingsPath => Path.Combine(AppDataDirectory, "settings.json");
 }
-

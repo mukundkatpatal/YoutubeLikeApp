@@ -12,7 +12,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private readonly FeedService _feedService;
     private readonly UserSettings _settings;
     private bool _isLoading;
+    private bool _isUpdateRequired;
     private string _statusText = "Starting...";
+    private string _updateMessage = "";
+    private string _updateDownloadUrl = "";
+    private string _updateNotes = "";
     private ChannelItem? _selectedChannel;
     private VideoItem? _selectedVideo;
 
@@ -41,6 +45,30 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         get => _statusText;
         set => SetField(ref _statusText, value);
+    }
+
+    public bool IsUpdateRequired
+    {
+        get => _isUpdateRequired;
+        private set => SetField(ref _isUpdateRequired, value);
+    }
+
+    public string UpdateMessage
+    {
+        get => _updateMessage;
+        private set => SetField(ref _updateMessage, value);
+    }
+
+    public string UpdateDownloadUrl
+    {
+        get => _updateDownloadUrl;
+        private set => SetField(ref _updateDownloadUrl, value);
+    }
+
+    public string UpdateNotes
+    {
+        get => _updateNotes;
+        private set => SetField(ref _updateNotes, value);
     }
 
     public VideoItem? SelectedVideo
@@ -83,9 +111,23 @@ public sealed class MainViewModel : INotifyPropertyChanged
         ? "The video list scrolls independently without resizing the player."
         : $"{SelectedVideo.ChannelTitle} - {SelectedVideo.PublishedAtText}";
 
+    public void ApplyUpdateResult(UpdateCheckResult result)
+    {
+        if (!result.UpdateAvailable)
+        {
+            return;
+        }
+
+        IsUpdateRequired = true;
+        UpdateMessage = $"sneakyTube {result.LatestVersion} is available. Installed version: {result.CurrentVersion}.";
+        UpdateDownloadUrl = result.DownloadUrl;
+        UpdateNotes = result.Notes;
+        StatusText = result.Message;
+    }
+
     public async Task RefreshAsync(CancellationToken cancellationToken)
     {
-        if (IsLoading)
+        if (IsLoading || IsUpdateRequired)
         {
             return;
         }
@@ -161,7 +203,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public async Task SelectChannelAsync(ChannelItem channel, CancellationToken cancellationToken)
     {
-        if (IsLoading)
+        if (IsLoading || IsUpdateRequired)
         {
             return;
         }

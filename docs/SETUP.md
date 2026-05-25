@@ -32,9 +32,30 @@ Example:
 {
   "youTubeApiKey": "PASTE_RESTRICTED_YOUTUBE_DATA_API_KEY_HERE",
   "configUrl": "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.json",
+  "updateManifestUrl": "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/update-manifest.json",
   "appReferrer": "https://mukundtube.local/"
 }
 ```
+
+## App Version Updates
+
+Channel/video rules update through `config.json`; they do not require reinstalling the app.
+
+Source-code updates use `update-manifest.json` in the same config repo:
+
+```json
+{
+  "version": "0.1.0",
+  "required": false,
+  "downloadUrl": "https://github.com/mukundkatpatal/YoutubeLikeApp/releases/latest",
+  "notes": "Initial development version.",
+  "publishedAt": "2026-05-26T00:00:00Z"
+}
+```
+
+The WPF app reads its installed version from `src/MukundTube/MukundTube.csproj`. On startup it checks the manifest. While open, it also checks every six hours. If the manifest version is newer than the installed version, the app blocks browsing and opens the update URL when `Download and install` is clicked.
+
+For the first Windows packaging pass, use MSIX with App Installer and point `downloadUrl` at the published `.appinstaller` file or a GitHub release that contains it. The app cannot overwrite itself while running; the practical flow is prompt, open installer, close app, install update, relaunch.
 
 ## Build On Windows
 

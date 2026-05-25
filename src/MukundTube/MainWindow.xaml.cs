@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using MukundTube.Models;
@@ -16,7 +17,9 @@ public partial class MainWindow : Window
 
     private readonly MainViewModel _viewModel;
     private readonly YouTubePlayerController _player;
+    private readonly UpdateService _updateService;
     private CancellationTokenSource? _refreshCancellation;
+    private CancellationTokenSource? _updateCancellation;
 
     public MainWindow()
     {
@@ -29,6 +32,9 @@ public partial class MainWindow : Window
 
         _viewModel = new MainViewModel(configService, feedService, settings);
         _player = new YouTubePlayerController(PlayerWebView, settings.AppReferrer);
+        _updateService = new UpdateService(
+            _httpClient,
+            settings.UpdateManifestUrl);
 
         _player.UnauthorizedPlaybackDetected += (_, videoId) =>
         {
@@ -54,6 +60,16 @@ public partial class MainWindow : Window
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        var updateResult = await _updateService.CheckAsync(CancellationToken.None)
+            .ConfigureAwait(true);
+        _viewModel.ApplyUpdateResult(updateResult);
+        StartUpdateMonitor();
+
+        if (_viewModel.IsUpdateRequired)
+        {
+            return;
+        }
+
         await _player.InitializeAsync().ConfigureAwait(true);
         await RefreshFeedAsync().ConfigureAwait(true);
     }
@@ -99,6 +115,23 @@ public partial class MainWindow : Window
         _viewModel.StatusText = $"{_viewModel.Channels.Count} approved channels loaded.";
     }
 
+    private void InstallUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        if (!Uri.TryCreate(_viewModel.UpdateDownloadUrl, UriKind.Absolute, out var updateUri))
+        {
+            _viewModel.StatusText = "Update URL is missing or invalid.";
+            return;
+        }
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = updateUri.ToString(),
+            UseShellExecute = true
+        });
+
+        Close();
+    }
+
     private async Task RefreshFeedAsync()
     {
         _refreshCancellation?.Cancel();
@@ -113,6 +146,39 @@ public partial class MainWindow : Window
     {
         _refreshCancellation?.Cancel();
         _refreshCancellation?.Dispose();
+        _updateCancellation?.Cancel();
+        _updateCancellation?.Dispose();
         _httpClient.Dispose();
+    }
+
+    private void StartUpdateMonitor()
+    {
+        _updateCancellation?.Cancel();
+        _updateCancellation?.Dispose();
+        _updateCancellation = new CancellationTokenSource();
+        _ = MonitorForUpdatesAsync(_updateCancellation.Token);
+    }
+
+    private async Task MonitorForUpdatesAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromHours(6));
+
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(true))
+            {
+                var updateResult = await _updateService.CheckAsync(cancellationToken)
+                    .ConfigureAwait(true);
+                _viewModel.ApplyUpdateResult(updateResult);
+                if (_viewModel.IsUpdateRequired)
+                {
+                    await _player.StopAsync().ConfigureAwait(true);
+                    _player.SetAllowedVideos([]);
+                }
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
     }
 }

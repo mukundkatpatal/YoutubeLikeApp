@@ -51,6 +51,16 @@ https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.
 
 Use YouTube channel IDs beginning with `UC...`, not handles like `@channelname`.
 
+## App Updates
+
+The Windows app has its own version in `src/MukundTube/MukundTube.csproj`. It checks this remote manifest for source-code updates:
+
+```text
+https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/update-manifest.json
+```
+
+When the manifest version is newer than the installed app version, the WPF app blocks browsing and sends the user to the configured update URL. Config-only changes still flow through `config.json` and do not require an app update.
+
 ## Important Reality Check
 
 This is a curated viewer, not full device lockdown. If a child can install another browser or use YouTube elsewhere, that bypasses the app. Qustodio and Windows account/device restrictions are still part of the real control layer.
