@@ -50,21 +50,20 @@ public sealed class FeedService
         var channels = await _youTube.GetChannelsAsync(config.Channels, apiKey, cancellationToken)
             .ConfigureAwait(false);
 
-        var enrichedChannels = new List<ChannelItem>();
-        foreach (var channel in channels)
+        var enrichedChannels = await Task.WhenAll(channels.Select(async channel =>
         {
-            var videos = await LoadChannelVideosAsync(config, channel, apiKey, cancellationToken)
+            var videos = await LoadChannelPreviewVideosAsync(config, channel, apiKey, cancellationToken)
                 .ConfigureAwait(false);
 
             var latestVideo = videos.FirstOrDefault();
-            enrichedChannels.Add(channel with
+            return channel with
             {
                 ThumbnailUrl = string.IsNullOrWhiteSpace(channel.ThumbnailUrl)
                     ? latestVideo?.ThumbnailUrl ?? ""
                     : channel.ThumbnailUrl,
                 LatestPublishedAt = latestVideo?.PublishedAt ?? DateTimeOffset.MinValue
-            });
-        }
+            };
+        })).ConfigureAwait(false);
 
         return enrichedChannels
             .OrderByDescending(channel => channel.LatestPublishedAt)
@@ -80,6 +79,21 @@ public sealed class FeedService
         var videos = await _youTube.GetLatestChannelVideosAsync(
             channel.ChannelId,
             config.MaxVideosPerChannel,
+            apiKey,
+            cancellationToken).ConfigureAwait(false);
+
+        return FeedComposer.ApplyChannelPolicy(config, channel.ChannelId, videos);
+    }
+
+    private async Task<IReadOnlyList<VideoItem>> LoadChannelPreviewVideosAsync(
+        AppConfig config,
+        ChannelItem channel,
+        string apiKey,
+        CancellationToken cancellationToken)
+    {
+        var videos = await _youTube.GetLatestChannelVideosAsync(
+            channel.ChannelId,
+            Math.Min(config.MaxVideosPerChannel, 5),
             apiKey,
             cancellationToken).ConfigureAwait(false);
 

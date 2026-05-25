@@ -7,7 +7,9 @@ const elements = {
   playerSection: document.querySelector("#playerSection"),
   channelSection: document.querySelector("#channelSection"),
   videoSection: document.querySelector("#videoSection"),
+  channelSkeleton: document.querySelector("#channelSkeleton"),
   channelGrid: document.querySelector("#channelGrid"),
+  videoSkeleton: document.querySelector("#videoSkeleton"),
   videoVirtualList: document.querySelector("#videoVirtualList"),
   videoVirtualSpacer: document.querySelector("#videoVirtualSpacer"),
   backButton: document.querySelector("#backButton"),
@@ -43,6 +45,7 @@ elements.backButton.addEventListener("click", () => {
   setStatus(`${state.channels.length} approved channels loaded.`);
 });
 
+renderSkeletons();
 elements.videoVirtualList.addEventListener("scroll", renderVirtualVideos);
 window.addEventListener("resize", renderVirtualVideos);
 
@@ -51,6 +54,7 @@ await refresh();
 async function refresh() {
   elements.refreshButton.disabled = true;
   setStatus("Loading approved channels...");
+  showChannelSkeleton(true);
 
   try {
     stopPlayer();
@@ -73,6 +77,7 @@ async function refresh() {
     renderChannels();
     setStatus(`${state.channels.length} approved channels loaded.`);
   } finally {
+    showChannelSkeleton(false);
     elements.refreshButton.disabled = false;
   }
 }
@@ -157,24 +162,22 @@ async function loadChannelCards(config, apiKey) {
     })));
   }
 
-  const videosByChannelId = new Map();
-  for (const channel of channels.filter(channel => channel.channelId)) {
-    const videos = await loadChannelVideos(channel, config, apiKey);
-    videosByChannelId.set(channel.channelId, videos);
+  await Promise.all(channels.filter(channel => channel.channelId).map(async channel => {
+    const videos = await loadChannelPreviewVideos(channel, config, apiKey);
     channel.thumbnailUrl = channel.thumbnailUrl || videos[0]?.thumbnailUrl || "";
     channel.latestPublishedAt = videos[0]?.publishedAt || "";
-  }
+  }));
 
   return {
     channels: channels
       .filter(channel => channel.channelId)
       .sort((left, right) => new Date(right.latestPublishedAt || 0).getTime()
         - new Date(left.latestPublishedAt || 0).getTime()),
-    videosByChannelId
+    videosByChannelId: new Map()
   };
 }
 
-async function loadChannelVideos(channel, config, apiKey) {
+async function loadChannelVideos(channel, config, apiKey, shouldCache = true) {
   if (state.videosByChannelId.has(channel.channelId)) {
     return state.videosByChannelId.get(channel.channelId);
   }
@@ -224,8 +227,18 @@ async function loadChannelVideos(channel, config, apiKey) {
       return new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime();
     });
 
-  state.videosByChannelId.set(channel.channelId, videos);
+  if (shouldCache) {
+    state.videosByChannelId.set(channel.channelId, videos);
+  }
   return videos;
+}
+
+async function loadChannelPreviewVideos(channel, config, apiKey) {
+  const previewConfig = {
+    ...config,
+    maxVideosPerChannel: Math.min(config.maxVideosPerChannel, 5)
+  };
+  return loadChannelVideos(channel, previewConfig, apiKey, false);
 }
 
 async function getPlaylistItems(playlistId, maxResults, apiKey) {
@@ -302,6 +315,7 @@ async function showChannelVideos(channel) {
   state.selectedChannelId = channel.channelId;
   stopPlayer();
   elements.refreshButton.disabled = true;
+  showVideoSkeleton(true);
   setStatus(`Loading videos from ${channel.title}...`);
 
   try {
@@ -313,6 +327,7 @@ async function showChannelVideos(channel) {
     elements.videoSection.classList.remove("hidden");
     setStatus(`${videos.length} approved videos loaded from ${channel.title}.`);
   } finally {
+    showVideoSkeleton(false);
     elements.refreshButton.disabled = false;
   }
 }
@@ -501,4 +516,55 @@ function emptyMessage(text) {
 
 function placeholderSvg(width, height) {
   return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}'%3E%3Crect width='${width}' height='${height}' fill='%23eeeeee'/%3E%3C/svg%3E`;
+}
+
+function renderSkeletons() {
+  elements.channelSkeleton.innerHTML = "";
+  for (let index = 0; index < 10; index++) {
+    elements.channelSkeleton.append(skeletonCard("channel"));
+  }
+
+  elements.videoSkeleton.innerHTML = "";
+  for (let index = 0; index < 12; index++) {
+    elements.videoSkeleton.append(skeletonCard("video"));
+  }
+}
+
+function skeletonCard(type) {
+  const card = document.createElement("div");
+  card.className = "skeleton-card";
+
+  const thumbWrap = document.createElement("div");
+  if (type === "channel") {
+    thumbWrap.className = "channel-thumb-wrap";
+  }
+
+  const thumb = document.createElement("div");
+  thumb.className = type === "channel"
+    ? "skeleton-thumb skeleton-channel-thumb"
+    : "skeleton-thumb skeleton-video-thumb";
+
+  if (type === "channel") {
+    thumbWrap.append(thumb);
+    card.append(thumbWrap);
+  } else {
+    card.append(thumb);
+  }
+
+  const line1 = document.createElement("div");
+  line1.className = "skeleton-line";
+  const line2 = document.createElement("div");
+  line2.className = "skeleton-line short";
+  card.append(line1, line2);
+  return card;
+}
+
+function showChannelSkeleton(isVisible) {
+  elements.channelSkeleton.classList.toggle("hidden", !isVisible);
+  elements.channelGrid.classList.toggle("hidden", isVisible);
+}
+
+function showVideoSkeleton(isVisible) {
+  elements.videoSkeleton.classList.toggle("hidden", !isVisible);
+  elements.videoVirtualList.classList.toggle("hidden", isVisible);
 }
