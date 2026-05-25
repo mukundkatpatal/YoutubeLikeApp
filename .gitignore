@@ -1,0 +1,15 @@
+bin/
+obj/
+.vs/
+.vscode/
+TestResults/
+*.user
+*.suo
+*.rsuser
+src/MukundTube/settings.local.json
+*.nupkg
+*.msix
+*.appx
+*.appxbundle
+*.msixbundle
+

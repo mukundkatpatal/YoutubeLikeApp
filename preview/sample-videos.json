@@ -1,0 +1,21 @@
+[
+  {
+    "videoId": "dQw4w9WgXcQ",
+    "title": "Sample approved video",
+    "channelId": "UC11111111111111111111",
+    "channelTitle": "Preview Channel",
+    "publishedAt": "2026-05-20T10:00:00Z",
+    "thumbnailUrl": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+    "isPinned": true
+  },
+  {
+    "videoId": "M7lc1UVf-VE",
+    "title": "YouTube Player API demo video",
+    "channelId": "UC22222222222222222222",
+    "channelTitle": "Preview Channel",
+    "publishedAt": "2026-05-18T12:30:00Z",
+    "thumbnailUrl": "https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg",
+    "isPinned": false
+  }
+]
+

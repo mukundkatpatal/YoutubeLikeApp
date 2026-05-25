@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MukundTube Preview</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>MukundTube Preview</h1>
+      <p id="status">Ready.</p>
+    </div>
+    <button id="refreshButton" type="button">Refresh</button>
+  </header>
+
+  <section class="settings" aria-label="Preview settings">
+    <label>
+      YouTube Data API key
+      <input id="apiKeyInput" type="password" autocomplete="off" placeholder="Paste key for Mac preview">
+    </label>
+    <label>
+      Config URL
+      <input id="configUrlInput" type="url" autocomplete="off">
+    </label>
+  </section>
+
+  <main class="workspace">
+    <aside class="feed" aria-label="Approved videos">
+      <div id="virtualList" class="virtual-list" role="listbox" aria-label="Approved videos">
+        <div id="virtualSpacer" class="virtual-spacer"></div>
+      </div>
+    </aside>
+    <section class="player-shell" aria-label="Player">
+      <div id="player" class="player"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js?v=7"></script>
+</body>
+</html>

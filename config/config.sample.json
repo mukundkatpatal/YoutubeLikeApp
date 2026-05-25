@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-25T00:00:00Z",
+  "refreshIntervalMinutes": 60,
+  "maxVideosPerChannel": 25,
+  "channels": [
+    {
+      "channelId": "UCxxxxxxxxxxxxxxxxxxxxxx",
+      "title": "Example Channel",
+      "enabled": true
+    }
+  ],
+  "blockedVideoIds": [
+    "VIDEOID1234"
+  ],
+  "pinnedVideoIds": [
+    "VIDEOID5678"
+  ]
+}
+
