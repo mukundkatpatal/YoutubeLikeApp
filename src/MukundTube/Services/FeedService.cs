@@ -52,8 +52,15 @@ public sealed class FeedService
 
         var enrichedChannels = await Task.WhenAll(channels.Select(async channel =>
         {
-            var videos = await LoadChannelPreviewVideosAsync(config, channel, apiKey, cancellationToken)
-                .ConfigureAwait(false);
+            IReadOnlyList<VideoItem> videos = [];
+            try
+            {
+                videos = await LoadChannelPreviewVideosAsync(config, channel, apiKey, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch (YouTubeApiException)
+            {
+            }
 
             var latestVideo = videos.FirstOrDefault();
             return channel with

@@ -49,7 +49,7 @@ renderSkeletons();
 elements.videoVirtualList.addEventListener("scroll", renderVirtualVideos);
 window.addEventListener("resize", renderVirtualVideos);
 
-await refresh();
+await refresh().catch(error => setStatus(`Could not load preview. ${error.message}`));
 
 async function refresh() {
   elements.refreshButton.disabled = true;
@@ -163,7 +163,7 @@ async function loadChannelCards(config, apiKey) {
   }
 
   await Promise.all(channels.filter(channel => channel.channelId).map(async channel => {
-    const videos = await loadChannelPreviewVideos(channel, config, apiKey);
+    const videos = await loadChannelPreviewVideos(channel, config, apiKey).catch(() => []);
     channel.thumbnailUrl = channel.thumbnailUrl || videos[0]?.thumbnailUrl || "";
     channel.latestPublishedAt = videos[0]?.publishedAt || "";
   }));
