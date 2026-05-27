@@ -1,3 +1,6 @@
+using System;
+using System.IO;
+
 namespace MukundTube.Services;
 
 public static class CachePaths
