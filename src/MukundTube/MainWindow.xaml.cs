@@ -166,13 +166,6 @@ public partial class MainWindow : Window
     private void ApplyFullscreenMode()
     {
         WindowState = WindowState.Normal;
-        WindowStartupLocation = WindowStartupLocation.Manual;
-        WindowStyle = WindowStyle.None;
-        ResizeMode = ResizeMode.NoResize;
-        Left = 0;
-        Top = 0;
-        Width = SystemParameters.PrimaryScreenWidth;
-        Height = SystemParameters.PrimaryScreenHeight;
         WindowState = WindowState.Maximized;
     }
 
