@@ -82,9 +82,9 @@
                                FontWeight="Bold" />
 
                     <Grid Grid.Row="1">
-                        <StackPanel>
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
+                        <WrapPanel>
+                            <WrapPanel.Style>
+                                <Style TargetType="WrapPanel">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsLoading}" Value="True">
@@ -92,44 +92,29 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </StackPanel.Style>
-                            <Grid MinHeight="132" Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="156" />
-                                    <ColumnDefinition Width="18" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Border Width="132" Height="132" Background="#2A2A2A" CornerRadius="66" />
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <Border Height="18" Width="240" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
-                                    <Border Height="13" Width="140" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
+                            </WrapPanel.Style>
+                            <Grid Width="230" Margin="0,0,18,26">
+                                <StackPanel>
+                                    <Border Width="156" Height="156" Background="#2A2A2A" CornerRadius="78" />
+                                    <Border Height="16" Width="190" HorizontalAlignment="Left" Margin="0,12,0,0" Background="#2A2A2A" CornerRadius="8" />
+                                    <Border Height="13" Width="130" HorizontalAlignment="Left" Margin="0,9,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
-                            <Grid MinHeight="132" Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="156" />
-                                    <ColumnDefinition Width="18" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Border Width="132" Height="132" Background="#2A2A2A" CornerRadius="66" />
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <Border Height="18" Width="220" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
-                                    <Border Height="13" Width="120" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
+                            <Grid Width="230" Margin="0,0,18,26">
+                                <StackPanel>
+                                    <Border Width="156" Height="156" Background="#2A2A2A" CornerRadius="78" />
+                                    <Border Height="16" Width="175" HorizontalAlignment="Left" Margin="0,12,0,0" Background="#2A2A2A" CornerRadius="8" />
+                                    <Border Height="13" Width="118" HorizontalAlignment="Left" Margin="0,9,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
-                            <Grid MinHeight="132" Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="156" />
-                                    <ColumnDefinition Width="18" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Border Width="132" Height="132" Background="#2A2A2A" CornerRadius="66" />
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                    <Border Height="18" Width="260" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
-                                    <Border Height="13" Width="150" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
+                            <Grid Width="230" Margin="0,0,18,26">
+                                <StackPanel>
+                                    <Border Width="156" Height="156" Background="#2A2A2A" CornerRadius="78" />
+                                    <Border Height="16" Width="205" HorizontalAlignment="Left" Margin="0,12,0,0" Background="#2A2A2A" CornerRadius="8" />
+                                    <Border Height="13" Width="145" HorizontalAlignment="Left" Margin="0,9,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
-                        </StackPanel>
+                        </WrapPanel>
 
                         <ListBox x:Name="ChannelList"
                                  ItemsSource="{Binding Channels}"
@@ -137,9 +122,9 @@
                                  SelectionChanged="ChannelList_SelectionChanged"
                                  BorderThickness="0"
                                  Background="#0F0F0F"
-                                 ScrollViewer.CanContentScroll="True"
-                                 VirtualizingPanel.IsVirtualizing="True"
-                                 VirtualizingPanel.VirtualizationMode="Recycling">
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.CanContentScroll="False">
                             <ListBox.Style>
                                 <Style TargetType="ListBox">
                                     <Setter Property="Visibility" Value="Visible" />
@@ -152,28 +137,32 @@
                             </ListBox.Style>
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <VirtualizingStackPanel />
+                                    <WrapPanel />
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Width" Value="230" />
                                     <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0,0,0,18" />
+                                    <Setter Property="Margin" Value="0,0,18,26" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Style>
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid MinHeight="132">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="156" />
-                                            <ColumnDefinition Width="18" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-
+                                    <StackPanel>
                                         <Border Width="132"
                                                 Height="132"
-                                                HorizontalAlignment="Center"
+                                                HorizontalAlignment="Left"
                                                 Background="#272727"
                                                 CornerRadius="66"
                                                 ClipToBounds="True">
@@ -181,19 +170,19 @@
                                                    Stretch="UniformToFill" />
                                         </Border>
 
-                                        <StackPanel Grid.Column="2"
-                                                    VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Title}"
-                                                       Foreground="#F1F1F1"
-                                                       FontSize="18"
-                                                       FontWeight="Bold"
-                                                       TextWrapping="Wrap" />
-                                            <TextBlock Text="Approved channel"
-                                                       Margin="0,6,0,0"
-                                                       Foreground="#AAAAAA"
-                                                       FontSize="13" />
-                                        </StackPanel>
-                                    </Grid>
+                                        <TextBlock Text="{Binding Title}"
+                                                   Margin="0,10,0,0"
+                                                   Foreground="#F1F1F1"
+                                                   FontSize="15"
+                                                   FontWeight="Bold"
+                                                   MaxHeight="40"
+                                                   TextWrapping="Wrap"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="Approved channel"
+                                                   Margin="0,6,0,0"
+                                                   Foreground="#AAAAAA"
+                                                   FontSize="13" />
+                                    </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -256,9 +245,9 @@
                     </Grid>
 
                     <Grid Grid.Row="2">
-                        <StackPanel>
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
+                        <WrapPanel>
+                            <WrapPanel.Style>
+                                <Style TargetType="WrapPanel">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsLoading}" Value="True">
@@ -266,44 +255,29 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </StackPanel.Style>
-                            <Grid Height="130" Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="224" />
-                                    <ColumnDefinition Width="14" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Border Width="224" Height="126" Background="#2A2A2A" CornerRadius="10" />
-                                <StackPanel Grid.Column="2">
-                                    <Border Height="17" Width="420" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
-                                    <Border Height="13" Width="180" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
+                            </WrapPanel.Style>
+                            <Grid Width="260" Margin="0,0,18,28">
+                                <StackPanel>
+                                    <Border Width="260" Height="146" Background="#2A2A2A" CornerRadius="10" />
+                                    <Border Height="16" Width="235" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="8" />
+                                    <Border Height="13" Width="150" HorizontalAlignment="Left" Margin="0,9,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
-                            <Grid Height="130" Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="224" />
-                                    <ColumnDefinition Width="14" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Border Width="224" Height="126" Background="#2A2A2A" CornerRadius="10" />
-                                <StackPanel Grid.Column="2">
-                                    <Border Height="17" Width="360" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
-                                    <Border Height="13" Width="160" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
+                            <Grid Width="260" Margin="0,0,18,28">
+                                <StackPanel>
+                                    <Border Width="260" Height="146" Background="#2A2A2A" CornerRadius="10" />
+                                    <Border Height="16" Width="215" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="8" />
+                                    <Border Height="13" Width="135" HorizontalAlignment="Left" Margin="0,9,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
-                            <Grid Height="130" Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="224" />
-                                    <ColumnDefinition Width="14" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Border Width="224" Height="126" Background="#2A2A2A" CornerRadius="10" />
-                                <StackPanel Grid.Column="2">
-                                    <Border Height="17" Width="390" HorizontalAlignment="Left" Background="#2A2A2A" CornerRadius="9" />
-                                    <Border Height="13" Width="150" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="7" />
+                            <Grid Width="260" Margin="0,0,18,28">
+                                <StackPanel>
+                                    <Border Width="260" Height="146" Background="#2A2A2A" CornerRadius="10" />
+                                    <Border Height="16" Width="245" HorizontalAlignment="Left" Margin="0,10,0,0" Background="#2A2A2A" CornerRadius="8" />
+                                    <Border Height="13" Width="145" HorizontalAlignment="Left" Margin="0,9,0,0" Background="#2A2A2A" CornerRadius="7" />
                                 </StackPanel>
                             </Grid>
-                        </StackPanel>
+                        </WrapPanel>
 
                         <ListBox x:Name="VideoList"
                                  ItemsSource="{Binding Videos}"
@@ -311,9 +285,9 @@
                                  BorderThickness="0"
                                  Background="#0F0F0F"
                                  SelectionChanged="VideoList_SelectionChanged"
-                                 ScrollViewer.CanContentScroll="True"
-                                 VirtualizingPanel.IsVirtualizing="True"
-                                 VirtualizingPanel.VirtualizationMode="Recycling">
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ScrollViewer.CanContentScroll="False">
                             <ListBox.Style>
                                 <Style TargetType="ListBox">
                                     <Setter Property="Visibility" Value="Visible" />
@@ -324,46 +298,54 @@
                                     </Style.Triggers>
                                 </Style>
                             </ListBox.Style>
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Width" Value="260" />
                                     <Setter Property="Padding" Value="0" />
-                                    <Setter Property="Margin" Value="0,0,0,18" />
+                                    <Setter Property="Margin" Value="0,0,18,28" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <ContentPresenter />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Style>
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid Height="130">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="224" />
-                                            <ColumnDefinition Width="14" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <Border Width="224"
-                                            Height="126"
-                                            Background="#272727"
+                                    <StackPanel>
+                                        <Border Width="260"
+                                                Height="146"
+                                                Background="#272727"
                                                 CornerRadius="10"
                                                 ClipToBounds="True">
                                             <Image Source="{Binding ThumbnailUrl}"
                                                    Stretch="UniformToFill" />
                                         </Border>
 
-                                        <StackPanel Grid.Column="2">
-                                            <TextBlock Text="{Binding Title}"
-                                                       FontWeight="Bold"
-                                                       FontSize="15"
-                                                       Foreground="#F1F1F1"
-                                                       MaxHeight="44"
-                                                       TextWrapping="Wrap"
-                                                       TextTrimming="CharacterEllipsis" />
-                                            <TextBlock Text="{Binding PublishedAtText}"
-                                                       Margin="0,6,0,0"
-                                                       Foreground="#AAAAAA"
-                                                       FontSize="13"
-                                                       TextTrimming="CharacterEllipsis" />
-                                        </StackPanel>
-                                    </Grid>
+                                        <TextBlock Text="{Binding Title}"
+                                                   Margin="0,10,0,0"
+                                                   FontWeight="Bold"
+                                                   FontSize="15"
+                                                   Foreground="#F1F1F1"
+                                                   MaxHeight="44"
+                                                   TextWrapping="Wrap"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding PublishedAtText}"
+                                                   Margin="0,6,0,0"
+                                                   Foreground="#AAAAAA"
+                                                   FontSize="13"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
