@@ -8,6 +8,9 @@
         Height="800"
         MinWidth="980"
         MinHeight="620"
+        WindowState="Maximized"
+        WindowStyle="None"
+        ResizeMode="NoResize"
         Background="#0F0F0F">
     <Grid>
         <Grid.RowDefinitions>

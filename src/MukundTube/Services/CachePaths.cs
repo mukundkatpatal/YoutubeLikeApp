@@ -24,4 +24,8 @@ public static class CachePaths
     public static string CachedConfigPath => Path.Combine(AppDataDirectory, "last-good-config.json");
 
     public static string UserSettingsPath => Path.Combine(AppDataDirectory, "settings.json");
+
+    public static string WebView2UserDataDirectory => Path.Combine(AppDataDirectory, "WebView2");
+
+    public static string CrashLogPath => Path.Combine(AppDataDirectory, "crash.log");
 }

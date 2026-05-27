@@ -35,7 +35,12 @@ public sealed class YouTubePlayerController
             return;
         }
 
-        await _webView.EnsureCoreWebView2Async().ConfigureAwait(true);
+        Directory.CreateDirectory(CachePaths.WebView2UserDataDirectory);
+        var environment = await CoreWebView2Environment.CreateAsync(
+                userDataFolder: CachePaths.WebView2UserDataDirectory)
+            .ConfigureAwait(true);
+
+        await _webView.EnsureCoreWebView2Async(environment).ConfigureAwait(true);
 
         var core = _webView.CoreWebView2;
         core.Settings.AreDefaultContextMenusEnabled = false;

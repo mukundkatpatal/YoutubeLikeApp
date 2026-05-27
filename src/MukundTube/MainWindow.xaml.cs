@@ -24,6 +24,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ApplyFullscreenMode();
 
         var settings = SettingsService.Load();
         var configService = new ConfigService(_httpClient, settings.ConfigUrl, CachePaths.CachedConfigPath);
@@ -54,12 +55,15 @@ public partial class MainWindow : Window
         };
 
         DataContext = _viewModel;
+        SourceInitialized += (_, _) => ApplyFullscreenMode();
         Loaded += MainWindow_Loaded;
         Closed += MainWindow_Closed;
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        ApplyFullscreenMode();
+
         var updateResult = await _updateService.CheckAsync(CancellationToken.None)
             .ConfigureAwait(true);
         _viewModel.ApplyUpdateResult(updateResult);
@@ -112,7 +116,7 @@ public partial class MainWindow : Window
         _viewModel.SelectedVideo = null;
         _viewModel.Videos.Clear();
         _player.SetAllowedVideos([]);
-        _viewModel.StatusText = $"{_viewModel.Channels.Count} approved channels loaded.";
+        _viewModel.StatusText = "";
     }
 
     private void InstallUpdate_Click(object sender, RoutedEventArgs e)
@@ -157,6 +161,19 @@ public partial class MainWindow : Window
         _updateCancellation?.Dispose();
         _updateCancellation = new CancellationTokenSource();
         _ = MonitorForUpdatesAsync(_updateCancellation.Token);
+    }
+
+    private void ApplyFullscreenMode()
+    {
+        WindowState = WindowState.Normal;
+        WindowStartupLocation = WindowStartupLocation.Manual;
+        WindowStyle = WindowStyle.None;
+        ResizeMode = ResizeMode.NoResize;
+        Left = 0;
+        Top = 0;
+        Width = SystemParameters.PrimaryScreenWidth;
+        Height = SystemParameters.PrimaryScreenHeight;
+        WindowState = WindowState.Maximized;
     }
 
     private async Task MonitorForUpdatesAsync(CancellationToken cancellationToken)

@@ -13,7 +13,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private readonly UserSettings _settings;
     private bool _isLoading;
     private bool _isUpdateRequired;
-    private string _statusText = "Starting...";
+    private string _statusText = "";
     private string _updateMessage = "";
     private string _updateDownloadUrl = "";
     private string _updateNotes = "";
@@ -179,7 +179,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
             OnPropertyChanged(nameof(HasChannels));
             OnPropertyChanged(nameof(HasVideos));
-            StatusText = $"{channels.Count} approved channels loaded. {configResult.Message}";
+            StatusText = "";
         }
         catch (OperationCanceledException)
         {
