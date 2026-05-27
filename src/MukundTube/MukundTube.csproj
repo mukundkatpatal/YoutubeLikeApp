@@ -5,9 +5,10 @@
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
-    <AssemblyName>sneakyTube</AssemblyName>
+    <AssemblyName>Youtube Beta</AssemblyName>
     <RootNamespace>MukundTube</RootNamespace>
-    <Product>sneakyTube</Product>
+    <Product>Youtube Beta</Product>
+    <ApplicationIcon>Assets\Icons\youtube-beta.ico</ApplicationIcon>
     <Version>0.1.0</Version>
     <FileVersion>0.1.0.0</FileVersion>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
@@ -22,5 +23,6 @@
     <Content Include="Assets\player.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Assets\Icons\youtube-beta.ico" />
   </ItemGroup>
 </Project>

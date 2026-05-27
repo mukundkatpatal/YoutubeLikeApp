@@ -1,6 +1,6 @@
-# sneakyTube
+# Youtube Beta
 
-sneakyTube is a Windows curated YouTube viewer for a child account. It has no search, no local admin UI, and no sign-in. Approved channels, blocked videos, and pinned videos come from a remote JSON config controlled by the parent.
+Youtube Beta is a Windows curated YouTube viewer for a child account. It has no search, no local admin UI, and no sign-in. Approved channels, blocked videos, and pinned videos come from a remote JSON config controlled by the parent.
 
 The production app is WPF + WebView2 for Windows. This repository also includes a Mac browser preview so the feed and config behavior can be checked on this machine.
 
@@ -53,7 +53,7 @@ Use YouTube channel IDs beginning with `UC...`, not handles like `@channelname`.
 
 ## App Updates
 
-sneakyTube has its own version in `src/MukundTube/MukundTube.csproj`. It checks this remote manifest for source-code updates:
+Youtube Beta has its own version in `src/MukundTube/MukundTube.csproj`. It checks this remote manifest for source-code updates:
 
 ```text
 https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/update-manifest.json

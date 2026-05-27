@@ -119,7 +119,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
 
         IsUpdateRequired = true;
-        UpdateMessage = $"sneakyTube {result.LatestVersion} is available. Installed version: {result.CurrentVersion}.";
+        UpdateMessage = $"Youtube Beta {result.LatestVersion} is available. Installed version: {result.CurrentVersion}.";
         UpdateDownloadUrl = result.DownloadUrl;
         UpdateNotes = result.Notes;
         StatusText = result.Message;
