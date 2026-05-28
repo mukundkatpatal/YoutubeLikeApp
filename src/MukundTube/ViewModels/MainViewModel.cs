@@ -111,7 +111,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public bool HasChannels => Channels.Count > 0;
 
-    public string SelectedVideoTitle => SelectedVideo?.Title ?? "Choose an approved video";
+    public string SelectedVideoTitle => SelectedVideo?.Title ?? "Choose a video";
 
     public string SelectedVideoMeta => SelectedVideo is null
         ? "The video list scrolls independently without resizing the player."
@@ -139,7 +139,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         }
 
         IsLoading = true;
-        StatusText = "Loading approved channels...";
+        StatusText = "Loading channels...";
 
         try
         {
@@ -256,7 +256,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(HasVideos));
             OnPropertyChanged(nameof(HasLongVideos));
             OnPropertyChanged(nameof(HasShorts));
-            StatusText = $"{videos.Count} approved videos loaded from {channel.Title}.";
+            StatusText = $"{videos.Count} videos loaded from {channel.Title}.";
         }
         catch (OperationCanceledException)
         {

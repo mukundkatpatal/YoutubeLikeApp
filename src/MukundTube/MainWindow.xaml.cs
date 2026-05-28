@@ -42,7 +42,7 @@ public partial class MainWindow : Window
             Dispatcher.Invoke(() =>
             {
                 _viewModel.SelectedVideo = null;
-                _viewModel.StatusText = $"Blocked an unapproved video: {videoId}.";
+                _viewModel.StatusText = $"Blocked a video outside this app: {videoId}.";
             });
         };
 

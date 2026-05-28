@@ -178,7 +178,7 @@
                                                    MaxHeight="40"
                                                    TextWrapping="Wrap"
                                                    TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="Approved channel"
+                                        <TextBlock Text="Channel"
                                                    Margin="0,6,0,0"
                                                    Foreground="#AAAAAA"
                                                    FontSize="13" />
