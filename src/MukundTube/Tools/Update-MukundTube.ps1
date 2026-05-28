@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 $projectDir = Split-Path -Parent $PSScriptRoot
 $appDataDir = Join-Path $env:LOCALAPPDATA 'Youtube Beta'
 $publishDir = Join-Path $appDataDir 'App'
+$appExePath = Join-Path $publishDir 'Youtube Beta.exe'
 $logPath = Join-Path $appDataDir 'update.log'
 $lockPath = Join-Path $appDataDir 'update.lock'
 
@@ -75,6 +76,14 @@ try {
     }
 
     Write-UpdateLog 'Update published successfully.'
+
+    if (Test-Path -LiteralPath $appExePath) {
+        Write-UpdateLog 'Starting Youtube Beta after update.'
+        Start-Process -FilePath $appExePath -WorkingDirectory $publishDir
+    }
+    else {
+        Write-UpdateLog "Published app was not found at $appExePath."
+    }
 }
 catch {
     Write-UpdateLog "ERROR: $_"
