@@ -107,6 +107,7 @@ public partial class MainWindow : Window
         }
 
         _viewModel.SelectedVideo = video;
+        _player.SetAllowedVideos(_viewModel.Videos.Concat(_viewModel.Shorts).Select(item => item.VideoId));
         await _player.PlayAsync(video).ConfigureAwait(true);
     }
 
@@ -146,7 +147,7 @@ public partial class MainWindow : Window
 
         await _player.StopAsync().ConfigureAwait(true);
         await _viewModel.RefreshAsync(_refreshCancellation.Token).ConfigureAwait(true);
-        _player.SetAllowedVideos([]);
+        _player.SetAllowedVideos(_viewModel.Videos.Concat(_viewModel.Shorts).Select(video => video.VideoId));
     }
 
     private void MainWindow_Closed(object? sender, EventArgs e)

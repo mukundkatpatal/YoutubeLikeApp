@@ -101,7 +101,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public bool IsChannelSelected => SelectedChannel is not null;
 
-    public string SelectedChannelTitle => SelectedChannel?.Title ?? "Channels";
+    public string SelectedChannelTitle => SelectedChannel?.Title ?? "Home";
 
     public bool HasVideos => Videos.Count > 0 || Shorts.Count > 0;
 
@@ -178,6 +178,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
             var channels = await _feedService.LoadChannelsAsync(CurrentConfig, _settings.YouTubeApiKey, cancellationToken)
                 .ConfigureAwait(true);
+            var videos = await _feedService.LoadFeedAsync(CurrentConfig, _settings.YouTubeApiKey, cancellationToken)
+                .ConfigureAwait(true);
 
             Channels.Clear();
             foreach (var channel in channels)
@@ -187,6 +189,16 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
             Videos.Clear();
             Shorts.Clear();
+            foreach (var video in videos.Where(video => !video.IsShort))
+            {
+                Videos.Add(video);
+            }
+
+            foreach (var shortVideo in videos.Where(video => video.IsShort))
+            {
+                Shorts.Add(shortVideo);
+            }
+
             SelectedChannel = null;
             SelectedVideo = null;
 
@@ -221,7 +233,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public async Task SelectChannelAsync(ChannelItem channel, CancellationToken cancellationToken)
     {
-        if (IsLoading || IsUpdateRequired)
+        if (IsUpdateRequired)
         {
             return;
         }

@@ -16,18 +16,35 @@ public sealed class FeedService
         string apiKey,
         CancellationToken cancellationToken)
     {
-        var candidateVideos = new List<VideoItem>();
+        var maxResultsPerChannel = Math.Min(config.MaxVideosPerChannel, 10);
+        using var concurrency = new SemaphoreSlim(4);
 
-        foreach (var channel in config.Channels.Where(channel => channel.Enabled))
-        {
-            var videos = await _youTube.GetLatestChannelVideosAsync(
-                channel.ChannelId,
-                config.MaxVideosPerChannel,
-                apiKey,
-                cancellationToken).ConfigureAwait(false);
+        var channelVideoTasks = config.Channels
+            .Where(channel => channel.Enabled)
+            .Select(async channel =>
+            {
+                await concurrency.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-            candidateVideos.AddRange(videos);
-        }
+                try
+                {
+                    return await _youTube.GetLatestChannelVideosAsync(
+                        channel.ChannelId,
+                        maxResultsPerChannel,
+                        apiKey,
+                        cancellationToken).ConfigureAwait(false);
+                }
+                catch (YouTubeApiException)
+                {
+                    return [];
+                }
+                finally
+                {
+                    concurrency.Release();
+                }
+            });
+
+        var channelVideos = await Task.WhenAll(channelVideoTasks).ConfigureAwait(false);
+        var candidateVideos = channelVideos.SelectMany(videos => videos).ToList();
 
         if (config.PinnedVideoIds.Count > 0)
         {
@@ -50,30 +67,8 @@ public sealed class FeedService
         var channels = await _youTube.GetChannelsAsync(config.Channels, apiKey, cancellationToken)
             .ConfigureAwait(false);
 
-        var enrichedChannels = await Task.WhenAll(channels.Select(async channel =>
-        {
-            IReadOnlyList<VideoItem> videos = [];
-            try
-            {
-                videos = await LoadChannelPreviewVideosAsync(config, channel, apiKey, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch (YouTubeApiException)
-            {
-            }
-
-            var latestVideo = videos.FirstOrDefault();
-            return channel with
-            {
-                ThumbnailUrl = string.IsNullOrWhiteSpace(channel.ThumbnailUrl)
-                    ? latestVideo?.ThumbnailUrl ?? ""
-                    : channel.ThumbnailUrl,
-                LatestPublishedAt = latestVideo?.PublishedAt ?? DateTimeOffset.MinValue
-            };
-        })).ConfigureAwait(false);
-
-        return enrichedChannels
-            .OrderByDescending(channel => channel.LatestPublishedAt)
+        return channels
+            .OrderBy(channel => channel.Title)
             .ToArray();
     }
 
