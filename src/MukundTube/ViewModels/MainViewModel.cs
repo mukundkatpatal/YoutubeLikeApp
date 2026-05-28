@@ -33,6 +33,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public ObservableCollection<VideoItem> Videos { get; } = [];
 
+    public ObservableCollection<VideoItem> Shorts { get; } = [];
+
     public AppConfig CurrentConfig { get; private set; } = AppConfig.Empty;
 
     public bool IsLoading
@@ -101,7 +103,11 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public string SelectedChannelTitle => SelectedChannel?.Title ?? "Channels";
 
-    public bool HasVideos => Videos.Count > 0;
+    public bool HasVideos => Videos.Count > 0 || Shorts.Count > 0;
+
+    public bool HasLongVideos => Videos.Count > 0;
+
+    public bool HasShorts => Shorts.Count > 0;
 
     public bool HasChannels => Channels.Count > 0;
 
@@ -141,10 +147,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
             {
                 Channels.Clear();
                 Videos.Clear();
+                Shorts.Clear();
                 SelectedChannel = null;
                 SelectedVideo = null;
                 OnPropertyChanged(nameof(HasChannels));
                 OnPropertyChanged(nameof(HasVideos));
+                OnPropertyChanged(nameof(HasLongVideos));
+                OnPropertyChanged(nameof(HasShorts));
                 StatusText = "Missing YouTube API key. Add settings.local.json beside the app or set MUKUND_TUBE_YOUTUBE_API_KEY.";
                 return;
             }
@@ -156,10 +165,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
             {
                 Channels.Clear();
                 Videos.Clear();
+                Shorts.Clear();
                 SelectedChannel = null;
                 SelectedVideo = null;
                 OnPropertyChanged(nameof(HasChannels));
                 OnPropertyChanged(nameof(HasVideos));
+                OnPropertyChanged(nameof(HasLongVideos));
+                OnPropertyChanged(nameof(HasShorts));
                 StatusText = configResult.Message;
                 return;
             }
@@ -174,11 +186,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
             }
 
             Videos.Clear();
+            Shorts.Clear();
             SelectedChannel = null;
             SelectedVideo = null;
 
             OnPropertyChanged(nameof(HasChannels));
             OnPropertyChanged(nameof(HasVideos));
+            OnPropertyChanged(nameof(HasLongVideos));
+            OnPropertyChanged(nameof(HasShorts));
             StatusText = "";
         }
         catch (OperationCanceledException)
@@ -189,10 +204,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
         {
             Channels.Clear();
             Videos.Clear();
+            Shorts.Clear();
             SelectedChannel = null;
             SelectedVideo = null;
             OnPropertyChanged(nameof(HasChannels));
             OnPropertyChanged(nameof(HasVideos));
+            OnPropertyChanged(nameof(HasLongVideos));
+            OnPropertyChanged(nameof(HasShorts));
             StatusText = $"Could not load channels. {ex.Message}";
         }
         finally
@@ -212,7 +230,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
         SelectedChannel = channel;
         SelectedVideo = null;
         Videos.Clear();
+        Shorts.Clear();
         OnPropertyChanged(nameof(HasVideos));
+        OnPropertyChanged(nameof(HasLongVideos));
+        OnPropertyChanged(nameof(HasShorts));
         StatusText = $"Loading videos from {channel.Title}...";
 
         try
@@ -221,12 +242,20 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 .ConfigureAwait(true);
 
             Videos.Clear();
-            foreach (var video in videos)
+            Shorts.Clear();
+            foreach (var video in videos.Where(video => !video.IsShort))
             {
                 Videos.Add(video);
             }
 
+            foreach (var shortVideo in videos.Where(video => video.IsShort))
+            {
+                Shorts.Add(shortVideo);
+            }
+
             OnPropertyChanged(nameof(HasVideos));
+            OnPropertyChanged(nameof(HasLongVideos));
+            OnPropertyChanged(nameof(HasShorts));
             StatusText = $"{videos.Count} approved videos loaded from {channel.Title}.";
         }
         catch (OperationCanceledException)
@@ -236,7 +265,10 @@ public sealed class MainViewModel : INotifyPropertyChanged
         catch (Exception ex)
         {
             Videos.Clear();
+            Shorts.Clear();
             OnPropertyChanged(nameof(HasVideos));
+            OnPropertyChanged(nameof(HasLongVideos));
+            OnPropertyChanged(nameof(HasShorts));
             StatusText = $"Could not load channel videos. {ex.Message}";
         }
         finally

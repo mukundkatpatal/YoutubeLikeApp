@@ -16,6 +16,10 @@ public sealed record VideoItem
 
     public bool IsPinned { get; init; }
 
+    public TimeSpan? Duration { get; init; }
+
+    public bool IsShort => Duration is { TotalSeconds: <= 180 };
+
     public string PublishedAtText => PublishedAt == default
         ? ""
         : PublishedAt.ToLocalTime().ToString("g");

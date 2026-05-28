@@ -21,7 +21,7 @@ public sealed class YouTubePlayerController
     public YouTubePlayerController(WebView2 webView, string appReferrer)
     {
         _webView = webView;
-        _appReferrer = appReferrer.EndsWith("/", StringComparison.Ordinal) ? appReferrer : appReferrer + "/";
+        _appReferrer = PlayerOrigin + "/";
     }
 
     public event EventHandler<string>? UnauthorizedPlaybackDetected;
@@ -55,6 +55,7 @@ public sealed class YouTubePlayerController
             CoreWebView2HostResourceAccessKind.DenyCors);
 
         core.NavigationStarting += OnNavigationStarting;
+        core.NewWindowRequested += OnNewWindowRequested;
         core.WebMessageReceived += OnWebMessageReceived;
         core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
         core.WebResourceRequested += OnWebResourceRequested;
@@ -80,6 +81,7 @@ public sealed class YouTubePlayerController
             return;
         }
 
+        _webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
         var url = $"{PlayerOrigin}/player.html?videoId={Uri.EscapeDataString(video.VideoId)}";
         _webView.CoreWebView2.Navigate(url);
     }
@@ -119,6 +121,11 @@ public sealed class YouTubePlayerController
         }
 
         args.Cancel = true;
+    }
+
+    private void OnNewWindowRequested(object? sender, CoreWebView2NewWindowRequestedEventArgs args)
+    {
+        args.Handled = true;
     }
 
     private void OnWebResourceRequested(object? sender, CoreWebView2WebResourceRequestedEventArgs args)

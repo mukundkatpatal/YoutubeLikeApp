@@ -96,16 +96,17 @@ public partial class MainWindow : Window
 
         await _player.StopAsync().ConfigureAwait(true);
         await _viewModel.SelectChannelAsync(channel, _refreshCancellation.Token).ConfigureAwait(true);
-        _player.SetAllowedVideos(_viewModel.Videos.Select(video => video.VideoId));
+        _player.SetAllowedVideos(_viewModel.Videos.Concat(_viewModel.Shorts).Select(video => video.VideoId));
     }
 
     private async void VideoList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_viewModel.SelectedVideo is not VideoItem video)
+        if (sender is not ListBox { SelectedItem: VideoItem video })
         {
             return;
         }
 
+        _viewModel.SelectedVideo = video;
         await _player.PlayAsync(video).ConfigureAwait(true);
     }
 
@@ -115,6 +116,7 @@ public partial class MainWindow : Window
         _viewModel.SelectedChannel = null;
         _viewModel.SelectedVideo = null;
         _viewModel.Videos.Clear();
+        _viewModel.Shorts.Clear();
         _player.SetAllowedVideos([]);
         _viewModel.StatusText = "";
     }
@@ -142,6 +144,7 @@ public partial class MainWindow : Window
         _refreshCancellation?.Dispose();
         _refreshCancellation = new CancellationTokenSource();
 
+        await _player.StopAsync().ConfigureAwait(true);
         await _viewModel.RefreshAsync(_refreshCancellation.Token).ConfigureAwait(true);
         _player.SetAllowedVideos([]);
     }

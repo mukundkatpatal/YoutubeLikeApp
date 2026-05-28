@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml;
 using MukundTube.Models;
 
 namespace MukundTube.Services;
@@ -31,11 +32,14 @@ public sealed class YouTubeDataApiClient
         var response = await GetPlaylistItemsAsync(uploadsPlaylistId, maxResults, apiKey, cancellationToken)
             .ConfigureAwait(false);
 
-        return response
+        var videoIds = response
             .Select(ToVideoItem)
             .Where(video => !string.IsNullOrWhiteSpace(video.VideoId))
             .Where(video => !IsPlaceholderTitle(video.Title))
+            .Select(video => video.VideoId)
             .ToArray();
+
+        return await GetVideosByIdsAsync(videoIds, apiKey, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyList<ChannelItem>> GetChannelsAsync(
@@ -79,7 +83,7 @@ public sealed class YouTubeDataApiClient
         {
             var joinedIds = string.Join(",", batch.Select(Uri.EscapeDataString));
             var url =
-                $"{ApiBaseUrl}/videos?part=snippet,status&id={joinedIds}&key={Uri.EscapeDataString(apiKey)}";
+                $"{ApiBaseUrl}/videos?part=snippet,status,contentDetails&id={joinedIds}&key={Uri.EscapeDataString(apiKey)}";
             var response = await SendAsync<VideosResponse>(url, cancellationToken).ConfigureAwait(false);
 
             results.AddRange(response.Items
@@ -200,8 +204,26 @@ public sealed class YouTubeDataApiClient
             ChannelId = snippet.ChannelId ?? "",
             ChannelTitle = WebUtility.HtmlDecode(snippet.ChannelTitle ?? ""),
             PublishedAt = snippet.PublishedAt,
-            ThumbnailUrl = PickThumbnail(snippet.Thumbnails)
+            ThumbnailUrl = PickThumbnail(snippet.Thumbnails),
+            Duration = ParseDuration(item.ContentDetails?.Duration)
         };
+    }
+
+    private static TimeSpan? ParseDuration(string? duration)
+    {
+        if (string.IsNullOrWhiteSpace(duration))
+        {
+            return null;
+        }
+
+        try
+        {
+            return XmlConvert.ToTimeSpan(duration);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
     }
 
     private static string PickThumbnail(IReadOnlyDictionary<string, Thumbnail>? thumbnails)
@@ -318,6 +340,8 @@ public sealed class YouTubeDataApiClient
         public VideoSnippet? Snippet { get; init; }
 
         public VideoStatus? Status { get; init; }
+
+        public VideoContentDetails? ContentDetails { get; init; }
     }
 
     private sealed record VideoSnippet
@@ -341,6 +365,11 @@ public sealed class YouTubeDataApiClient
 
         [JsonPropertyName("madeForKids")]
         public bool? MadeForKids { get; init; }
+    }
+
+    private sealed record VideoContentDetails
+    {
+        public string? Duration { get; init; }
     }
 
     private sealed record Thumbnail
