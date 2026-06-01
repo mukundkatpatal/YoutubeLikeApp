@@ -1,0 +1,174 @@
+{
+    "version":  1,
+    "updatedAt":  "2026-05-28T00:00:00Z",
+    "refreshIntervalMinutes":  60,
+    "maxVideosPerChannel":  100,
+    "channels":  [
+                     {
+                         "channelId":  "UC4rlAVgAK0SGk-yTfe48Qpw",
+                         "title":  "BrightSide",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCIsEhwBMPkRHsEgqYAPQHsA",
+                         "title":  "ChessBase India",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCL5YbN5WLFD8dLIegT5QAbA",
+                         "title":  "agadmator\u0027s Chess Channel",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCM-ONC2bCHytG2mYtKDmIeA",
+                         "title":  "Saint Louis Chess Club",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCHP9CdeguNUI-_nBv_UXBhw",
+                         "title":  "Daniel Naroditsky",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCkJdvwRC-oGPhRHW_XPNokg",
+                         "title":  "Hanging Pawns",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UC6EnFbK-P5q0zeaqI5yobKg",
+                         "title":  "Ben Finegold",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCMBATpFb--uLNAODOVWvCTA",
+                         "title":  "PowerPlayChess",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCsKZ2yOsgfNxln8xH5WkGvg",
+                         "title":  "Remote Chess Academy",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCQHX6ViZmPsWiYSFAyS0a3Q",
+                         "title":  "GothamChess",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCCDOQrpqLqKVcTCKzqarxLg",
+                         "title":  "ChessNetwork",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCXy10-NEFGxQ3b4NVrzHw1Q",
+                         "title":  "Eric Rosen",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCweCc7bSMX5J4jEH7HFImng",
+                         "title":  "GMHikaru",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCch2JvY2ZSwcjf5gb93HGQw",
+                         "title":  "NOS Journaal in Makkelijke Taal",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCYO_jab_esuFRV4b17AJtAw",
+                         "title":  "3Blue1Brown",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCHnyfMqiRRG1u-2MsSQLbXA",
+                         "title":  "Veritasium",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCsXVk37bltHxD1rDPwtNM8Q",
+                         "title":  "Kurzgesagt – In a Nutshell",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCSW0CYhKC1J0cpknZvN8MvQ",
+                         "title":  "Universiteit van Nederland",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCqc2EjpKBRVWxy0Eh3qw03g",
+                         "title":  "NTR Wetenschap",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UC96giptWg69kzhnuSkgo-Gg",
+                         "title":  "Effortless Charm",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UC53cAvFeWsNwsfCQnJmLjDQ",
+                         "title":  "Satvic Movement",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCwpHKudUkP5tNgmMdexB3ow",
+                         "title":  "Mentour Pilot",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCovVc-qqwYp8oqwO3Sdzx7w",
+                         "title":  "74 Gear",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UC88tlMjiS7kf8uhPWyBTn_A",
+                         "title":  "Captain Joe",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCT3wwJBh8fwePiNC63NlzCA",
+                         "title":  "Simple Flying",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UC1ZBQ-F-yktYD4m5AzM6pww",
+                         "title":  "Mustard",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCR1IuLEqb6UEA_zQ81kwXfg",
+                         "title":  "Real Engineering",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UC6107grRI4m0o2-emgoDnAA",
+                         "title":  "SmarterEveryDay",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UC29_CCc5qpnRaVryYIKiLeg",
+                         "title":  "DJ’s Aviation",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UC9RM-iSvTu1uPJb8X5yp3EQ",
+                         "title":  "Wendover Productions",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCfoK9LI9vmQQ36zqsFZtNJQ",
+                         "title":  "Airforceproud95",
+                         "enabled":  true
+                     },
+                     {
+                         "channelId":  "UCXh6VKhioaeEaMQasii7IfQ",
+                         "title":  "TheFlightChannel",
+                         "enabled":  true
+                     }
+                 ],
+    "blockedVideoIds":  [
+                            "VIDEOID1234"
+                        ],
+    "pinnedVideoIds":  [
+                           "VIDEOID5678"
+                       ]
+}

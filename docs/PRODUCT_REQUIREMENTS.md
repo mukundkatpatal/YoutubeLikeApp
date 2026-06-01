@@ -23,6 +23,8 @@ Child:
 ## Current Requirements
 
 - Load parent-controlled remote config.
+- Load local parent-controlled settings from the documented production settings
+  file, executable-adjacent local settings, or environment variables.
 - Validate config before using it.
 - Cache the last valid config for offline or invalid-config fallback.
 - Load approved channels through the YouTube Data API.
@@ -48,6 +50,7 @@ Parent-controlled:
 - config URL
 - update manifest URL
 - future AI curation approvals
+- production settings file
 
 Child-allowed:
 

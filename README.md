@@ -39,6 +39,32 @@ dotnet test .\MukundTube.sln -c Release
 dotnet publish .\src\MukundTube\MukundTube.csproj -c Release -r win-x64 --self-contained true
 ```
 
+Publish to the local app folder and create/update the desktop shortcut:
+
+```powershell
+.\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+```
+
+If local scripts are blocked:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+```
+
+See `docs/PUBLISHING.md` for the full publishing flow.
+
+## Production Settings
+
+On the Windows machine that runs Youtube Beta, create:
+
+```text
+%LocalAppData%\Youtube Beta\settings.json
+```
+
+Use `config/settings.sample.json` as the template and replace only the API-key
+placeholder. Full instructions, including PowerShell and Command Prompt commands,
+live in `docs/SETTINGS.md`.
+
 ## Remote Config
 
 Create a public GitHub repository named `son-youtube-config` and add `config.json` based on `config/config.sample.json`.
@@ -50,6 +76,22 @@ https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.
 ```
 
 Use YouTube channel IDs beginning with `UC...`, not handles like `@channelname`.
+
+Download the current GitHub config into this repo:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\Download-Config.ps1
+```
+
+Edit the config with the local React admin app:
+
+```powershell
+cd admin\config-editor
+npm install
+npm run dev
+```
+
+Then open `http://127.0.0.1:5174`.
 
 ## App Updates
 
@@ -74,6 +116,8 @@ safer decisions:
 - `docs/ARCHITECTURE.md` explains the current app structure.
 - `docs/PRODUCT_GUARDRAILS.md` defines safety and platform constraints.
 - `docs/AI_CHANGE_PLAYBOOK.md` explains how to approach common changes.
+- `docs/PUBLISHING.md` explains the local publish and desktop shortcut flow.
+- `docs/SETTINGS.md` explains production and preview settings files.
 - `docs/PRODUCT_STRATEGY.md`, `docs/PRODUCT_REQUIREMENTS.md`, and
   `docs/AI_ROADMAP.md` describe future product direction.
 

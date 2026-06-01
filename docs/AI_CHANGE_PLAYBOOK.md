@@ -16,9 +16,11 @@ what to verify.
 Update these together:
 
 - `config/config.sample.json`
+- `config/config.github.json` if the live downloaded example should be refreshed
 - `src/MukundTube/Models/AppConfig.cs`
 - `src/MukundTube/Services/ConfigValidator.cs`
 - `preview/app.js` if the preview reads the field
+- `admin/config-editor/src/main.jsx`
 - `docs/SETUP.md`
 - tests in `tests/MukundTube.Tests`
 
@@ -27,6 +29,19 @@ Verify:
 ```powershell
 dotnet test .\MukundTube.sln -c Release
 ```
+
+## Add Or Change Settings Fields
+
+Update these together:
+
+- `config/settings.sample.json`
+- `src/MukundTube/Models/UserSettings.cs`
+- `src/MukundTube/Services/SettingsService.cs`
+- `docs/SETTINGS.md`
+- `docs/SETUP.md` if install instructions change
+- user-facing missing-settings messages
+
+Settings files may contain API keys. Never commit real keys.
 
 ## Change Feed Policy
 
@@ -74,6 +89,18 @@ Start with:
 
 Keep the UI calm and child-friendly. Do not add settings, admin, API-key, search,
 or sign-in controls to the child-facing app.
+
+## Change Publishing Or Shortcut Behavior
+
+Start with:
+
+- `src/MukundTube/Tools/Publish-YoutubeBeta.ps1`
+- `src/MukundTube/Properties/PublishProfiles/FolderProfile.pubxml`
+- `docs/PUBLISHING.md`
+
+The expected local install target is `%LocalAppData%\Youtube Beta\App\`.
+The desktop shortcut should point to the published `Youtube Beta.exe`, not a
+development build under `bin` or `obj`.
 
 ## Change Preview UI
 

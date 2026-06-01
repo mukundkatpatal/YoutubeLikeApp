@@ -1,0 +1,269 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="ColorBackground">#0F0F0F</Color>
+    <Color x:Key="ColorSurface">#181818</Color>
+    <Color x:Key="ColorSurfaceVariant">#212121</Color>
+    <Color x:Key="ColorSurfaceHover">#272727</Color>
+    <Color x:Key="ColorSurfaceSelected">#303030</Color>
+    <Color x:Key="ColorOutline">#303030</Color>
+    <Color x:Key="ColorOutlineStrong">#3F3F3F</Color>
+    <Color x:Key="ColorText">#F1F1F1</Color>
+    <Color x:Key="ColorTextMuted">#AAAAAA</Color>
+    <Color x:Key="ColorTextSubtle">#717171</Color>
+    <Color x:Key="ColorPrimary">#FF0033</Color>
+    <Color x:Key="ColorPrimaryHover">#FF335C</Color>
+    <Color x:Key="ColorOnPrimary">#FFFFFF</Color>
+    <Color x:Key="ColorInverseSurface">#F1F1F1</Color>
+    <Color x:Key="ColorOnInverseSurface">#0F0F0F</Color>
+    <Color x:Key="ColorOverlay">#E6000000</Color>
+
+    <SolidColorBrush x:Key="AppBackgroundBrush" Color="{StaticResource ColorBackground}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource ColorSurface}" />
+    <SolidColorBrush x:Key="SurfaceVariantBrush" Color="{StaticResource ColorSurfaceVariant}" />
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="{StaticResource ColorSurfaceHover}" />
+    <SolidColorBrush x:Key="SurfaceSelectedBrush" Color="{StaticResource ColorSurfaceSelected}" />
+    <SolidColorBrush x:Key="OutlineBrush" Color="{StaticResource ColorOutline}" />
+    <SolidColorBrush x:Key="OutlineStrongBrush" Color="{StaticResource ColorOutlineStrong}" />
+    <SolidColorBrush x:Key="TextBrush" Color="{StaticResource ColorText}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource ColorTextMuted}" />
+    <SolidColorBrush x:Key="TextSubtleBrush" Color="{StaticResource ColorTextSubtle}" />
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource ColorPrimary}" />
+    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="{StaticResource ColorPrimaryHover}" />
+    <SolidColorBrush x:Key="OnPrimaryBrush" Color="{StaticResource ColorOnPrimary}" />
+    <SolidColorBrush x:Key="InverseSurfaceBrush" Color="{StaticResource ColorInverseSurface}" />
+    <SolidColorBrush x:Key="OnInverseSurfaceBrush" Color="{StaticResource ColorOnInverseSurface}" />
+    <SolidColorBrush x:Key="OverlayBrush" Color="{StaticResource ColorOverlay}" />
+    <SolidColorBrush x:Key="BlackBrush" Color="#000000" />
+
+    <Style x:Key="MaterialButtonChrome" TargetType="Button">
+        <Setter Property="Height" Value="38" />
+        <Setter Property="MinWidth" Value="84" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="ButtonBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="19"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                            <Setter Property="Cursor" Value="Arrow" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PrimaryButtonStyle"
+           BasedOn="{StaticResource MaterialButtonChrome}"
+           TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource OnPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryHoverBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource PrimaryHoverBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
+                <Setter Property="Opacity" Value="0.88" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="TonalButtonStyle"
+           BasedOn="{StaticResource MaterialButtonChrome}"
+           TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource SurfaceHoverBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource InverseSurfaceBrush}" />
+                <Setter Property="Foreground" Value="{StaticResource OnInverseSurfaceBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource InverseSurfaceBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="#D8D8D8" />
+                <Setter Property="Foreground" Value="{StaticResource OnInverseSurfaceBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="NavigationButtonStyle"
+           BasedOn="{StaticResource MaterialButtonChrome}"
+           TargetType="Button">
+        <Setter Property="Height" Value="42" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource SurfaceHoverBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="PlainListBoxItemStyle" TargetType="ListBoxItem">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="ItemBorder"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="8,6"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SurfaceHoverBrush}" />
+                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{StaticResource SurfaceHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SurfaceSelectedBrush}" />
+                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{StaticResource OutlineStrongBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ChipListBoxItemStyle"
+           BasedOn="{StaticResource PlainListBoxItemStyle}"
+           TargetType="ListBoxItem">
+        <Setter Property="Width" Value="170" />
+        <Setter Property="Margin" Value="0,0,14,0" />
+    </Style>
+
+    <Style x:Key="VideoListBoxItemStyle"
+           BasedOn="{StaticResource PlainListBoxItemStyle}"
+           TargetType="ListBoxItem">
+        <Setter Property="Width" Value="304" />
+        <Setter Property="Margin" Value="0,0,18,30" />
+    </Style>
+
+    <Style x:Key="YouTubeListBoxStyle" TargetType="ListBox">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    </Style>
+
+    <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style x:Key="PageTitleStyle"
+           BasedOn="{StaticResource SectionTitleStyle}"
+           TargetType="TextBlock">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style x:Key="BodyMutedTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style TargetType="ProgressBar">
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+        <Setter Property="Background" Value="{StaticResource SurfaceVariantBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource SurfaceSelectedBrush}" />
+        <Setter Property="Width" Value="10" />
+        <Setter Property="Height" Value="10" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid x:Name="Root"
+                          Background="Transparent"
+                          SnapsToDevicePixels="True">
+                        <Track x:Name="PART_Track"
+                               IsDirectionReversed="True"
+                               Orientation="{TemplateBinding Orientation}">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageUpCommand"
+                                              Opacity="0" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border x:Name="ThumbBorder"
+                                                    Margin="2"
+                                                    Background="{StaticResource SurfaceSelectedBrush}"
+                                                    CornerRadius="4" />
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource TextSubtleBrush}" />
+                                                </Trigger>
+                                                <Trigger Property="IsDragging" Value="True">
+                                                    <Setter TargetName="ThumbBorder" Property="Background" Value="{StaticResource TextMutedBrush}" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageDownCommand"
+                                              Opacity="0" />
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Height" Value="10" />
+                <Setter Property="Width" Value="Auto" />
+            </Trigger>
+            <Trigger Property="Orientation" Value="Vertical">
+                <Setter Property="Width" Value="10" />
+                <Setter Property="Height" Value="Auto" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

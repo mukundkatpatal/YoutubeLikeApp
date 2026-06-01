@@ -70,12 +70,38 @@ The app supports:
 
 Channel IDs must be YouTube `UC...` IDs, not handles.
 
+## Local Settings
+
+The production settings template lives in `config/settings.sample.json`.
+
+The Windows app reads settings from:
+
+- `settings.local.json` beside the executable
+- `%LocalAppData%\Youtube Beta\settings.json`
+- environment variables
+
+`docs/SETTINGS.md` is the canonical human setup guide for these files.
+
 ## Browser Preview
 
 `preview` is a browser implementation for checking feed and config behavior on
 machines that cannot run WPF. It should stay aligned with the config schema and
 basic feed behavior, but it does not prove WebView2 lockdown, Windows packaging,
 or parental-control integration.
+
+## Config Editor
+
+`admin/config-editor` is a React admin app for the parent. It edits the remote
+config shape used by the WPF app and exports a GitHub-ready `config.json`.
+
+The editor starts from `config/config.github.json`, which can be refreshed with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\Download-Config.ps1
+```
+
+The editor must stay parent/admin-only. Do not surface it inside the child-facing
+WPF app.
 
 ## Tests
 

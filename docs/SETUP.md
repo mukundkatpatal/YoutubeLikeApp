@@ -26,6 +26,8 @@ Create a YouTube Data API v3 key in Google Cloud and restrict it as tightly as G
 - `settings.local.json` beside `Youtube Beta.exe`
 - Environment variable `MUKUND_TUBE_YOUTUBE_API_KEY`
 
+For step-by-step Windows commands and troubleshooting, see `docs/SETTINGS.md`.
+
 Example:
 
 ```json
@@ -79,6 +81,15 @@ Publish a local build:
 ```powershell
 dotnet publish .\src\MukundTube\MukundTube.csproj -c Release -r win-x64 --self-contained true
 ```
+
+Or publish to `%LocalAppData%\Youtube Beta\App\` and create/update the desktop
+shortcut:
+
+```powershell
+.\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+```
+
+See `docs/PUBLISHING.md` for the full local publishing flow.
 
 The output can be wrapped with MSIX or a simple local installer on the Windows machine. This repo includes the app source and publish path; MSIX signing should be completed on Windows because certificates and packaging identity are machine/account specific.
 

@@ -154,7 +154,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
                 OnPropertyChanged(nameof(HasVideos));
                 OnPropertyChanged(nameof(HasLongVideos));
                 OnPropertyChanged(nameof(HasShorts));
-                StatusText = "Missing YouTube API key. Add settings.local.json beside the app or set MUKUND_TUBE_YOUTUBE_API_KEY.";
+                StatusText = "Missing YouTube API key. Add %LocalAppData%\\Youtube Beta\\settings.json, "
+                    + "add settings.local.json beside the app, or set MUKUND_TUBE_YOUTUBE_API_KEY.";
                 return;
             }
 

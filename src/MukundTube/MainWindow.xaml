@@ -9,248 +9,295 @@
         MinWidth="980"
         MinHeight="620"
         WindowState="Maximized"
-        Background="#0F0F0F">
+        Background="{StaticResource AppBackgroundBrush}"
+        FontFamily="Segoe UI">
     <Window.Resources>
-        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="88" />
-            <Setter Property="Height" Value="36" />
-            <Setter Property="Padding" Value="16,0" />
-            <Setter Property="Background" Value="#F1F1F1" />
-            <Setter Property="Foreground" Value="#0F0F0F" />
-            <Setter Property="BorderBrush" Value="#F1F1F1" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#FFFFFF" />
-                                <Setter Property="BorderBrush" Value="#FFFFFF" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#D8D8D8" />
-                                <Setter Property="BorderBrush" Value="#D8D8D8" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="QuietButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="36" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="Background" Value="#272727" />
-            <Setter Property="Foreground" Value="#F1F1F1" />
-            <Setter Property="BorderBrush" Value="#3F3F3F" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F1F1F1" />
-                                <Setter Property="Foreground" Value="#0F0F0F" />
-                                <Setter Property="BorderBrush" Value="#F1F1F1" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#D8D8D8" />
-                                <Setter Property="Foreground" Value="#0F0F0F" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="PlainListBoxItemStyle" TargetType="ListBoxItem">
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="ItemBorder"
-                                Background="Transparent"
-                                BorderBrush="Transparent"
-                                BorderThickness="1"
-                                Padding="6">
-                            <ContentPresenter />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="#202020" />
-                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#3F3F3F" />
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="ItemBorder" Property="Background" Value="#303030" />
-                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#F1F1F1" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <DataTemplate x:Key="VideoCardTemplate">
-            <StackPanel>
-                <Border Width="260"
-                        Height="146"
-                        Background="#272727"
-                        CornerRadius="8"
+        <DataTemplate x:Key="ChannelRowTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="48" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Width="38"
+                        Height="38"
+                        Background="{StaticResource SurfaceVariantBrush}"
+                        CornerRadius="19"
                         ClipToBounds="True">
                     <Image Source="{Binding ThumbnailUrl}"
                            Stretch="UniformToFill" />
                 </Border>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding Title}"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource TextBrush}"
+                           FontSize="14"
+                           FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="VideoCardTemplate">
+            <StackPanel>
+                <Grid Width="280"
+                      Height="158">
+                    <Border Background="{StaticResource SurfaceVariantBrush}"
+                            CornerRadius="12"
+                            ClipToBounds="True">
+                        <Image Source="{Binding ThumbnailUrl}"
+                               Stretch="UniformToFill" />
+                    </Border>
+                    <Border HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Margin="10"
+                            Padding="8,3"
+                            Background="{StaticResource PrimaryBrush}"
+                            CornerRadius="10"
+                            Visibility="{Binding IsPinned, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="Pinned"
+                                   Foreground="{StaticResource OnPrimaryBrush}"
+                                   FontSize="11"
+                                   FontWeight="Bold" />
+                    </Border>
+                </Grid>
+
                 <TextBlock Text="{Binding Title}"
-                           Margin="0,10,0,0"
-                           FontWeight="Bold"
+                           Margin="0,12,0,0"
+                           Foreground="{StaticResource TextBrush}"
+                           FontWeight="SemiBold"
                            FontSize="15"
-                           Foreground="#F1F1F1"
-                           MaxHeight="44"
+                           LineHeight="19"
+                           MaxHeight="42"
                            TextWrapping="Wrap"
                            TextTrimming="CharacterEllipsis" />
                 <TextBlock Text="{Binding ChannelTitle}"
                            Margin="0,6,0,0"
-                           Foreground="#AAAAAA"
-                           FontSize="13"
+                           Style="{StaticResource BodyMutedTextStyle}"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding PublishedAtText}"
+                           Margin="0,2,0,0"
+                           Foreground="{StaticResource TextSubtleBrush}"
+                           FontSize="12"
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
         </DataTemplate>
 
         <DataTemplate x:Key="ShortCardTemplate">
-            <StackPanel Width="150">
-                <Border Width="150"
-                        Height="220"
-                        Background="#272727"
-                        CornerRadius="8"
-                        ClipToBounds="True">
-                    <Image Source="{Binding ThumbnailUrl}"
-                           Stretch="UniformToFill" />
-                </Border>
+            <StackPanel Width="154">
+                <Grid Width="154"
+                      Height="226">
+                    <Border Background="{StaticResource SurfaceVariantBrush}"
+                            CornerRadius="12"
+                            ClipToBounds="True">
+                        <Image Source="{Binding ThumbnailUrl}"
+                               Stretch="UniformToFill" />
+                    </Border>
+                    <Border HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Margin="8"
+                            Padding="7,3"
+                            Background="{StaticResource PrimaryBrush}"
+                            CornerRadius="9"
+                            Visibility="{Binding IsPinned, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="Pinned"
+                                   Foreground="{StaticResource OnPrimaryBrush}"
+                                   FontSize="10"
+                                   FontWeight="Bold" />
+                    </Border>
+                </Grid>
                 <TextBlock Text="{Binding Title}"
                            Margin="0,10,0,0"
-                           FontWeight="Bold"
+                           Foreground="{StaticResource TextBrush}"
+                           FontWeight="SemiBold"
                            FontSize="14"
-                           Foreground="#F1F1F1"
+                           LineHeight="18"
                            MaxHeight="54"
                            TextWrapping="Wrap"
+                           TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding ChannelTitle}"
+                           Margin="0,6,0,0"
+                           Style="{StaticResource BodyMutedTextStyle}"
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
         </DataTemplate>
     </Window.Resources>
 
-    <Grid>
+    <Grid Background="{StaticResource AppBackgroundBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="56" />
+            <RowDefinition Height="64" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0"
-                Background="#0F0F0F"
-                BorderBrush="#303030"
+                Background="{StaticResource SurfaceBrush}"
+                BorderBrush="{StaticResource OutlineBrush}"
                 BorderThickness="0,0,0,1"
-                Padding="24,0">
-            <DockPanel LastChildFill="True">
-                <Button DockPanel.Dock="Right"
-                        Style="{StaticResource PrimaryButtonStyle}"
-                        Click="Refresh_Click"
-                        Content="Refresh" />
-                <StackPanel Orientation="Vertical"
+                Padding="22,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="292" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
                             VerticalAlignment="Center">
+                    <Border Width="38"
+                            Height="27"
+                            Background="{StaticResource PrimaryBrush}"
+                            CornerRadius="7">
+                        <Path Data="M 14 7 L 25 13.5 L 14 20 Z"
+                              Fill="{StaticResource OnPrimaryBrush}"
+                              Stretch="Uniform"
+                              Width="16"
+                              Height="18"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center" />
+                    </Border>
                     <TextBlock Text="Youtube Beta"
-                               Foreground="#F1F1F1"
+                               Margin="12,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource TextBrush}"
                                FontSize="20"
                                FontWeight="Bold" />
-                    <TextBlock Text="{Binding StatusText}"
-                               Foreground="#AAAAAA"
-                               FontSize="12"
-                               TextTrimming="CharacterEllipsis" />
                 </StackPanel>
-            </DockPanel>
+
+                <Border Grid.Column="1"
+                        Height="42"
+                        MaxWidth="620"
+                        Margin="12,0,28,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Background="{StaticResource SurfaceVariantBrush}"
+                        BorderBrush="{StaticResource OutlineStrongBrush}"
+                        BorderThickness="1"
+                        CornerRadius="21"
+                        Padding="18,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="22" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Path Data="M 10 4 A 6 6 0 1 0 10 16 A 6 6 0 0 0 10 4 M 15 15 L 20 20"
+                              Stroke="{StaticResource TextMutedBrush}"
+                              StrokeThickness="2"
+                              StrokeStartLineCap="Round"
+                              StrokeEndLineCap="Round"
+                              Width="18"
+                              Height="18"
+                              Stretch="Uniform"
+                              VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1"
+                                   Text="Parent curated videos"
+                                   Margin="12,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   FontSize="13"
+                                   TextTrimming="CharacterEllipsis" />
+                    </Grid>
+                </Border>
+
+                <Button Grid.Column="2"
+                        Style="{StaticResource TonalButtonStyle}"
+                        Click="Refresh_Click"
+                        Content="Refresh" />
+            </Grid>
         </Border>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="292" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0"
-                    Background="#151515"
-                    BorderBrush="#303030"
+                    Background="{StaticResource AppBackgroundBrush}"
+                    BorderBrush="{StaticResource OutlineBrush}"
                     BorderThickness="0,0,1,0"
-                    Padding="18">
+                    Padding="14,18">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0"
-                               Text="Channels"
-                               Foreground="#F1F1F1"
-                               FontSize="18"
-                               FontWeight="Bold" />
-                    <Button Grid.Row="1"
-                            Margin="0,16,0,14"
+
+                    <Button Grid.Row="0"
                             HorizontalAlignment="Stretch"
-                            Style="{StaticResource QuietButtonStyle}"
-                            Click="Refresh_Click"
-                            Content="All channels" />
-                    <ListBox Grid.Row="2"
-                             x:Name="ChannelList"
-                             ItemsSource="{Binding Channels}"
-                             SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
-                             SelectionChanged="ChannelList_SelectionChanged"
-                             BorderThickness="0"
-                             Background="#151515"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             ItemContainerStyle="{StaticResource PlainListBoxItemStyle}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="48" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Border Width="38"
-                                            Height="38"
-                                            Background="#272727"
-                                            CornerRadius="19"
-                                            ClipToBounds="True">
-                                        <Image Source="{Binding ThumbnailUrl}"
-                                               Stretch="UniformToFill" />
-                                    </Border>
-                                    <TextBlock Grid.Column="1"
-                                               Text="{Binding Title}"
-                                               VerticalAlignment="Center"
-                                               Foreground="#F1F1F1"
-                                               FontSize="14"
-                                               FontWeight="Bold"
-                                               TextTrimming="CharacterEllipsis" />
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                            HorizontalContentAlignment="Left"
+                            Style="{StaticResource NavigationButtonStyle}"
+                            Click="Refresh_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M 4 12 L 12 5 L 20 12 L 20 21 L 14 21 L 14 15 L 10 15 L 10 21 L 4 21 Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="18"
+                                  Height="18"
+                                  Stretch="Uniform"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="Home"
+                                       Margin="14,0,0,0"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Grid.Row="1"
+                            Margin="0,8,0,18"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Style="{StaticResource NavigationButtonStyle}"
+                            Click="Refresh_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M 12 5 A 7 7 0 1 0 19 12 L 16 12 A 4 4 0 1 1 14.8 9.2 L 12 12 L 20 12 L 20 4 L 17.2 6.8 A 7 7 0 0 0 12 5 Z"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Width="18"
+                                  Height="18"
+                                  Stretch="Uniform"
+                                  VerticalAlignment="Center" />
+                            <TextBlock Text="Refresh feed"
+                                       Margin="14,0,0,0"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Border Grid.Row="2"
+                            Margin="4,0,4,14"
+                            BorderBrush="{StaticResource OutlineBrush}"
+                            BorderThickness="0,1,0,0" />
+
+                    <Grid Grid.Row="3">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Subscriptions"
+                                   Margin="8,0,0,12"
+                                   Style="{StaticResource SectionTitleStyle}"
+                                   FontSize="17" />
+                        <ListBox Grid.Row="1"
+                                 x:Name="ChannelList"
+                                 ItemsSource="{Binding Channels}"
+                                 SelectedItem="{Binding SelectedChannel, Mode=TwoWay}"
+                                 SelectionChanged="ChannelList_SelectionChanged"
+                                 Style="{StaticResource YouTubeListBoxStyle}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ItemContainerStyle="{StaticResource PlainListBoxItemStyle}"
+                                 ItemTemplate="{StaticResource ChannelRowTemplate}" />
+                    </Grid>
+
+                    <TextBlock Grid.Row="4"
+                               Margin="8,16,8,0"
+                               Text="{Binding StatusText}"
+                               Foreground="{StaticResource TextSubtleBrush}"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis" />
                 </Grid>
             </Border>
 
             <Grid Grid.Column="1"
-                  Margin="24">
+                  Margin="28,24,28,0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -263,46 +310,66 @@
                              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" />
 
                 <Grid Grid.Row="1"
-                      Margin="0,0,0,22"
-                      Background="Black"
-                      ClipToBounds="True">
+                      Margin="0,0,0,24">
                     <Grid.Style>
                         <Style TargetType="Grid">
-                            <Setter Property="Height" Value="520" />
                             <Setter Property="Visibility" Value="Visible" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding SelectedVideo}" Value="{x:Null}">
-                                    <Setter Property="Height" Value="0" />
                                     <Setter Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Grid.Style>
-                    <wv2:WebView2 x:Name="PlayerWebView" />
+                    <StackPanel>
+                        <Border Height="520"
+                                Background="{StaticResource BlackBrush}"
+                                CornerRadius="12"
+                                ClipToBounds="True">
+                            <wv2:WebView2 x:Name="PlayerWebView" />
+                        </Border>
+                        <TextBlock Text="{Binding SelectedVideoTitle}"
+                                   Margin="0,14,0,0"
+                                   Foreground="{StaticResource TextBrush}"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding SelectedVideoMeta}"
+                                   Margin="0,6,0,0"
+                                   Style="{StaticResource BodyMutedTextStyle}" />
+                    </StackPanel>
                 </Grid>
 
                 <ScrollViewer Grid.Row="2"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <StackPanel>
-                        <DockPanel Margin="0,0,0,16">
+                        <DockPanel Margin="0,0,0,18">
                             <TextBlock Text="{Binding SelectedChannelTitle}"
-                                       Foreground="#F1F1F1"
-                                       FontSize="24"
-                                       FontWeight="Bold" />
+                                       Style="{StaticResource PageTitleStyle}" />
+                            <Border Margin="14,2,0,0"
+                                    Padding="12,5"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Background="{StaticResource SurfaceHoverBrush}"
+                                    CornerRadius="14"
+                                    Visibility="{Binding HasVideos, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <TextBlock Text="Parent approved"
+                                           Foreground="{StaticResource TextBrush}"
+                                           FontSize="12"
+                                           FontWeight="SemiBold" />
+                            </Border>
                         </DockPanel>
 
                         <TextBlock Text="Shorts"
-                                   Foreground="#F1F1F1"
-                                   FontSize="18"
-                                   FontWeight="Bold"
+                                   Style="{StaticResource SectionTitleStyle}"
                                    Visibility="{Binding HasShorts, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <ListBox x:Name="ShortsList"
-                                 Height="318"
-                                 Margin="0,14,0,28"
+                                 Height="322"
+                                 Margin="0,14,0,30"
                                  ItemsSource="{Binding Shorts}"
-                                 BorderThickness="0"
-                                 Background="#0F0F0F"
+                                 Style="{StaticResource YouTubeListBoxStyle}"
                                  SelectionChanged="VideoList_SelectionChanged"
                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -316,10 +383,7 @@
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemContainerStyle>
-                                <Style BasedOn="{StaticResource PlainListBoxItemStyle}" TargetType="ListBoxItem">
-                                    <Setter Property="Width" Value="172" />
-                                    <Setter Property="Margin" Value="0,0,14,0" />
-                                </Style>
+                                <StaticResource ResourceKey="ChipListBoxItemStyle" />
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <StaticResource ResourceKey="ShortCardTemplate" />
@@ -327,15 +391,12 @@
                         </ListBox>
 
                         <TextBlock Text="Recent videos"
-                                   Foreground="#F1F1F1"
-                                   FontSize="18"
-                                   FontWeight="Bold"
+                                   Style="{StaticResource SectionTitleStyle}"
                                    Visibility="{Binding HasLongVideos, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <ListBox x:Name="VideoList"
                                  Margin="0,14,0,0"
                                  ItemsSource="{Binding Videos}"
-                                 BorderThickness="0"
-                                 Background="#0F0F0F"
+                                 Style="{StaticResource YouTubeListBoxStyle}"
                                  SelectionChanged="VideoList_SelectionChanged"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -347,10 +408,7 @@
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemContainerStyle>
-                                <Style BasedOn="{StaticResource PlainListBoxItemStyle}" TargetType="ListBoxItem">
-                                    <Setter Property="Width" Value="282" />
-                                    <Setter Property="Margin" Value="0,0,18,28" />
-                                </Style>
+                                <StaticResource ResourceKey="VideoListBoxItemStyle" />
                             </ListBox.ItemContainerStyle>
                             <ListBox.ItemTemplate>
                                 <StaticResource ResourceKey="VideoCardTemplate" />
@@ -362,33 +420,30 @@
         </Grid>
 
         <Grid Grid.RowSpan="2"
-              Background="#E6000000"
+              Background="{StaticResource OverlayBrush}"
               Visibility="{Binding IsUpdateRequired, Converter={StaticResource BoolToVisibilityConverter}}">
-            <Border Width="520"
-                    Padding="28"
+            <Border Width="540"
+                    Padding="30"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Background="#181818"
-                    BorderBrush="#303030"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource OutlineStrongBrush}"
                     BorderThickness="1"
-                    CornerRadius="8">
+                    CornerRadius="12">
                 <StackPanel>
                     <TextBlock Text="Update required"
-                               Foreground="#F1F1F1"
-                               FontSize="24"
-                               FontWeight="Bold" />
+                               Style="{StaticResource PageTitleStyle}" />
                     <TextBlock Text="{Binding UpdateMessage}"
                                Margin="0,12,0,0"
-                               Foreground="#F1F1F1"
+                               Foreground="{StaticResource TextBrush}"
                                FontSize="15"
                                TextWrapping="Wrap" />
                     <TextBlock Text="{Binding UpdateNotes}"
                                Margin="0,10,0,0"
-                               Foreground="#AAAAAA"
-                               FontSize="13"
+                               Style="{StaticResource BodyMutedTextStyle}"
                                TextWrapping="Wrap" />
-                    <Button Height="40"
-                            Margin="0,22,0,0"
+                    <Button Height="42"
+                            Margin="0,24,0,0"
                             Padding="18,0"
                             HorizontalAlignment="Left"
                             Style="{StaticResource PrimaryButtonStyle}"
