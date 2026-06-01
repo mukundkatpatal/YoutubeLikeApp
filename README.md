@@ -65,6 +65,18 @@ When the manifest version is newer than the installed app version, the WPF app b
 
 This is a curated viewer, not full device lockdown. If a child can install another browser or use YouTube elsewhere, that bypasses the app. Qustodio and Windows account/device restrictions are still part of the real control layer.
 
+## Project Context For AI Agents
+
+This repository includes AI-ready project context so coding assistants can make
+safer decisions:
+
+- `AGENTS.md` is the primary operating guide for AI coding agents.
+- `docs/ARCHITECTURE.md` explains the current app structure.
+- `docs/PRODUCT_GUARDRAILS.md` defines safety and platform constraints.
+- `docs/AI_CHANGE_PLAYBOOK.md` explains how to approach common changes.
+- `docs/PRODUCT_STRATEGY.md`, `docs/PRODUCT_REQUIREMENTS.md`, and
+  `docs/AI_ROADMAP.md` describe future product direction.
+
 ## Sources
 
 - YouTube IFrame Player API: https://developers.google.com/youtube/iframe_api_reference
