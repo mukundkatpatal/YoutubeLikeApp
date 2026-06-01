@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import defaultConfig from "../../../config/config.github.json";
+import defaultConfig from "./default-config.json";
 import "./styles.css";
 
 const rawConfigUrl = "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.json";
 const githubEditUrl = "https://github.com/mukundkatpatal/son-youtube-config/edit/main/config.json";
+const youtubeApiBaseUrl = "https://www.googleapis.com/youtube/v3";
+const apiKeyStorageKey = "youtube-beta-config-editor-api-key";
 
 function createEmptyChannel() {
   return {
@@ -66,8 +68,8 @@ function validateConfig(config) {
     errors.push("Refresh interval must be between 1 and 1440 minutes.");
   }
 
-  if (config.maxVideosPerChannel < 1 || config.maxVideosPerChannel > 200) {
-    errors.push("Max videos per channel must be between 1 and 200.");
+  if (config.maxVideosPerChannel < 1 || config.maxVideosPerChannel > 500) {
+    errors.push("Max videos per channel must be between 1 and 500.");
   }
 
   const channelIds = new Set();
@@ -109,11 +111,125 @@ function validateVideoIds(videoIds, label, errors) {
   });
 }
 
+function channelUrl(channelId) {
+  return `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`;
+}
+
+function parseChannelInput(value) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return { kind: "empty", value: "" };
+  }
+
+  if (looksLikeChannelId(trimmed)) {
+    return { kind: "id", value: trimmed };
+  }
+
+  if (trimmed.startsWith("@")) {
+    return { kind: "handle", value: trimmed };
+  }
+
+  try {
+    const url = new URL(trimmed);
+    const pathParts = url.pathname.split("/").filter(Boolean);
+    const channelIndex = pathParts.indexOf("channel");
+    const userIndex = pathParts.indexOf("user");
+    const customIndex = pathParts.indexOf("c");
+
+    if (channelIndex >= 0 && looksLikeChannelId(pathParts[channelIndex + 1] || "")) {
+      return { kind: "id", value: pathParts[channelIndex + 1] };
+    }
+
+    if (pathParts[0]?.startsWith("@")) {
+      return { kind: "handle", value: pathParts[0] };
+    }
+
+    if (userIndex >= 0 && pathParts[userIndex + 1]) {
+      return { kind: "username", value: pathParts[userIndex + 1] };
+    }
+
+    if (customIndex >= 0 && pathParts[customIndex + 1]) {
+      return { kind: "search", value: pathParts[customIndex + 1].replace(/-/g, " ") };
+    }
+  } catch {
+    // Plain text falls through to search.
+  }
+
+  return { kind: "search", value: trimmed.replace(/^@/, "") };
+}
+
+async function getJson(url) {
+  const response = await fetch(url);
+  const body = await response.text();
+  if (!response.ok) {
+    throw new Error(`YouTube API returned ${response.status}: ${body}`);
+  }
+
+  return JSON.parse(body);
+}
+
+function toCandidate(item) {
+  const snippet = item.snippet || {};
+  return {
+    channelId: item.id?.channelId || item.id || "",
+    title: snippet.title || "",
+    description: snippet.description || "",
+    thumbnailUrl:
+      snippet.thumbnails?.default?.url ||
+      snippet.thumbnails?.medium?.url ||
+      snippet.thumbnails?.high?.url ||
+      "",
+    source: item.source || ""
+  };
+}
+
+async function resolveExactChannel(parsed, apiKey) {
+  const params = new URLSearchParams({
+    part: "snippet",
+    key: apiKey
+  });
+
+  if (parsed.kind === "id") {
+    params.set("id", parsed.value);
+  } else if (parsed.kind === "handle") {
+    params.set("forHandle", parsed.value);
+  } else if (parsed.kind === "username") {
+    params.set("forUsername", parsed.value);
+  } else {
+    return [];
+  }
+
+  const data = await getJson(`${youtubeApiBaseUrl}/channels?${params.toString()}`);
+  return (data.items || []).map((item) => toCandidate({ ...item, source: parsed.kind }));
+}
+
+async function searchChannels(query, apiKey) {
+  const params = new URLSearchParams({
+    part: "snippet",
+    type: "channel",
+    maxResults: "6",
+    q: query,
+    key: apiKey
+  });
+
+  const data = await getJson(`${youtubeApiBaseUrl}/search?${params.toString()}`);
+  return (data.items || []).map((item) => toCandidate({ ...item, source: "search" }));
+}
+
 function App() {
   const [config, setConfig] = useState(() => normalizeConfig(defaultConfig));
   const [jsonDraft, setJsonDraft] = useState(() => formatConfig(normalizeConfig(defaultConfig)));
   const [message, setMessage] = useState("Loaded downloaded GitHub config.");
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem(apiKeyStorageKey) || "");
+  const [channelInput, setChannelInput] = useState("");
+  const [resolverStatus, setResolverStatus] = useState("");
+  const [resolverResults, setResolverResults] = useState([]);
+  const [isResolving, setIsResolving] = useState(false);
   const errors = useMemo(() => validateConfig(config), [config]);
+  const channelIdSet = useMemo(
+    () => new Set(config.channels.map((channel) => channel.channelId).filter(Boolean)),
+    [config.channels]
+  );
   const enabledCount = config.channels.filter((channel) => channel.enabled).length;
 
   function updateConfig(patch) {
@@ -152,6 +268,81 @@ function App() {
 
   function addChannel() {
     updateConfig({ channels: [...config.channels, createEmptyChannel()] });
+  }
+
+  function saveApiKey(value) {
+    setApiKey(value);
+    if (value.trim()) {
+      localStorage.setItem(apiKeyStorageKey, value.trim());
+    } else {
+      localStorage.removeItem(apiKeyStorageKey);
+    }
+  }
+
+  async function resolveChannel() {
+    const parsed = parseChannelInput(channelInput);
+    if (parsed.kind === "empty") {
+      setResolverStatus("Paste a YouTube channel URL, @handle, channel ID, or search text.");
+      setResolverResults([]);
+      return;
+    }
+
+    if (!apiKey.trim()) {
+      setResolverStatus("Paste a YouTube Data API key first.");
+      setResolverResults([]);
+      return;
+    }
+
+    setIsResolving(true);
+    setResolverStatus("Resolving channel...");
+    setResolverResults([]);
+
+    try {
+      let results = await resolveExactChannel(parsed, apiKey.trim());
+      if (results.length === 0 && parsed.kind !== "search") {
+        setResolverStatus("No exact match found. Searching channels...");
+        results = await searchChannels(parsed.value.replace(/^@/, ""), apiKey.trim());
+      } else if (parsed.kind === "search") {
+        results = await searchChannels(parsed.value, apiKey.trim());
+      }
+
+      setResolverResults(results);
+      setResolverStatus(
+        results.length === 0
+          ? "No channels found."
+          : parsed.kind === "search"
+            ? "Choose the correct channel from the search results."
+            : "Review the resolved channel before adding it."
+      );
+    } catch (error) {
+      setResolverStatus(error.message);
+    } finally {
+      setIsResolving(false);
+    }
+  }
+
+  function addResolvedChannel(candidate) {
+    if (!candidate.channelId) {
+      setResolverStatus("Could not add this channel because the channel ID is missing.");
+      return;
+    }
+
+    if (channelIdSet.has(candidate.channelId)) {
+      setResolverStatus(`${candidate.title || candidate.channelId} is already in the config.`);
+      return;
+    }
+
+    updateConfig({
+      channels: [
+        ...config.channels,
+        {
+          channelId: candidate.channelId,
+          title: candidate.title || candidate.channelId,
+          enabled: true
+        }
+      ]
+    });
+    setResolverStatus(`Added ${candidate.title || candidate.channelId}.`);
   }
 
   function applyJsonDraft() {
@@ -289,12 +480,72 @@ function App() {
               <input
                 type="number"
                 min="1"
-                max="200"
+                max="500"
                 value={config.maxVideosPerChannel}
                 onChange={(event) => updateConfig({ maxVideosPerChannel: Number(event.target.value) })}
               />
             </label>
           </div>
+
+          <div className="section-head spaced">
+            <div>
+              <h2>Add channel from YouTube</h2>
+              <p className="section-note">Paste a channel URL, @handle, UC channel ID, legacy user URL, or search text.</p>
+            </div>
+          </div>
+          <div className="resolver">
+            <label>
+              YouTube Data API key
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(event) => saveApiKey(event.target.value)}
+                placeholder="Stored in this browser only"
+              />
+            </label>
+            <label>
+              Public channel input
+              <input
+                value={channelInput}
+                onChange={(event) => setChannelInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    resolveChannel();
+                  }
+                }}
+                placeholder="https://www.youtube.com/@GothamChess"
+              />
+            </label>
+            <button type="button" className="primary" onClick={resolveChannel} disabled={isResolving}>
+              {isResolving ? "Resolving..." : "Find channel"}
+            </button>
+          </div>
+          <p className="helper-text">{resolverStatus}</p>
+          {resolverResults.length > 0 && (
+            <div className="candidate-list">
+              {resolverResults.map((candidate) => {
+                const exists = channelIdSet.has(candidate.channelId);
+                return (
+                  <article className="candidate-card" key={candidate.channelId}>
+                    <img src={candidate.thumbnailUrl} alt="" />
+                    <div>
+                      <strong>{candidate.title || "Untitled channel"}</strong>
+                      <span>{candidate.channelId}</span>
+                      <p>{candidate.description}</p>
+                    </div>
+                    <div className="candidate-actions">
+                      <a className="button ghost" href={channelUrl(candidate.channelId)} target="_blank" rel="noreferrer">
+                        Test link
+                      </a>
+                      <button type="button" onClick={() => addResolvedChannel(candidate)} disabled={exists}>
+                        {exists ? "Already added" : "Add enabled"}
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
 
           <div className="section-head spaced">
             <h2>Channels</h2>
@@ -329,6 +580,9 @@ function App() {
                   />
                 </label>
                 <div className="row-actions">
+                  <a className="button ghost" href={channelUrl(channel.channelId)} target="_blank" rel="noreferrer">
+                    Test
+                  </a>
                   <button type="button" onClick={() => moveChannel(index, -1)} disabled={index === 0}>
                     Up
                   </button>

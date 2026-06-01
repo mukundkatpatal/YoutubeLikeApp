@@ -136,7 +136,6 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="292" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0"
@@ -162,45 +161,15 @@
                                FontWeight="Bold" />
                 </StackPanel>
 
-                <Border Grid.Column="1"
-                        Height="42"
-                        MaxWidth="620"
-                        Margin="12,0,28,0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Background="{StaticResource SurfaceVariantBrush}"
-                        BorderBrush="{StaticResource OutlineStrongBrush}"
-                        BorderThickness="1"
-                        CornerRadius="21"
-                        Padding="18,0">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="22" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Path Data="M 10 4 A 6 6 0 1 0 10 16 A 6 6 0 0 0 10 4 M 15 15 L 20 20"
-                              Stroke="{StaticResource TextMutedBrush}"
-                              StrokeThickness="2"
-                              StrokeStartLineCap="Round"
-                              StrokeEndLineCap="Round"
-                              Width="18"
-                              Height="18"
-                              Stretch="Uniform"
-                              VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1"
-                                   Text="Parent curated videos"
-                                   Margin="12,0,0,0"
-                                   VerticalAlignment="Center"
-                                   Foreground="{StaticResource TextMutedBrush}"
-                                   FontSize="13"
-                                   TextTrimming="CharacterEllipsis" />
-                    </Grid>
-                </Border>
+                <TextBlock Grid.Column="1"
+                           Text="{Binding StatusText}"
+                           Margin="12,0,28,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource TextMutedBrush}"
+                           FontSize="13"
+                           TextTrimming="CharacterEllipsis" />
 
-                <Button Grid.Column="2"
-                        Style="{StaticResource TonalButtonStyle}"
-                        Click="Refresh_Click"
-                        Content="Refresh" />
             </Grid>
         </Border>
 
@@ -255,7 +224,7 @@
                                   Height="18"
                                   Stretch="Uniform"
                                   VerticalAlignment="Center" />
-                            <TextBlock Text="Refresh feed"
+                            <TextBlock Text="Update feed"
                                        Margin="14,0,0,0"
                                        VerticalAlignment="Center" />
                         </StackPanel>
@@ -348,47 +317,87 @@
                         <DockPanel Margin="0,0,0,18">
                             <TextBlock Text="{Binding SelectedChannelTitle}"
                                        Style="{StaticResource PageTitleStyle}" />
-                            <Border Margin="14,2,0,0"
-                                    Padding="12,5"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Center"
-                                    Background="{StaticResource SurfaceHoverBrush}"
-                                    CornerRadius="14"
-                                    Visibility="{Binding HasVideos, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <TextBlock Text="Parent approved"
-                                           Foreground="{StaticResource TextBrush}"
-                                           FontSize="12"
-                                           FontWeight="SemiBold" />
-                            </Border>
                         </DockPanel>
 
-                        <TextBlock Text="Shorts"
-                                   Style="{StaticResource SectionTitleStyle}"
-                                   Visibility="{Binding HasShorts, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        <ListBox x:Name="ShortsList"
-                                 Height="322"
-                                 Margin="0,14,0,30"
-                                 ItemsSource="{Binding Shorts}"
-                                 Style="{StaticResource YouTubeListBoxStyle}"
-                                 SelectionChanged="VideoList_SelectionChanged"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                 ScrollViewer.CanContentScroll="True"
-                                 VirtualizingPanel.IsVirtualizing="True"
-                                 VirtualizingPanel.VirtualizationMode="Recycling"
-                                 Visibility="{Binding HasShorts, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <ListBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <VirtualizingStackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ListBox.ItemsPanel>
-                            <ListBox.ItemContainerStyle>
-                                <StaticResource ResourceKey="ChipListBoxItemStyle" />
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.ItemTemplate>
-                                <StaticResource ResourceKey="ShortCardTemplate" />
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                        <Border Margin="0,0,0,32"
+                                Padding="18,16,18,14"
+                                Background="{StaticResource ShelfBrush}"
+                                BorderBrush="{StaticResource OutlineBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Visibility="{Binding HasShorts, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel>
+                                <DockPanel Margin="0,0,0,14">
+                                    <StackPanel DockPanel.Dock="Right"
+                                                Orientation="Horizontal">
+                                        <Button Width="38"
+                                                MinWidth="38"
+                                                Height="34"
+                                                Padding="0"
+                                                Margin="0,0,8,0"
+                                                Style="{StaticResource TonalButtonStyle}"
+                                                Click="ShortsScrollLeft_Click"
+                                                ToolTip="Scroll shorts left">
+                                            <Path Data="M 15 5 L 8 12 L 15 19"
+                                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                  StrokeThickness="2.5"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  Stretch="Uniform"
+                                                  Width="13"
+                                                  Height="16" />
+                                        </Button>
+                                        <Button Width="38"
+                                                MinWidth="38"
+                                                Height="34"
+                                                Padding="0"
+                                                Style="{StaticResource TonalButtonStyle}"
+                                                Click="ShortsScrollRight_Click"
+                                                ToolTip="Scroll shorts right">
+                                            <Path Data="M 9 5 L 16 12 L 9 19"
+                                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                                  StrokeThickness="2.5"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  Stretch="Uniform"
+                                                  Width="13"
+                                                  Height="16" />
+                                        </Button>
+                                    </StackPanel>
+                                    <Border Width="4"
+                                            Height="22"
+                                            Margin="0,0,10,0"
+                                            Background="{StaticResource PrimaryBrush}"
+                                            CornerRadius="2" />
+                                    <TextBlock Text="Shorts"
+                                               Style="{StaticResource SectionTitleStyle}" />
+                                </DockPanel>
+                                <ListBox x:Name="ShortsList"
+                                         Height="306"
+                                         ItemsSource="{Binding Shorts}"
+                                         Style="{StaticResource YouTubeListBoxStyle}"
+                                         Background="{StaticResource ShelfBrush}"
+                                         SelectionChanged="VideoList_SelectionChanged"
+                                         PreviewMouseWheel="HorizontalList_PreviewMouseWheel"
+                                         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                         ScrollViewer.CanContentScroll="True"
+                                         VirtualizingPanel.IsVirtualizing="True"
+                                         VirtualizingPanel.VirtualizationMode="Recycling">
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <VirtualizingStackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+                                    <ListBox.ItemContainerStyle>
+                                        <StaticResource ResourceKey="ChipListBoxItemStyle" />
+                                    </ListBox.ItemContainerStyle>
+                                    <ListBox.ItemTemplate>
+                                        <StaticResource ResourceKey="ShortCardTemplate" />
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
 
                         <TextBlock Text="Recent videos"
                                    Style="{StaticResource SectionTitleStyle}"

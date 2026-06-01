@@ -23,6 +23,9 @@ authoritative than broad roadmap docs when deciding what is safe to implement.
 ## Current Architecture
 
 - `src/MukundTube` is the production Windows WPF app.
+- `src/MukundTube.Notifier` is a separate tray/toast notifier. Keep it separate
+  from the main app so scheduled publishing can replace `Youtube Beta.exe`
+  without the notifier locking the app files.
 - `src/MukundTube/Assets/player.html` hosts the official YouTube iframe player
   inside WebView2.
 - `src/MukundTube/Services/YouTubePlayerController.cs` controls WebView2
@@ -34,10 +37,17 @@ authoritative than broad roadmap docs when deciding what is safe to implement.
 - `preview` is a browser preview for config/feed behavior. It is not proof of
   Windows WebView2 or parental-control behavior.
 - `admin/config-editor` is a parent/admin React app for editing the remote
-  GitHub `config.json`.
+  GitHub `config.json`. It may use a browser-local YouTube Data API key to
+  resolve public channel URLs, handles, and search text into `UC...` channel IDs.
 - `tests/MukundTube.Tests` covers policy and config validation.
 - `src/MukundTube/Tools/Publish-YoutubeBeta.ps1` publishes the app to
   `%LocalAppData%\Youtube Beta\App\` and creates the desktop shortcut.
+- `src/MukundTube/Tools/Register-YoutubeBetaNotifier.ps1` publishes the
+  notifier to `%LocalAppData%\Youtube Beta\Notifier\`, registers the per-user
+  logon task, and can start the notifier for local testing.
+- `src/MukundTube/Tools/Update-MukundTube.ps1` writes
+  `%LocalAppData%\Youtube Beta\update-state.json` after a successful publish;
+  the notifier watches that file and shows one notification per new event ID.
 - `tools/Download-Config.ps1` downloads the current GitHub config into
   `config/config.github.json`.
 
@@ -76,6 +86,12 @@ Publish local Release app and create/update the desktop shortcut:
 
 ```powershell
 .\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+```
+
+Publish/register/start the tray notifier:
+
+```powershell
+.\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
 ```
 
 ## Change Guidance

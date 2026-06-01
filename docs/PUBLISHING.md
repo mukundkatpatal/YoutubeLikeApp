@@ -21,6 +21,12 @@ The desktop shortcut is:
 Desktop\Youtube Beta.lnk
 ```
 
+The tray notifier is published separately to:
+
+```text
+%LocalAppData%\Youtube Beta\Notifier\
+```
+
 ## Publish And Create Shortcut
 
 Run from the repository root:
@@ -55,6 +61,59 @@ To publish, update the desktop shortcut, and launch the published app:
 .\src\MukundTube\Tools\Publish-YoutubeBeta.ps1 -StopRunning -Launch
 ```
 
+## Register The Tray Notifier
+
+The notifier is a separate process that owns the system tray icon and Windows
+toast notifications. It watches:
+
+```text
+%LocalAppData%\Youtube Beta\update-state.json
+```
+
+Publish it, register the per-user logon Scheduled Task, and start it:
+
+```powershell
+.\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
+```
+
+The script also checks for the Windows App Runtime 2 packages required by
+`Microsoft.WindowsAppSDK` 2.1.3 and installs them from the restored NuGet cache
+when they are missing. To skip that check:
+
+```powershell
+.\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning -SkipRuntimeInstall
+```
+
+Execution-policy-safe form:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
+```
+
+To publish/register without launching it immediately:
+
+```powershell
+.\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning -NoLaunch
+```
+
+For a local notification test, start the notifier and then write a fresh update
+event:
+
+```powershell
+$appData = Join-Path $env:LOCALAPPDATA 'Youtube Beta'
+$appExe = Join-Path $appData 'App\Youtube Beta.exe'
+$state = @{
+  schemaVersion = 1
+  eventId = "manual-test-$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())"
+  status = 'Published'
+  version = 'manual-test'
+  publishedAtUtc = [DateTimeOffset]::UtcNow.ToString('o')
+  message = 'Youtube Beta manual test update is ready.'
+  appExePath = $appExe
+}
+$state | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $appData 'update-state.json') -Encoding UTF8
+```
+
 ## Settings
 
 The published app reads production settings from:
@@ -72,3 +131,6 @@ See `docs/SETTINGS.md` for the exact JSON template and troubleshooting steps.
 - The shortcut always points to the published executable, not `bin` or `obj`.
 - Re-run the script after code changes when you want the desktop shortcut to
   launch the latest published version.
+- `Update-MukundTube.ps1` writes `update-state.json` only after a successful
+  publish and published executable check. The notifier reads that file and
+  suppresses duplicate notifications for the same `eventId`.

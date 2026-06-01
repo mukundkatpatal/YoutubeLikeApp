@@ -22,6 +22,12 @@ FeedComposer -> approved videos, pinned videos, blocked videos
 MainViewModel -> WPF UI -> YouTubePlayerController -> WebView2 iframe player
 ```
 
+The update notifier is intentionally separate from the main app:
+
+```text
+Scheduled updater -> update-state.json -> MukundTube.Notifier -> tray/toast
+```
+
 ## Production App
 
 `src/MukundTube` contains the production Windows app.
@@ -41,6 +47,20 @@ MainViewModel -> WPF UI -> YouTubePlayerController -> WebView2 iframe player
   player asset, sets request referrers, blocks new windows, and stops playback
   when a video ID is not allowed.
 - `Services/UpdateService.cs` checks a remote update manifest.
+
+## Update Notifier
+
+`src/MukundTube.Notifier` contains a small Windows tray process. It starts at
+user logon, watches `%LocalAppData%\Youtube Beta\update-state.json`, and shows a
+Windows toast or tray balloon when the scheduled updater publishes a new app
+version. It stores the last shown event ID in
+`%LocalAppData%\Youtube Beta\notifier-state.json` so the same update is not
+announced repeatedly.
+
+Keep this process separate from the main WPF app. The notifier must not keep
+`%LocalAppData%\Youtube Beta\App\Youtube Beta.exe` running or loaded, because
+the scheduled updater needs to overwrite that folder while the main app is
+closed.
 
 ## WebView2 Player
 
@@ -93,8 +113,13 @@ or parental-control integration.
 
 `admin/config-editor` is a React admin app for the parent. It edits the remote
 config shape used by the WPF app and exports a GitHub-ready `config.json`.
+It can resolve YouTube channel URLs, handles, legacy usernames, channel IDs, and
+search text into the `UC...` channel IDs required by the WPF app. The admin
+YouTube API key is stored only in the browser's local storage.
 
-The editor starts from `config/config.github.json`, which can be refreshed with:
+The editor starts from `admin/config-editor/src/default-config.json`. The same
+download script also writes the root copy at `config/config.github.json`.
+Refresh both with:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\tools\Download-Config.ps1

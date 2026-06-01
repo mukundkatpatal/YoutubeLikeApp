@@ -182,12 +182,6 @@ public sealed class MainViewModel : INotifyPropertyChanged
             var videos = await _feedService.LoadFeedAsync(CurrentConfig, _settings.YouTubeApiKey, cancellationToken)
                 .ConfigureAwait(true);
 
-            Channels.Clear();
-            foreach (var channel in channels)
-            {
-                Channels.Add(channel);
-            }
-
             Videos.Clear();
             Shorts.Clear();
             foreach (var video in videos.Where(video => !video.IsShort))
@@ -198,6 +192,12 @@ public sealed class MainViewModel : INotifyPropertyChanged
             foreach (var shortVideo in videos.Where(video => video.IsShort))
             {
                 Shorts.Add(shortVideo);
+            }
+
+            Channels.Clear();
+            foreach (var channel in OrderChannelsByRecentUpload(channels, videos))
+            {
+                Channels.Add(channel);
             }
 
             SelectedChannel = null;
@@ -300,6 +300,26 @@ public sealed class MainViewModel : INotifyPropertyChanged
         field = value;
         OnPropertyChanged(propertyName);
         return true;
+    }
+
+    private static IReadOnlyList<ChannelItem> OrderChannelsByRecentUpload(
+        IEnumerable<ChannelItem> channels,
+        IEnumerable<VideoItem> videos)
+    {
+        var latestByChannelId = videos
+            .Where(video => !string.IsNullOrWhiteSpace(video.ChannelId))
+            .GroupBy(video => video.ChannelId, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Max(video => video.PublishedAt),
+                StringComparer.Ordinal);
+
+        return channels
+            .OrderByDescending(channel => latestByChannelId.TryGetValue(channel.ChannelId, out var latest)
+                ? latest
+                : DateTimeOffset.MinValue)
+            .ThenBy(channel => channel.Title, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

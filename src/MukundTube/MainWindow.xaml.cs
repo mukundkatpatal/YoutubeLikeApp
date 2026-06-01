@@ -2,6 +2,8 @@ using System.Net.Http;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using MukundTube.Models;
 using MukundTube.Services;
 using MukundTube.ViewModels;
@@ -139,6 +141,33 @@ public partial class MainWindow : Window
         Close();
     }
 
+    private void HorizontalList_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (sender is not DependencyObject source)
+        {
+            return;
+        }
+
+        var scrollViewer = FindDescendant<ScrollViewer>(source);
+        if (scrollViewer is null)
+        {
+            return;
+        }
+
+        scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - e.Delta);
+        e.Handled = true;
+    }
+
+    private void ShortsScrollLeft_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollShortsBy(-560);
+    }
+
+    private void ShortsScrollRight_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollShortsBy(560);
+    }
+
     private async Task RefreshFeedAsync()
     {
         _refreshCancellation?.Cancel();
@@ -194,5 +223,37 @@ public partial class MainWindow : Window
         catch (OperationCanceledException)
         {
         }
+    }
+
+    private void ScrollShortsBy(double offset)
+    {
+        var scrollViewer = FindDescendant<ScrollViewer>(ShortsList);
+        if (scrollViewer is null)
+        {
+            return;
+        }
+
+        scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset + offset);
+    }
+
+    private static T? FindDescendant<T>(DependencyObject source)
+        where T : DependencyObject
+    {
+        for (var index = 0; index < VisualTreeHelper.GetChildrenCount(source); index++)
+        {
+            var child = VisualTreeHelper.GetChild(source, index);
+            if (child is T match)
+            {
+                return match;
+            }
+
+            var descendant = FindDescendant<T>(child);
+            if (descendant is not null)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
     }
 }

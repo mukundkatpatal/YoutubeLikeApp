@@ -67,6 +67,14 @@
         events: {
           onReady: function () {
             reportCurrentVideo();
+            if (typeof player.mute === "function") {
+              player.mute();
+            }
+
+            if (typeof player.playVideo === "function") {
+              player.playVideo();
+            }
+
             window.setInterval(reportCurrentVideo, 1000);
           },
           onStateChange: reportCurrentVideo,

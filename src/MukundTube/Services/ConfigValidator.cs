@@ -23,9 +23,9 @@ public static class ConfigValidator
             errors.Add("refreshIntervalMinutes must be between 1 and 1440.");
         }
 
-        if (config.MaxVideosPerChannel is < 1 or > 200)
+        if (config.MaxVideosPerChannel is < 1 or > 500)
         {
-            errors.Add("maxVideosPerChannel must be between 1 and 200.");
+            errors.Add("maxVideosPerChannel must be between 1 and 500.");
         }
 
         var channelIds = new HashSet<string>(StringComparer.Ordinal);

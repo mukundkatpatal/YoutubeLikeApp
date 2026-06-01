@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <AssemblyName>Youtube Beta Notifier</AssemblyName>
+    <RootNamespace>MukundTube.Notifier</RootNamespace>
+    <ApplicationIcon>..\MukundTube\Assets\Icons\youtube-beta.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\MukundTube\Assets\Icons\youtube-beta.ico" Link="Assets\Icons\youtube-beta.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

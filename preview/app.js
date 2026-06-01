@@ -103,7 +103,7 @@ async function loadConfig(configUrl) {
     version: config.version,
     updatedAt: config.updatedAt,
     refreshIntervalMinutes: config.refreshIntervalMinutes ?? 60,
-    maxVideosPerChannel: Math.min(Math.max(config.maxVideosPerChannel ?? 25, 1), 200),
+    maxVideosPerChannel: Math.min(Math.max(config.maxVideosPerChannel ?? 25, 1), 500),
     channels: Array.isArray(config.channels) ? config.channels : [],
     blockedVideoIds: Array.isArray(config.blockedVideoIds) ? config.blockedVideoIds : [],
     pinnedVideoIds: Array.isArray(config.pinnedVideoIds) ? config.pinnedVideoIds : []
@@ -242,7 +242,7 @@ async function loadChannelPreviewVideos(channel, config, apiKey) {
 }
 
 async function getPlaylistItems(playlistId, maxResults, apiKey) {
-  const requestedResults = Math.min(Math.max(maxResults || 25, 1), 200);
+  const requestedResults = Math.min(Math.max(maxResults || 25, 1), 500);
   let remaining = requestedResults;
   let pageToken = "";
   const items = [];

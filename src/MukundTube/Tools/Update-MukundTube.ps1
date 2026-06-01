@@ -6,6 +6,7 @@ $publishDir = Join-Path $appDataDir 'App'
 $appExePath = Join-Path $publishDir 'Youtube Beta.exe'
 $logPath = Join-Path $appDataDir 'update.log'
 $lockPath = Join-Path $appDataDir 'update.lock'
+$updateStatePath = Join-Path $appDataDir 'update-state.json'
 
 New-Item -ItemType Directory -Force -Path $appDataDir | Out-Null
 
@@ -14,6 +15,37 @@ function Write-UpdateLog {
 
     $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
     Add-Content -LiteralPath $logPath -Value "[$timestamp] $Message"
+}
+
+function Write-UpdateState {
+    param(
+        [string] $Version,
+        [string] $RemoteHead
+    )
+
+    $publishedAtUtc = (Get-Date).ToUniversalTime()
+    $state = [ordered]@{
+        schemaVersion = 1
+        eventId = "$RemoteHead-$($publishedAtUtc.ToString('yyyyMMddHHmmss'))"
+        status = 'Published'
+        version = $Version
+        publishedAtUtc = $publishedAtUtc.ToString('o')
+        message = "Youtube Beta $Version is ready."
+        appExePath = $appExePath
+    }
+
+    $state | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $updateStatePath -Encoding UTF8
+}
+
+function Get-ProjectVersion {
+    $projectFile = Join-Path $projectDir 'MukundTube.csproj'
+    [xml] $project = Get-Content -LiteralPath $projectFile
+    $version = $project.Project.PropertyGroup.Version | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace($version)) {
+        return 'unknown'
+    }
+
+    return $version
 }
 
 if (Test-Path -LiteralPath $lockPath) {
@@ -75,11 +107,10 @@ try {
         throw "dotnet publish failed with exit code $LASTEXITCODE."
     }
 
-    Write-UpdateLog 'Update published successfully.'
-
     if (Test-Path -LiteralPath $appExePath) {
-        Write-UpdateLog 'Starting Youtube Beta after update.'
-        Start-Process -FilePath $appExePath -WorkingDirectory $publishDir
+        $publishedVersion = Get-ProjectVersion
+        Write-UpdateState -Version $publishedVersion -RemoteHead $remoteHead
+        Write-UpdateLog "Update published successfully. Wrote notifier state for version $publishedVersion."
     }
     else {
         Write-UpdateLog "Published app was not found at $appExePath."

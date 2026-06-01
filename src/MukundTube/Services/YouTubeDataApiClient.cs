@@ -112,7 +112,7 @@ public sealed class YouTubeDataApiClient
         string apiKey,
         CancellationToken cancellationToken)
     {
-        var requestedResults = Math.Clamp(maxResults, 1, 200);
+        var requestedResults = Math.Clamp(maxResults, 1, 500);
         var remaining = requestedResults;
         var pageToken = "";
         var results = new List<PlaylistItemResource>();

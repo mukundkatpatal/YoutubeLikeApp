@@ -6,7 +6,7 @@ Youtube Beta.
 It starts from the downloaded config at:
 
 ```text
-config/config.github.json
+src/default-config.json
 ```
 
 Refresh that file from GitHub:
@@ -14,6 +14,8 @@ Refresh that file from GitHub:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\tools\Download-Config.ps1
 ```
+
+The same script also writes the root copy at `config/config.github.json`.
 
 Run the editor:
 
@@ -32,6 +34,10 @@ http://127.0.0.1:5174
 The editor can:
 
 - edit general config settings
+- paste a YouTube API key into browser local storage
+- resolve public channel URLs, handles, legacy user URLs, channel IDs, or search text into `UC...` channel IDs
+- preview resolved/search result channels before adding them
+- open test links for configured channels
 - add, remove, reorder, enable, and disable channels
 - edit blocked and pinned video IDs
 - validate IDs using the same basic rules as the WPF app

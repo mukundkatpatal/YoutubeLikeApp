@@ -4,6 +4,7 @@ namespace MukundTube.Services;
 
 public sealed class FeedService
 {
+    private const int ChannelDetailVideoLimit = 500;
     private readonly YouTubeDataApiClient _youTube;
 
     public FeedService(YouTubeDataApiClient youTube)
@@ -80,7 +81,7 @@ public sealed class FeedService
     {
         var videos = await _youTube.GetLatestChannelVideosAsync(
             channel.ChannelId,
-            config.MaxVideosPerChannel,
+            Math.Max(config.MaxVideosPerChannel, ChannelDetailVideoLimit),
             apiKey,
             cancellationToken).ConfigureAwait(false);
 
