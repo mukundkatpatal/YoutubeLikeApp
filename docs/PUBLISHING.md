@@ -98,10 +98,11 @@ To publish/register without launching it immediately:
 
 ## New Video Notifications
 
-The notifier also checks for up to two newly approved videos published since
-local midnight yesterday. It runs this check at notifier startup, every two
-hours while the notifier is running, and whenever you choose `Check new videos
-now` from the tray icon menu.
+The notifier also checks for up to two recent videos published since local
+midnight yesterday. It runs this check at notifier startup, every two
+hours while the notifier is running. The tray icon's `Show recent videos now`
+command shows the latest recent videos even if the automatic check has already
+seen them.
 
 To test manually without waiting for the two-hour timer:
 

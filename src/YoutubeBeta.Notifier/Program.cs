@@ -45,7 +45,10 @@ internal static class Program
                     echoNotificationToFallback: true);
                 try
                 {
-                    service.CheckAsync(showStatusWhenNoVideos: true, CancellationToken.None).GetAwaiter().GetResult();
+                    service.CheckAsync(
+                        showStatusWhenNoVideos: true,
+                        includeAlreadySeen: true,
+                        cancellationToken: CancellationToken.None).GetAwaiter().GetResult();
                 }
                 finally
                 {

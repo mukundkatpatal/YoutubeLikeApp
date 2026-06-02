@@ -32,9 +32,12 @@ internal sealed class RecentVideoNotificationService
         _echoNotificationToFallback = echoNotificationToFallback;
     }
 
-    public async Task CheckAsync(bool showStatusWhenNoVideos, CancellationToken cancellationToken)
+    public async Task CheckAsync(
+        bool showStatusWhenNoVideos,
+        bool includeAlreadySeen,
+        CancellationToken cancellationToken)
     {
-        _writeLog("Checking recent approved videos.");
+        _writeLog("Checking recent videos.");
         var settings = SettingsService.Load();
         if (string.IsNullOrWhiteSpace(settings.YouTubeApiKey))
         {
@@ -73,37 +76,55 @@ internal sealed class RecentVideoNotificationService
         var state = LoadState();
         var shownIds = state.ShownVideoIds.ToHashSet(StringComparer.Ordinal);
         var cutoff = DateTimeOffset.Now.Date.AddDays(-1);
-        var recentUnseenVideos = videos
+        var recentVideosSinceYesterday = videos
             .Where(video => video.PublishedAt >= cutoff)
-            .Where(video => !shownIds.Contains(video.VideoId))
             .OrderByDescending(video => video.PublishedAt)
             .ToArray();
+        var recentUnseenVideos = recentVideosSinceYesterday
+            .Where(video => !shownIds.Contains(video.VideoId))
+            .ToArray();
+        var videosToShow = includeAlreadySeen ? recentVideosSinceYesterday : recentUnseenVideos;
 
         SaveState(state with { LastCheckedAtUtc = DateTimeOffset.UtcNow });
 
-        if (recentUnseenVideos.Length == 0)
+        if (videosToShow.Length == 0)
         {
-            _writeLog("No unannounced approved videos found since yesterday.");
+            var message = includeAlreadySeen
+                ? "No recent videos found since yesterday."
+                : "No unannounced recent videos found since yesterday.";
+            _writeLog(message);
             if (showStatusWhenNoVideos)
             {
-                _showFallbackNotification("Youtube Beta", "No unannounced approved videos found since yesterday.");
+                _showFallbackNotification("Youtube Beta", message);
             }
 
             return;
         }
 
-        var recentVideos = recentUnseenVideos.Take(MaxVideosToNotify).ToArray();
+        var recentVideos = videosToShow.Take(MaxVideosToNotify).ToArray();
         ShowRecentVideoNotification(recentVideos);
-        SaveState(new RecentVideoNotifierState
+        var seenVideosToPersist = includeAlreadySeen ? recentVideosSinceYesterday : recentUnseenVideos;
+        if (seenVideosToPersist.Length > 0)
         {
-            LastCheckedAtUtc = DateTimeOffset.UtcNow,
-            ShownVideoIds = shownIds
-                .Concat(recentUnseenVideos.Select(video => video.VideoId))
-                .Distinct(StringComparer.Ordinal)
-                .TakeLast(200)
-                .ToArray()
-        });
-        _writeLog($"Notified {recentVideos.Length} recent videos and marked {recentUnseenVideos.Length} recent videos as seen.");
+            SaveState(new RecentVideoNotifierState
+            {
+                LastCheckedAtUtc = DateTimeOffset.UtcNow,
+                ShownVideoIds = shownIds
+                    .Concat(seenVideosToPersist.Select(video => video.VideoId))
+                    .Distinct(StringComparer.Ordinal)
+                    .TakeLast(200)
+                    .ToArray()
+            });
+        }
+
+        if (includeAlreadySeen)
+        {
+            _writeLog($"Showed {recentVideos.Length} latest recent videos manually and marked {seenVideosToPersist.Length} recent videos as seen.");
+        }
+        else
+        {
+            _writeLog($"Notified {recentVideos.Length} recent videos and marked {seenVideosToPersist.Length} recent videos as seen.");
+        }
     }
 
     private void ShowRecentVideoNotification(IReadOnlyList<VideoItem> videos)

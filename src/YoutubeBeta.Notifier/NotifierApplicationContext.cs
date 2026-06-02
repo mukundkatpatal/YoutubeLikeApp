@@ -72,9 +72,9 @@ internal sealed class NotifierApplicationContext : ApplicationContext
         {
             Interval = (int)TimeSpan.FromHours(2).TotalMilliseconds
         };
-        _recentVideoTimer.Tick += async (_, _) => await CheckRecentVideosAsync(showStatusWhenNoVideos: false).ConfigureAwait(true);
+        _recentVideoTimer.Tick += async (_, _) => await CheckRecentVideosAsync(showStatusWhenNoVideos: false, includeAlreadySeen: false).ConfigureAwait(true);
         _recentVideoTimer.Start();
-        _ = CheckRecentVideosAsync(showStatusWhenNoVideos: false);
+        _ = CheckRecentVideosAsync(showStatusWhenNoVideos: false, includeAlreadySeen: false);
     }
 
     protected override void Dispose(bool disposing)
@@ -101,7 +101,7 @@ internal sealed class NotifierApplicationContext : ApplicationContext
     {
         var menu = new ContextMenuStrip();
         menu.Items.Add("Open Youtube Beta", null, (_, _) => LaunchApp(_latestUpdate));
-        menu.Items.Add("Check new videos now", null, async (_, _) => await CheckRecentVideosAsync(showStatusWhenNoVideos: true).ConfigureAwait(true));
+        menu.Items.Add("Show recent videos now", null, async (_, _) => await CheckRecentVideosAsync(showStatusWhenNoVideos: true, includeAlreadySeen: true).ConfigureAwait(true));
         menu.Items.Add("Check update status", null, (_, _) => CheckForUpdates(showCurrentStatus: true));
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Exit notifier", null, (_, _) => ExitThread());
@@ -290,11 +290,11 @@ internal sealed class NotifierApplicationContext : ApplicationContext
         _trayIcon.ShowBalloonTip(10000, title, message, ToolTipIcon.Info);
     }
 
-    private async Task CheckRecentVideosAsync(bool showStatusWhenNoVideos)
+    private async Task CheckRecentVideosAsync(bool showStatusWhenNoVideos, bool includeAlreadySeen)
     {
         try
         {
-            await _recentVideoNotifications.CheckAsync(showStatusWhenNoVideos, CancellationToken.None)
+            await _recentVideoNotifications.CheckAsync(showStatusWhenNoVideos, includeAlreadySeen, CancellationToken.None)
                 .ConfigureAwait(true);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or JsonException or YouTubeApiException)
