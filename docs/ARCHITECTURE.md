@@ -57,6 +57,12 @@ version. It stores the last shown event ID in
 `%LocalAppData%\Youtube Beta\notifier-state.json` so the same update is not
 announced repeatedly.
 
+The notifier also checks the approved feed at startup, every two hours, and on
+manual request. It shows up to two videos published since local midnight
+yesterday, then records shown video IDs in
+`%LocalAppData%\Youtube Beta\recent-video-notifier-state.json` so the same video
+is not announced repeatedly.
+
 Keep this process separate from the main WPF app. The notifier must not keep
 `%LocalAppData%\Youtube Beta\App\Youtube Beta.exe` running or loaded, because
 the scheduled updater needs to overwrite that folder while the main app is

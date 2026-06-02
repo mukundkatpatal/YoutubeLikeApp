@@ -17,4 +17,23 @@
   <ItemGroup>
     <Content Include="..\YoutubeBeta\Assets\Icons\youtube-beta.ico" Link="Assets\Icons\youtube-beta.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\YoutubeBeta\Models\AppConfig.cs" Link="Shared\Models\AppConfig.cs" />
+    <Compile Include="..\YoutubeBeta\Models\ChannelConfig.cs" Link="Shared\Models\ChannelConfig.cs" />
+    <Compile Include="..\YoutubeBeta\Models\ChannelItem.cs" Link="Shared\Models\ChannelItem.cs" />
+    <Compile Include="..\YoutubeBeta\Models\UpdateManifest.cs" Link="Shared\Models\UpdateManifest.cs" />
+    <Compile Include="..\YoutubeBeta\Models\UserSettings.cs" Link="Shared\Models\UserSettings.cs" />
+    <Compile Include="..\YoutubeBeta\Models\VideoItem.cs" Link="Shared\Models\VideoItem.cs" />
+    <Compile Include="..\YoutubeBeta\Services\CachePaths.cs" Link="Shared\Services\CachePaths.cs" />
+    <Compile Include="..\YoutubeBeta\Services\ConfigLoadResult.cs" Link="Shared\Services\ConfigLoadResult.cs" />
+    <Compile Include="..\YoutubeBeta\Services\ConfigService.cs" Link="Shared\Services\ConfigService.cs" />
+    <Compile Include="..\YoutubeBeta\Services\ConfigValidator.cs" Link="Shared\Services\ConfigValidator.cs" />
+    <Compile Include="..\YoutubeBeta\Services\FeedComposer.cs" Link="Shared\Services\FeedComposer.cs" />
+    <Compile Include="..\YoutubeBeta\Services\FeedService.cs" Link="Shared\Services\FeedService.cs" />
+    <Compile Include="..\YoutubeBeta\Services\JsonDefaults.cs" Link="Shared\Services\JsonDefaults.cs" />
+    <Compile Include="..\YoutubeBeta\Services\SettingsService.cs" Link="Shared\Services\SettingsService.cs" />
+    <Compile Include="..\YoutubeBeta\Services\YouTubeApiException.cs" Link="Shared\Services\YouTubeApiException.cs" />
+    <Compile Include="..\YoutubeBeta\Services\YouTubeDataApiClient.cs" Link="Shared\Services\YouTubeDataApiClient.cs" />
+  </ItemGroup>
 </Project>

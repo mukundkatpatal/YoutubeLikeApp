@@ -48,6 +48,9 @@ authoritative than broad roadmap docs when deciding what is safe to implement.
 - `src/YoutubeBeta/Tools/Update-YoutubeBeta.ps1` writes
   `%LocalAppData%\Youtube Beta\update-state.json` after a successful publish;
   the notifier watches that file and shows one notification per new event ID.
+- `src/YoutubeBeta/Tools/Check-NewVideos.ps1` runs the notifier's recent-video
+  check immediately for manual testing. The notifier also checks at startup and
+  every two hours while running.
 - `tools/Download-Config.ps1` downloads the current GitHub config into
   `config/config.github.json`.
 

@@ -96,6 +96,39 @@ To publish/register without launching it immediately:
 .\src\YoutubeBeta\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning -NoLaunch
 ```
 
+## New Video Notifications
+
+The notifier also checks for up to two newly approved videos published since
+local midnight yesterday. It runs this check at notifier startup, every two
+hours while the notifier is running, and whenever you choose `Check new videos
+now` from the tray icon menu.
+
+To test manually without waiting for the two-hour timer:
+
+```powershell
+.\src\YoutubeBeta\Tools\Check-NewVideos.ps1
+```
+
+Or run the published notifier directly:
+
+```powershell
+& "$env:LOCALAPPDATA\Youtube Beta\Notifier\Youtube Beta Notifier.exe" --check-videos
+```
+
+The notifier remembers shown video IDs in:
+
+```text
+%LocalAppData%\Youtube Beta\recent-video-notifier-state.json
+```
+
+To force a repeat notification during testing, delete that state file and run
+the manual check again:
+
+```powershell
+Remove-Item "$env:LOCALAPPDATA\Youtube Beta\recent-video-notifier-state.json" -ErrorAction SilentlyContinue
+.\src\YoutubeBeta\Tools\Check-NewVideos.ps1
+```
+
 For a local notification test, start the notifier and then write a fresh update
 event:
 

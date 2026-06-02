@@ -5,9 +5,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
+using YoutubeBeta.Services;
 
 namespace YoutubeBeta.Notifier;
 
@@ -16,7 +18,9 @@ internal sealed class NotifierApplicationContext : ApplicationContext
     private readonly NotifyIcon _trayIcon;
     private readonly FileSystemWatcher _watcher;
     private readonly System.Windows.Forms.Timer _debounceTimer;
+    private readonly System.Windows.Forms.Timer _recentVideoTimer;
     private readonly SynchronizationContext _uiContext;
+    private readonly RecentVideoNotificationService _recentVideoNotifications;
     private UpdateState? _latestUpdate;
     private string _lastShownEventId;
     private bool _notificationsRegistered;
@@ -32,6 +36,14 @@ internal sealed class NotifierApplicationContext : ApplicationContext
         _trayIcon.Visible = true;
 
         RegisterNotifications();
+        _recentVideoNotifications = new RecentVideoNotificationService(
+            WriteLog,
+            (title, message) =>
+            {
+                ShowBalloon(title, message);
+                return true;
+            },
+            _notificationsRegistered);
 
         _debounceTimer = new System.Windows.Forms.Timer
         {
@@ -55,6 +67,14 @@ internal sealed class NotifierApplicationContext : ApplicationContext
         WriteLog($"Watching {AppPaths.UpdateStatePath}.");
 
         CheckForUpdates(showCurrentStatus: false);
+
+        _recentVideoTimer = new System.Windows.Forms.Timer
+        {
+            Interval = (int)TimeSpan.FromHours(2).TotalMilliseconds
+        };
+        _recentVideoTimer.Tick += async (_, _) => await CheckRecentVideosAsync(showStatusWhenNoVideos: false).ConfigureAwait(true);
+        _recentVideoTimer.Start();
+        _ = CheckRecentVideosAsync(showStatusWhenNoVideos: false);
     }
 
     protected override void Dispose(bool disposing)
@@ -68,6 +88,7 @@ internal sealed class NotifierApplicationContext : ApplicationContext
 
             _watcher.Dispose();
             _debounceTimer.Dispose();
+            _recentVideoTimer.Dispose();
             _trayIcon.Visible = false;
             _trayIcon.Dispose();
             WriteLog("Notifier stopped.");
@@ -80,6 +101,7 @@ internal sealed class NotifierApplicationContext : ApplicationContext
     {
         var menu = new ContextMenuStrip();
         menu.Items.Add("Open Youtube Beta", null, (_, _) => LaunchApp(_latestUpdate));
+        menu.Items.Add("Check new videos now", null, async (_, _) => await CheckRecentVideosAsync(showStatusWhenNoVideos: true).ConfigureAwait(true));
         menu.Items.Add("Check update status", null, (_, _) => CheckForUpdates(showCurrentStatus: true));
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Exit notifier", null, (_, _) => ExitThread());
@@ -268,6 +290,23 @@ internal sealed class NotifierApplicationContext : ApplicationContext
         _trayIcon.ShowBalloonTip(10000, title, message, ToolTipIcon.Info);
     }
 
+    private async Task CheckRecentVideosAsync(bool showStatusWhenNoVideos)
+    {
+        try
+        {
+            await _recentVideoNotifications.CheckAsync(showStatusWhenNoVideos, CancellationToken.None)
+                .ConfigureAwait(true);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException or InvalidOperationException or JsonException or YouTubeApiException)
+        {
+            WriteLog($"Recent video check failed: {ex.Message}");
+            if (showStatusWhenNoVideos)
+            {
+                ShowBalloon("Youtube Beta", $"Could not check for new videos. {ex.Message}");
+            }
+        }
+    }
+
     private void UpdateTrayTooltip(UpdateState update)
     {
         var version = string.IsNullOrWhiteSpace(update.Version) ? "unknown version" : update.Version;
@@ -303,7 +342,7 @@ internal sealed class NotifierApplicationContext : ApplicationContext
         WriteLog($"Launched app: {appPath}");
     }
 
-    private static void WriteLog(string message)
+    public static void WriteLog(string message)
     {
         try
         {
