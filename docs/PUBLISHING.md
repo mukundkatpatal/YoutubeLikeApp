@@ -32,33 +32,33 @@ The tray notifier is published separately to:
 Run from the repository root:
 
 ```powershell
-.\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+.\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1
 ```
 
 If Windows blocks local scripts with an execution-policy message, run the same
 script without changing machine-wide policy:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+powershell -ExecutionPolicy Bypass -File .\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1
 ```
 
 If Youtube Beta is already running, close it first. To let the script stop the
 running app before publishing:
 
 ```powershell
-.\src\MukundTube\Tools\Publish-YoutubeBeta.ps1 -StopRunning
+.\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1 -StopRunning
 ```
 
 Execution-policy-safe form:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\src\MukundTube\Tools\Publish-YoutubeBeta.ps1 -StopRunning
+powershell -ExecutionPolicy Bypass -File .\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1 -StopRunning
 ```
 
 To publish, update the desktop shortcut, and launch the published app:
 
 ```powershell
-.\src\MukundTube\Tools\Publish-YoutubeBeta.ps1 -StopRunning -Launch
+.\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1 -StopRunning -Launch
 ```
 
 ## Register The Tray Notifier
@@ -73,7 +73,7 @@ toast notifications. It watches:
 Publish it, register the per-user logon Scheduled Task, and start it:
 
 ```powershell
-.\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
+.\src\YoutubeBeta\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
 ```
 
 The script also checks for the Windows App Runtime 2 packages required by
@@ -81,19 +81,19 @@ The script also checks for the Windows App Runtime 2 packages required by
 when they are missing. To skip that check:
 
 ```powershell
-.\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning -SkipRuntimeInstall
+.\src\YoutubeBeta\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning -SkipRuntimeInstall
 ```
 
 Execution-policy-safe form:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
+powershell -ExecutionPolicy Bypass -File .\src\YoutubeBeta\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
 ```
 
 To publish/register without launching it immediately:
 
 ```powershell
-.\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning -NoLaunch
+.\src\YoutubeBeta\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning -NoLaunch
 ```
 
 For a local notification test, start the notifier and then write a fresh update
@@ -126,11 +126,11 @@ See `docs/SETTINGS.md` for the exact JSON template and troubleshooting steps.
 
 ## Notes
 
-- The script uses `src/MukundTube/Properties/PublishProfiles/FolderProfile.pubxml`.
+- The script uses `src/YoutubeBeta/Properties/PublishProfiles/FolderProfile.pubxml`.
 - The publish profile creates a Release, self-contained, win-x64 build.
 - The shortcut always points to the published executable, not `bin` or `obj`.
 - Re-run the script after code changes when you want the desktop shortcut to
   launch the latest published version.
-- `Update-MukundTube.ps1` writes `update-state.json` only after a successful
+- `Update-YoutubeBeta.ps1` writes `update-state.json` only after a successful
   publish and published executable check. The notifier reads that file and
   suppresses duplicate notifications for the same `eventId`.

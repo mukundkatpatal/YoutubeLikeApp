@@ -1,5 +1,5 @@
 {
-  "youTubeApiKey": "PASTE_YOUR_YOUTUBE_API_KEY_HERE",
+  "youTubeApiKey": "PASTE_RESTRICTED_YOUTUBE_DATA_API_KEY_HERE",
   "configUrl": "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.json",
   "updateManifestUrl": "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/update-manifest.json",
   "appReferrer": "https://youtubebeta.local/"

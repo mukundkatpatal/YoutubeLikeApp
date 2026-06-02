@@ -24,7 +24,7 @@ Create a YouTube Data API v3 key in Google Cloud and restrict it as tightly as G
 
 - `%LocalAppData%\Youtube Beta\settings.json`
 - `settings.local.json` beside `Youtube Beta.exe`
-- Environment variable `MUKUND_TUBE_YOUTUBE_API_KEY`
+- Environment variable `YOUTUBE_BETA_YOUTUBE_API_KEY`
 
 For step-by-step Windows commands and troubleshooting, see `docs/SETTINGS.md`.
 
@@ -35,7 +35,7 @@ Example:
   "youTubeApiKey": "PASTE_RESTRICTED_YOUTUBE_DATA_API_KEY_HERE",
   "configUrl": "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.json",
   "updateManifestUrl": "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/update-manifest.json",
-  "appReferrer": "https://mukundtube.local/"
+  "appReferrer": "https://youtubebeta.local/"
 }
 ```
 
@@ -55,7 +55,7 @@ Source-code updates use `update-manifest.json` in the same config repo:
 }
 ```
 
-The WPF app reads its installed version from `src/MukundTube/MukundTube.csproj`. On startup it checks the manifest. While open, it also checks every six hours. If the manifest version is newer than the installed version, the app blocks browsing and opens the update URL when `Download and install` is clicked.
+The WPF app reads its installed version from `src/YoutubeBeta/YoutubeBeta.csproj`. On startup it checks the manifest. While open, it also checks every six hours. If the manifest version is newer than the installed version, the app blocks browsing and opens the update URL when `Download and install` is clicked.
 
 For the first Windows packaging pass, use MSIX with App Installer and point `downloadUrl` at the published `.appinstaller` file or a GitHub release that contains it. The app cannot overwrite itself while running; the practical flow is prompt, open installer, close app, install update, relaunch.
 
@@ -71,22 +71,22 @@ Install:
 Build:
 
 ```powershell
-dotnet restore .\MukundTube.sln
-dotnet build .\MukundTube.sln -c Release
-dotnet test .\MukundTube.sln -c Release
+dotnet restore .\YoutubeBeta.sln
+dotnet build .\YoutubeBeta.sln -c Release
+dotnet test .\YoutubeBeta.sln -c Release
 ```
 
 Publish a local build:
 
 ```powershell
-dotnet publish .\src\MukundTube\MukundTube.csproj -c Release -r win-x64 --self-contained true
+dotnet publish .\src\YoutubeBeta\YoutubeBeta.csproj -c Release -r win-x64 --self-contained true
 ```
 
 Or publish to `%LocalAppData%\Youtube Beta\App\` and create/update the desktop
 shortcut:
 
 ```powershell
-.\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+.\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1
 ```
 
 See `docs/PUBLISHING.md` for the full local publishing flow.
@@ -109,7 +109,7 @@ http://localhost:4173/preview/
 
 The preview uses the same config shape and feed filtering. Without a YouTube Data API key it shows local sample videos. With a key it reads the remote config and YouTube Data API. Playback in the preview uses a direct official YouTube embed; the Windows app adds the WebView2 playback guard.
 
-For real data in the Mac preview, create `preview/settings.local.json` from `preview/settings.local.sample.json` and paste the API key there. That local settings file is ignored by Git. The production Windows app reads the API key from `settings.local.json`, `%LocalAppData%\Youtube Beta\settings.json`, or the `MUKUND_TUBE_YOUTUBE_API_KEY` environment variable.
+For real data in the Mac preview, create `preview/settings.local.json` from `preview/settings.local.sample.json` and paste the API key there. That local settings file is ignored by Git. The production Windows app reads the API key from `settings.local.json`, `%LocalAppData%\Youtube Beta\settings.json`, or the `YOUTUBE_BETA_YOUTUBE_API_KEY` environment variable.
 
 `maxVideosPerChannel` controls how many approved uploads are fetched per channel. YouTube returns at most 50 playlist items per request, so the app paginates up to the configured limit. Keep this number reasonable, such as 50-100 for normal use. For channels with many Shorts, values up to 500 are supported, but they use more API quota and take longer to refresh.
 

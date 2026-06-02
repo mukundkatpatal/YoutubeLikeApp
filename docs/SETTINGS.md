@@ -33,7 +33,7 @@ Paste this JSON:
   "youTubeApiKey": "PASTE_YOUR_YOUTUBE_API_KEY_HERE",
   "configUrl": "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.json",
   "updateManifestUrl": "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/update-manifest.json",
-  "appReferrer": "https://mukundtube.local/"
+  "appReferrer": "https://youtubebeta.local/"
 }
 ```
 
@@ -77,10 +77,10 @@ Environment variables win over file settings.
 
 Supported environment variables:
 
-- `MUKUND_TUBE_YOUTUBE_API_KEY`
-- `MUKUND_TUBE_CONFIG_URL`
-- `MUKUND_TUBE_UPDATE_MANIFEST_URL`
-- `MUKUND_TUBE_APP_REFERRER`
+- `YOUTUBE_BETA_YOUTUBE_API_KEY`
+- `YOUTUBE_BETA_CONFIG_URL`
+- `YOUTUBE_BETA_UPDATE_MANIFEST_URL`
+- `YOUTUBE_BETA_APP_REFERRER`
 
 ## Development Preview Settings
 

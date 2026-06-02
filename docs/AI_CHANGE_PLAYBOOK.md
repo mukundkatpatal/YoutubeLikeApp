@@ -17,17 +17,17 @@ Update these together:
 
 - `config/config.sample.json`
 - `config/config.github.json` if the live downloaded example should be refreshed
-- `src/MukundTube/Models/AppConfig.cs`
-- `src/MukundTube/Services/ConfigValidator.cs`
+- `src/YoutubeBeta/Models/AppConfig.cs`
+- `src/YoutubeBeta/Services/ConfigValidator.cs`
 - `preview/app.js` if the preview reads the field
 - `admin/config-editor/src/main.jsx`
 - `docs/SETUP.md`
-- tests in `tests/MukundTube.Tests`
+- tests in `tests/YoutubeBeta.Tests`
 
 Verify:
 
 ```powershell
-dotnet test .\MukundTube.sln -c Release
+dotnet test .\YoutubeBeta.sln -c Release
 ```
 
 ## Add Or Change Settings Fields
@@ -35,8 +35,8 @@ dotnet test .\MukundTube.sln -c Release
 Update these together:
 
 - `config/settings.sample.json`
-- `src/MukundTube/Models/UserSettings.cs`
-- `src/MukundTube/Services/SettingsService.cs`
+- `src/YoutubeBeta/Models/UserSettings.cs`
+- `src/YoutubeBeta/Services/SettingsService.cs`
 - `docs/SETTINGS.md`
 - `docs/SETUP.md` if install instructions change
 - user-facing missing-settings messages
@@ -47,8 +47,8 @@ Settings files may contain API keys. Never commit real keys.
 
 Start with:
 
-- `src/MukundTube/Services/FeedComposer.cs`
-- `tests/MukundTube.Tests/FeedComposerTests.cs`
+- `src/YoutubeBeta/Services/FeedComposer.cs`
+- `tests/YoutubeBeta.Tests/FeedComposerTests.cs`
 
 Keep policy deterministic. Pinned, blocked, enabled-channel, duplicate, and
 shorts behavior should be covered by tests before changing UI code.
@@ -57,8 +57,8 @@ shorts behavior should be covered by tests before changing UI code.
 
 Start with:
 
-- `src/MukundTube/Services/YouTubeDataApiClient.cs`
-- `src/MukundTube/Services/FeedService.cs`
+- `src/YoutubeBeta/Services/YouTubeDataApiClient.cs`
+- `src/YoutubeBeta/Services/FeedService.cs`
 
 Consider:
 
@@ -73,9 +73,9 @@ Consider:
 
 Start with:
 
-- `src/MukundTube/Services/YouTubePlayerController.cs`
-- `src/MukundTube/Assets/player.html`
-- `src/MukundTube/MainWindow.xaml.cs`
+- `src/YoutubeBeta/Services/YouTubePlayerController.cs`
+- `src/YoutubeBeta/Assets/player.html`
+- `src/YoutubeBeta/MainWindow.xaml.cs`
 
 Be conservative. Do not loosen navigation, new-window blocking, or video ID
 allow-list enforcement unless the user explicitly asks for that risk.
@@ -84,8 +84,8 @@ allow-list enforcement unless the user explicitly asks for that risk.
 
 Start with:
 
-- `src/MukundTube/MainWindow.xaml`
-- `src/MukundTube/ViewModels/MainViewModel.cs`
+- `src/YoutubeBeta/MainWindow.xaml`
+- `src/YoutubeBeta/ViewModels/MainViewModel.cs`
 
 Keep the UI calm and child-friendly. Do not add settings, admin, API-key, search,
 or sign-in controls to the child-facing app.
@@ -94,8 +94,8 @@ or sign-in controls to the child-facing app.
 
 Start with:
 
-- `src/MukundTube/Tools/Publish-YoutubeBeta.ps1`
-- `src/MukundTube/Properties/PublishProfiles/FolderProfile.pubxml`
+- `src/YoutubeBeta/Tools/Publish-YoutubeBeta.ps1`
+- `src/YoutubeBeta/Properties/PublishProfiles/FolderProfile.pubxml`
 - `docs/PUBLISHING.md`
 
 The expected local install target is `%LocalAppData%\Youtube Beta\App\`.

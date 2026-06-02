@@ -5,9 +5,9 @@ Run commands from the repository root.
 ## Standard Verification
 
 ```powershell
-dotnet restore .\MukundTube.sln
-dotnet build .\MukundTube.sln -c Release
-dotnet test .\MukundTube.sln -c Release
+dotnet restore .\YoutubeBeta.sln
+dotnet build .\YoutubeBeta.sln -c Release
+dotnet test .\YoutubeBeta.sln -c Release
 ```
 
 ## Browser Preview

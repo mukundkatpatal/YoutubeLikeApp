@@ -28,27 +28,27 @@ Then paste the YouTube Data API key into `preview/settings.local.json`. The file
 
 ## Windows App
 
-The WPF project lives in `src/MukundTube`. It targets `.NET 10` and Windows WPF/WebView2.
+The WPF project lives in `src/YoutubeBeta`. It targets `.NET 10` and Windows WPF/WebView2.
 
 Build on Windows:
 
 ```powershell
-dotnet restore .\MukundTube.sln
-dotnet build .\MukundTube.sln -c Release
-dotnet test .\MukundTube.sln -c Release
-dotnet publish .\src\MukundTube\MukundTube.csproj -c Release -r win-x64 --self-contained true
+dotnet restore .\YoutubeBeta.sln
+dotnet build .\YoutubeBeta.sln -c Release
+dotnet test .\YoutubeBeta.sln -c Release
+dotnet publish .\src\YoutubeBeta\YoutubeBeta.csproj -c Release -r win-x64 --self-contained true
 ```
 
 Publish to the local app folder and create/update the desktop shortcut:
 
 ```powershell
-.\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+.\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1
 ```
 
 If local scripts are blocked:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+powershell -ExecutionPolicy Bypass -File .\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1
 ```
 
 See `docs/PUBLISHING.md` for the full publishing flow.
@@ -95,7 +95,7 @@ Then open `http://127.0.0.1:5174`.
 
 ## App Updates
 
-Youtube Beta has its own version in `src/MukundTube/MukundTube.csproj`. It checks this remote manifest for source-code updates:
+Youtube Beta has its own version in `src/YoutubeBeta/YoutubeBeta.csproj`. It checks this remote manifest for source-code updates:
 
 ```text
 https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/update-manifest.json

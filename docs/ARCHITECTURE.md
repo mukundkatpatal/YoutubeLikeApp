@@ -25,12 +25,12 @@ MainViewModel -> WPF UI -> YouTubePlayerController -> WebView2 iframe player
 The update notifier is intentionally separate from the main app:
 
 ```text
-Scheduled updater -> update-state.json -> MukundTube.Notifier -> tray/toast
+Scheduled updater -> update-state.json -> YoutubeBeta.Notifier -> tray/toast
 ```
 
 ## Production App
 
-`src/MukundTube` contains the production Windows app.
+`src/YoutubeBeta` contains the production Windows app.
 
 - `MainWindow.xaml` defines the WPF layout.
 - `MainWindow.xaml.cs` wires services, update checks, refresh, channel selection,
@@ -50,7 +50,7 @@ Scheduled updater -> update-state.json -> MukundTube.Notifier -> tray/toast
 
 ## Update Notifier
 
-`src/MukundTube.Notifier` contains a small Windows tray process. It starts at
+`src/YoutubeBeta.Notifier` contains a small Windows tray process. It starts at
 user logon, watches `%LocalAppData%\Youtube Beta\update-state.json`, and shows a
 Windows toast or tray balloon when the scheduled updater publishes a new app
 version. It stores the last shown event ID in
@@ -64,7 +64,7 @@ closed.
 
 ## WebView2 Player
 
-The app maps `https://app.mukundtube.local/` to local assets and loads
+The app maps `https://app.youtubebeta.local/` to local assets and loads
 `Assets/player.html`. The page embeds the official YouTube iframe player.
 
 Playback safety is split across:
@@ -130,7 +130,7 @@ WPF app.
 
 ## Tests
 
-`tests/MukundTube.Tests` currently covers:
+`tests/YoutubeBeta.Tests` currently covers:
 
 - feed policy behavior
 - config validation behavior

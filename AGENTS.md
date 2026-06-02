@@ -22,30 +22,30 @@ authoritative than broad roadmap docs when deciding what is safe to implement.
 
 ## Current Architecture
 
-- `src/MukundTube` is the production Windows WPF app.
-- `src/MukundTube.Notifier` is a separate tray/toast notifier. Keep it separate
+- `src/YoutubeBeta` is the production Windows WPF app.
+- `src/YoutubeBeta.Notifier` is a separate tray/toast notifier. Keep it separate
   from the main app so scheduled publishing can replace `Youtube Beta.exe`
   without the notifier locking the app files.
-- `src/MukundTube/Assets/player.html` hosts the official YouTube iframe player
+- `src/YoutubeBeta/Assets/player.html` hosts the official YouTube iframe player
   inside WebView2.
-- `src/MukundTube/Services/YouTubePlayerController.cs` controls WebView2
+- `src/YoutubeBeta/Services/YouTubePlayerController.cs` controls WebView2
   navigation and playback allow-list behavior.
-- `src/MukundTube/Services/ConfigService.cs` loads remote JSON config and falls
+- `src/YoutubeBeta/Services/ConfigService.cs` loads remote JSON config and falls
   back to the last valid cached config.
-- `src/MukundTube/Services/FeedComposer.cs` applies channel, blocked-video, and
+- `src/YoutubeBeta/Services/FeedComposer.cs` applies channel, blocked-video, and
   pinned-video policy.
 - `preview` is a browser preview for config/feed behavior. It is not proof of
   Windows WebView2 or parental-control behavior.
 - `admin/config-editor` is a parent/admin React app for editing the remote
   GitHub `config.json`. It may use a browser-local YouTube Data API key to
   resolve public channel URLs, handles, and search text into `UC...` channel IDs.
-- `tests/MukundTube.Tests` covers policy and config validation.
-- `src/MukundTube/Tools/Publish-YoutubeBeta.ps1` publishes the app to
+- `tests/YoutubeBeta.Tests` covers policy and config validation.
+- `src/YoutubeBeta/Tools/Publish-YoutubeBeta.ps1` publishes the app to
   `%LocalAppData%\Youtube Beta\App\` and creates the desktop shortcut.
-- `src/MukundTube/Tools/Register-YoutubeBetaNotifier.ps1` publishes the
+- `src/YoutubeBeta/Tools/Register-YoutubeBetaNotifier.ps1` publishes the
   notifier to `%LocalAppData%\Youtube Beta\Notifier\`, registers the per-user
   logon task, and can start the notifier for local testing.
-- `src/MukundTube/Tools/Update-MukundTube.ps1` writes
+- `src/YoutubeBeta/Tools/Update-YoutubeBeta.ps1` writes
   `%LocalAppData%\Youtube Beta\update-state.json` after a successful publish;
   the notifier watches that file and shows one notification per new event ID.
 - `tools/Download-Config.ps1` downloads the current GitHub config into
@@ -56,9 +56,9 @@ authoritative than broad roadmap docs when deciding what is safe to implement.
 Run from the repository root:
 
 ```powershell
-dotnet restore .\MukundTube.sln
-dotnet build .\MukundTube.sln -c Release
-dotnet test .\MukundTube.sln -c Release
+dotnet restore .\YoutubeBeta.sln
+dotnet build .\YoutubeBeta.sln -c Release
+dotnet test .\YoutubeBeta.sln -c Release
 ```
 
 Preview app:
@@ -85,13 +85,13 @@ npm run dev
 Publish local Release app and create/update the desktop shortcut:
 
 ```powershell
-.\src\MukundTube\Tools\Publish-YoutubeBeta.ps1
+.\src\YoutubeBeta\Tools\Publish-YoutubeBeta.ps1
 ```
 
 Publish/register/start the tray notifier:
 
 ```powershell
-.\src\MukundTube\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
+.\src\YoutubeBeta\Tools\Register-YoutubeBetaNotifier.ps1 -StopRunning
 ```
 
 ## Change Guidance
@@ -102,8 +102,8 @@ Publish/register/start the tray notifier:
 - If changing config shape, update `config/config.sample.json`, models,
   validation, docs, preview code, admin config editor code, and tests together.
 - If changing settings shape or precedence, update `config/settings.sample.json`,
-  `docs/SETTINGS.md`, `src/MukundTube/Models/UserSettings.cs`,
-  `src/MukundTube/Services/SettingsService.cs`, and any user-facing status text
+  `docs/SETTINGS.md`, `src/YoutubeBeta/Models/UserSettings.cs`,
+  `src/YoutubeBeta/Services/SettingsService.cs`, and any user-facing status text
   together.
 - If changing playback behavior, review `YouTubePlayerController.cs`,
   `Assets/player.html`, YouTube iframe policy, and the official WebView2
