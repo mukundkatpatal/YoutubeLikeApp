@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ParentUser {
+  id            String         @id @default(cuid())
+  googleSubject String         @unique
+  email         String         @unique
+  displayName   String?
+  avatarUrl     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  memberships   FamilyMember[]
+}
+
+model Family {
+  id                     String            @id @default(cuid())
+  name                   String
+  configVersion          Int               @default(1)
+  refreshIntervalMinutes Int               @default(60)
+  maxVideosPerChannel    Int               @default(100)
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  members                FamilyMember[]
+  childProfiles          ChildProfile[]
+  approvedChannels       ApprovedChannel[]
+  blockedVideos          BlockedVideo[]
+  pinnedVideos           PinnedVideo[]
+}
+
+model FamilyMember {
+  id           String     @id @default(cuid())
+  familyId     String
+  parentUserId String
+  role         ParentRole @default(OWNER)
+  createdAt    DateTime   @default(now())
+  family       Family     @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  parentUser   ParentUser @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, parentUserId])
+}
+
+model ChildProfile {
+  id          String   @id @default(cuid())
+  familyId    String
+  displayName String
+  accessToken String   @unique
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  family      Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+}
+
+model ApprovedChannel {
+  id        String   @id @default(cuid())
+  familyId  String
+  channelId String
+  title     String
+  enabled   Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, channelId])
+  @@index([familyId, enabled])
+}
+
+model BlockedVideo {
+  id        String   @id @default(cuid())
+  familyId  String
+  videoId   String
+  createdAt DateTime @default(now())
+  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, videoId])
+}
+
+model PinnedVideo {
+  id        String   @id @default(cuid())
+  familyId  String
+  videoId   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  family    Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, videoId])
+}
+
+model YouTubeChannelCache {
+  channelId       String    @id
+  title           String
+  thumbnailUrl    String?
+  uploadsPlaylist String?
+  fetchedAt       DateTime  @default(now())
+  videos          YouTubeVideoCache[]
+}
+
+model YouTubeVideoCache {
+  videoId      String   @id
+  channelId    String
+  title        String
+  thumbnailUrl String?
+  publishedAt  DateTime
+  fetchedAt    DateTime @default(now())
+  channel      YouTubeChannelCache @relation(fields: [channelId], references: [channelId], onDelete: Cascade)
+
+  @@index([channelId, publishedAt])
+}
+
+enum ParentRole {
+  OWNER
+  ADMIN
+}

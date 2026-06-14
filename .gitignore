@@ -2,6 +2,9 @@ bin/
 obj/
 node_modules/
 dist/
+.env
+.env.*
+!.env.sample
 .vs/
 .vscode/
 TestResults/
