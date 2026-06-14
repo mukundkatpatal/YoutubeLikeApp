@@ -1,0 +1,99 @@
+apps/api/src/auth/session.ts
+  s_65677feefd0d8f::t_4fa36fc08b33f8 1-40,42-55
+  s_65677feefd0d8f::t_75c85669a21361 41
+apps/api/src/routes/youtubeAdmin.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1-45
+apps/api/scripts/seed-config.ts
+  s_65677feefd0d8f::t_654c429a309f61 1
+  s_65677feefd0d8f::t_579ae00eed6421 2-48
+apps/api/src/types.ts
+  s_65677feefd0d8f::t_4fa36fc08b33f8 1,3-26
+  s_65677feefd0d8f::t_c6953ee3ca2892 2
+apps/api/src/routes/health.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1-9
+apps/api/prisma/schema.prisma
+  s_65677feefd0d8f::t_cda0edc41912bc 1-119
+apps/api/src/db/prisma.ts
+  s_65677feefd0d8f::t_4fa36fc08b33f8 1-5
+apps/api/tests/auth.test.ts
+  s_65677feefd0d8f::t_579ae00eed6421 1-24
+apps/api/tsconfig.json
+  s_65677feefd0d8f::t_cda0edc41912bc 1-18
+apps/api/src/services/configService.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 2,6-9,42
+  s_65677feefd0d8f::t_c6953ee3ca2892 1,3-5,10-41,43-131
+apps/api/src/routes/kids.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1-22
+apps/api/src/server.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1,3-30,35-63
+  s_65677feefd0d8f::t_75c85669a21361 2,31-34
+apps/api/README.md
+  s_65677feefd0d8f::t_cda0edc41912bc 1-27
+apps/api/tests/configSchemas.test.ts
+  s_65677feefd0d8f::t_f2e18d38c39dba 52
+  s_65677feefd0d8f::t_579ae00eed6421 1-51,53-58
+docs/API_MVP.md
+  s_65677feefd0d8f::t_70abce9bd5ee65 49
+  s_65677feefd0d8f::t_579ae00eed6421 1-48,50-52,54-84
+  s_65677feefd0d8f::t_a553485a3718ae 53
+apps/api/src/routes/legacy.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1-21
+apps/api/vitest.config.ts
+  s_65677feefd0d8f::t_cda0edc41912bc 1-8
+apps/api/src/config/schemas.ts
+  s_65677feefd0d8f::t_4fa36fc08b33f8 1-36
+apps/api/src/services/youtubeService.ts
+  s_65677feefd0d8f::t_3c1b47930b337f 75-88,103-119
+  s_65677feefd0d8f::t_f2e18d38c39dba 201-209
+  s_65677feefd0d8f::t_c6953ee3ca2892 1-74,89-102,120-200,210
+apps/api/src/config/env.ts
+  s_65677feefd0d8f::t_4fa36fc08b33f8 2-36
+  s_65677feefd0d8f::t_75c85669a21361 1
+apps/api/src/routes/adminConfig.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1-26
+apps/api/src/index.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1-10
+apps/api/prisma/migrations/20260614222700_init/migration.sql
+  s_65677feefd0d8f::t_4a84b1803da77b 1-158
+apps/api/src/routes/me.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1-13
+apps/api/src/auth/google.ts
+  s_65677feefd0d8f::t_4fa36fc08b33f8 1-64
+apps/api/.env.sample
+  s_65677feefd0d8f::t_cda0edc41912bc 1-5,7-9
+  h_e4e43a5e1511e4 6,10
+.gitignore
+  s_65677feefd0d8f::t_074c950dcaf54b 5-7
+apps/api/package.json
+  s_65677feefd0d8f::t_cda0edc41912bc 1-11,13-14,16-17,19-21,24,28-34,36-37
+  s_65677feefd0d8f::t_70abce9bd5ee65 12,15
+  s_65677feefd0d8f::t_b0aa9611504124 22,26-27
+  s_65677feefd0d8f::t_a553485a3718ae 18
+  s_65677feefd0d8f::t_d8f22240e09483 23,25
+  s_65677feefd0d8f::t_4ed72483e6cd44 35
+apps/api/tests/server.test.ts
+  s_65677feefd0d8f::t_579ae00eed6421 1-28
+apps/api/src/routes/auth.ts
+  s_65677feefd0d8f::t_afa2e4bf26e268 1-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "efba1c511bdfb4ae7e9cef6d55e59520c8706676",
+  "prompts": {},
+  "humans": {
+    "h_e4e43a5e1511e4": {
+      "author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_65677feefd0d8f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5dd5-7e51-7a21-ba90-e7e9ad43f072",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  }
+}
