@@ -32,5 +32,18 @@ export const childAccessSchema = z.object({
   accessToken: z.string().trim().min(16)
 });
 
+export const childProfileCreateSchema = z.object({
+  displayName: z.string().trim().min(1).max(80)
+});
+
+export const childProfileUpdateSchema = z.object({
+  displayName: z.string().trim().min(1).max(80).optional(),
+  enabled: z.boolean().optional()
+}).refine((value) => value.displayName !== undefined || value.enabled !== undefined, {
+  message: "At least one child profile field is required."
+});
+
 export type ChannelConfig = z.infer<typeof channelConfigSchema>;
 export type AppConfig = z.infer<typeof appConfigSchema>;
+export type ChildProfileCreate = z.infer<typeof childProfileCreateSchema>;
+export type ChildProfileUpdate = z.infer<typeof childProfileUpdateSchema>;

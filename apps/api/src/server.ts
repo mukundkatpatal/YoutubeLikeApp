@@ -6,6 +6,7 @@ import { loadEnv, type AppEnv } from "./config/env.js";
 import { createPrismaClient } from "./db/prisma.js";
 import { readSession } from "./auth/session.js";
 import { GoogleYouTubeService, type YouTubeService } from "./services/youtubeService.js";
+import { registerAdminChildrenRoutes } from "./routes/adminChildren.js";
 import { registerAdminConfigRoutes } from "./routes/adminConfig.js";
 import { registerAuthRoutes } from "./routes/auth.js";
 import { registerHealthRoutes } from "./routes/health.js";
@@ -55,6 +56,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Fas
   await registerHealthRoutes(app);
   await registerAuthRoutes(app);
   await registerMeRoutes(app);
+  await registerAdminChildrenRoutes(app);
   await registerAdminConfigRoutes(app);
   await registerYouTubeAdminRoutes(app);
   await registerKidsRoutes(app);

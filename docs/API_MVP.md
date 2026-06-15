@@ -7,7 +7,7 @@ foundation that can later serve the parent admin app and child PWA.
 ## Architecture
 
 ```text
-React admin/PWA clients
+React admin and child PWA clients
         |
         v
 Fastify API -> Prisma -> Postgres
@@ -16,11 +16,11 @@ Fastify API -> Prisma -> Postgres
 YouTube Data API metadata cache
 ```
 
-The API owns Google parent auth, config persistence, YouTube metadata fetches,
-and legacy config JSON generation. The first frontend client is
-`admin/config-editor`, which now loads and saves config through this API instead
-of editing GitHub raw JSON. YouTube playback remains a client concern and must
-use the official iframe player.
+The API owns Google parent auth, child profile pairing, config persistence,
+YouTube metadata fetches, and legacy config JSON generation. The first frontend
+client is `admin/config-editor`, which loads and saves config through this API
+instead of editing GitHub raw JSON. YouTube playback remains a client concern
+and must use the official iframe player.
 
 ## Database Model
 
@@ -39,16 +39,18 @@ use the official iframe player.
 Parents sign in with Google OAuth. The API verifies the Google ID token, checks
 `PARENT_ALLOWLIST_EMAILS`, then sets a signed HTTP-only session cookie.
 
-Child access is intentionally not Google sign-in for the MVP. `GET /kids/config`
-requires a child access token, which avoids putting a parent login on the child
-device.
+Child access is intentionally not Google sign-in for the MVP. Parents create
+child profiles from the admin API. Each profile has a generated access token for
+pairing a child device/app to the correct family. List responses expose only a
+token preview; create and rotate responses return the full token for the parent
+to copy into an install link.
 
 ## Deployment: Render + Neon
 
 1. Create a Neon Postgres database and copy the connection string.
 2. Create a Render Web Service from the GitHub repo.
 3. Set the root directory to `apps/api`.
-4. Use build command `npm install && npm run build`.
+4. Use build command `npm install --include=dev && npm run build`.
 5. Use start command `npm run start`.
 6. Add environment variables from `apps/api/.env.sample`.
 7. Run migrations from a trusted machine or Render shell with
@@ -65,6 +67,10 @@ deploying the same API elsewhere and changing `DATABASE_URL`.
 - `GET /auth/google/callback`
 - `POST /auth/logout`
 - `GET /me`
+- `GET /admin/children`
+- `POST /admin/children`
+- `PATCH /admin/children/:childId`
+- `POST /admin/children/:childId/rotate-token`
 - `GET /admin/config`
 - `PUT /admin/config`
 - `GET /admin/youtube/channels/search?q=...`
@@ -72,12 +78,26 @@ deploying the same API elsewhere and changing `DATABASE_URL`.
 - `GET /kids/config`
 - `GET /legacy/config.json`
 
+## Child Pairing Contract
+
+Parent-only child profile endpoints require the same signed parent session as
+the rest of the admin API. A child profile belongs to exactly one family, and
+its access token is the pairing credential used by the future child PWA.
+
+- `GET /admin/children` returns child IDs, names, enabled state, timestamps, and
+  token previews.
+- `POST /admin/children` creates an enabled child profile and returns the full
+  token once.
+- `PATCH /admin/children/:childId` renames or enables/disables a child profile.
+- `POST /admin/children/:childId/rotate-token` invalidates the old token and
+  returns the new token once.
+
 ## Guardrails For Future AI/Agent Changes
 
 - Do not expose the YouTube API key to frontend clients.
 - Do not reintroduce browser-local YouTube API key storage in the admin app.
-- Do not add child-facing search, comments, subscriptions, uploads, sign-in, or
-  open browsing.
+- Do not add child-facing Google sign-in, search, comments, subscriptions,
+  uploads, or open browsing.
 - Do not scrape, download, proxy, or modify YouTube playback.
 - Keep the legacy JSON endpoint compatible until the Windows app is retired.
 - Parent approval remains required before any AI-suggested content reaches a

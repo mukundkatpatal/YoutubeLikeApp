@@ -8,6 +8,8 @@ child. These guardrails should shape all product and engineering decisions.
 - Parent-approved content sources.
 - No child-facing search.
 - No child-facing sign-in.
+- Parent-issued child pairing tokens are allowed for device/app setup; child
+  Google login is not part of the MVP safety model.
 - No open web browsing.
 - No comments, uploads, subscriptions, or algorithmic YouTube home feed.
 - Remote parent-controlled config.
@@ -30,7 +32,7 @@ child. These guardrails should shape all product and engineering decisions.
 Require explicit human approval before making changes that:
 
 - add search, recommendations, browse pages, or external links
-- add sign-in or user accounts for children
+- add child Google sign-in or child-controlled user accounts
 - add local admin/config UI inside the child app
 - loosen WebView2 navigation restrictions
 - allow arbitrary video IDs from URLs, query strings, clipboard, or user input
