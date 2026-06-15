@@ -1,8 +1,9 @@
 # Architecture
 
 Youtube Beta is a Windows WPF app that presents a parent-curated YouTube feed to
-a child. The current implementation favors a small local app with remote config
-over a backend-heavy platform.
+a child. The current Windows implementation favors a small local app with remote
+config. The web/PWA direction adds a Node API and Postgres-backed parent/child
+model while keeping the same parent-controlled content policy.
 
 ## Runtime Shape
 
@@ -117,15 +118,13 @@ or parental-control integration.
 
 ## Config Editor
 
-`admin/config-editor` is a React admin app for the parent. It edits the remote
-config shape used by the WPF app and exports a GitHub-ready `config.json`.
-It can resolve YouTube channel URLs, handles, legacy usernames, channel IDs, and
-search text into the `UC...` channel IDs required by the WPF app. The admin
-YouTube API key is stored only in the browser's local storage.
+`admin/config-editor` is a React admin app for the parent. It signs in through
+the Node API, edits the family config in Postgres, and resolves YouTube channel
+URLs, handles, legacy usernames, channel IDs, and search text through backend
+YouTube API integration. The YouTube API key stays server-side.
 
-The editor starts from `admin/config-editor/src/default-config.json`. The same
-download script also writes the root copy at `config/config.github.json`.
-Refresh both with:
+The editor starts from `admin/config-editor/src/default-config.json` only as a
+local fallback. The seeded import source can still be refreshed with:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\tools\Download-Config.ps1
@@ -133,6 +132,25 @@ powershell -ExecutionPolicy Bypass -File .\tools\Download-Config.ps1
 
 The editor must stay parent/admin-only. Do not surface it inside the child-facing
 WPF app.
+
+## Node API And Child PWA Direction
+
+`apps/api` is a Fastify/Prisma API for the public web direction. It serves the
+parent admin app, legacy config JSON, and child-token PWA endpoints. Parents
+authenticate with Google. Children do not sign in with Google; they use
+parent-issued pairing tokens stored by the child PWA.
+
+Child PWA data flow:
+
+```text
+Child PWA -> x-child-access-token -> Fastify API -> Postgres config/cache
+                                                -> YouTube Data API if stale
+```
+
+The child endpoints are cache-first. They return approved cached metadata when
+available and attempt backend YouTube refreshes only when channel/video metadata
+is stale. The frontend must not receive YouTube API keys or arbitrary search
+capabilities.
 
 ## Tests
 
@@ -143,3 +161,7 @@ WPF app.
 
 Add tests here when modifying domain policy, config rules, update parsing, or
 other logic that can be tested without a real WebView2 instance.
+
+`apps/api/tests` covers the Node API contracts, including parent auth helpers,
+child profile management, child token access, child video filtering, and
+cache-first behavior.

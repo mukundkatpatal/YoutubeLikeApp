@@ -30,7 +30,7 @@ export async function buildServer(options: BuildServerOptions = {}): Promise<Fas
 
   app.decorate("api", { env, prisma, youtube });
   await app.register(cors, {
-    origin: env.WEB_APP_ORIGIN,
+    origin: [env.WEB_APP_ORIGIN, env.KIDS_WEB_APP_ORIGIN],
     credentials: true,
     methods: ["GET", "HEAD", "POST", "PUT", "OPTIONS"]
   });

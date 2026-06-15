@@ -42,6 +42,18 @@ Child profiles are paired to devices with generated access tokens. Listing
 children returns only a token preview; the full token is returned when a child is
 created or rotated so the parent can copy the install link.
 
+## Child PWA endpoints
+
+- `GET /kids/bootstrap`
+- `GET /kids/channels/:channelId/videos?limit=50&cursor=0`
+- `GET /kids/app-version?currentVersion=0.1.0`
+- `GET /kids/config` for legacy config-compatible child access
+
+Child data endpoints require `x-child-access-token`. The token maps the child
+app/device to one family, so the API can return only that family's approved
+channels and videos. Video pages are cache-first and fall back to stale cached
+metadata if YouTube quota or network calls fail.
+
 ## Important rules
 
 - Keep `YOUTUBE_API_KEY` server-side only.

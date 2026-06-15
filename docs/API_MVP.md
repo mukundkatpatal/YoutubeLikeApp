@@ -53,6 +53,8 @@ to copy into an install link.
 4. Use build command `npm install --include=dev && npm run build`.
 5. Use start command `npm run start`.
 6. Add environment variables from `apps/api/.env.sample`.
+   Child PWA deployments also need `KIDS_WEB_APP_ORIGIN`,
+   `KIDS_LATEST_VERSION`, and `KIDS_MINIMUM_SUPPORTED_VERSION`.
 7. Run migrations from a trusted machine or Render shell with
    `npm run prisma:deploy`.
 8. Seed the current config with `npm run seed:config`.
@@ -75,6 +77,9 @@ deploying the same API elsewhere and changing `DATABASE_URL`.
 - `PUT /admin/config`
 - `GET /admin/youtube/channels/search?q=...`
 - `GET /admin/youtube/channels/:channelId/videos`
+- `GET /kids/bootstrap`
+- `GET /kids/channels/:channelId/videos?limit=50&cursor=0`
+- `GET /kids/app-version?currentVersion=...`
 - `GET /kids/config`
 - `GET /legacy/config.json`
 
@@ -91,6 +96,25 @@ its access token is the pairing credential used by the future child PWA.
 - `PATCH /admin/children/:childId` renames or enables/disables a child profile.
 - `POST /admin/children/:childId/rotate-token` invalidates the old token and
   returns the new token once.
+
+## Child PWA API Contract
+
+Child PWA data endpoints use the `x-child-access-token` header. Query-string
+`accessToken` remains accepted for setup/legacy compatibility, but the installed
+PWA should use the header after storing its token locally.
+
+- `GET /kids/bootstrap` returns the child profile, family metadata, PWA version
+  policy, config timestamps, and enabled approved channels with cached
+  thumbnails/latest-video dates when available.
+- `GET /kids/channels/:channelId/videos?limit=50&cursor=0` returns a cache-first
+  page of videos for an approved enabled channel. The cursor is a decimal offset
+  returned as `nextCursor`.
+- `GET /kids/app-version?currentVersion=...` returns latest/minimum supported
+  versions and whether the current PWA must force-update.
+
+The API uses Postgres YouTube metadata cache first. If channel/video cache is
+stale, it tries a backend YouTube refresh, but child endpoints still return
+cached metadata when YouTube quota or network calls fail.
 
 ## Guardrails For Future AI/Agent Changes
 

@@ -38,6 +38,29 @@ The preview cannot verify:
 - packaging and update installation
 - Qustodio behavior on the target machine
 
+## Node API
+
+Run from `apps/api`:
+
+```bash
+npm run typecheck
+npm test
+npm run build
+```
+
+The API tests should cover:
+
+- parent auth and allowlist behavior
+- admin config save/load
+- child profile create/list/disable/rotate
+- child token rejection for missing or invalid tokens
+- child bootstrap returning only enabled approved channels
+- child video pages rejecting unapproved channels
+- blocked/private/deleted videos excluded from child results
+- pinned videos sorted before normal newest videos
+- stale YouTube cache refresh attempted server-side with cached fallback
+- child PWA app-version force-update decisions
+
 ## Windows Manual Checks
 
 On a Windows target machine, verify:
@@ -65,6 +88,8 @@ High-value automated tests:
 - update manifest parsing
 - settings merge precedence
 - API response mapping where practical
+- child API token-to-family policy
+- child feed cache fallback
 
 Lower-value or manual-only areas:
 

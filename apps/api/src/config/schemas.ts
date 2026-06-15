@@ -43,7 +43,13 @@ export const childProfileUpdateSchema = z.object({
   message: "At least one child profile field is required."
 });
 
+export const childVideosQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+  cursor: z.coerce.number().int().min(0).default(0)
+});
+
 export type ChannelConfig = z.infer<typeof channelConfigSchema>;
 export type AppConfig = z.infer<typeof appConfigSchema>;
 export type ChildProfileCreate = z.infer<typeof childProfileCreateSchema>;
 export type ChildProfileUpdate = z.infer<typeof childProfileUpdateSchema>;
+export type ChildVideosQuery = z.infer<typeof childVideosQuerySchema>;

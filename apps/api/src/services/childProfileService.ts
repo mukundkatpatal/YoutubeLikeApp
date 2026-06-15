@@ -19,6 +19,12 @@ export type ChildProfileWithToken = ChildProfileSummary & {
   accessToken: string;
 };
 
+export type ChildAccessContext = {
+  childId: string;
+  displayName: string;
+  familyId: string;
+};
+
 export function generateChildAccessToken(): string {
   return `child_${randomBytes(32).toString("base64url")}`;
 }
@@ -81,6 +87,28 @@ export async function rotateChildAccessToken(
 
   const profile = await updateWithUniqueToken(prisma, childId);
   return toWithToken(profile);
+}
+
+export async function findEnabledChildByAccessToken(
+  prisma: PrismaClient,
+  accessToken: string
+): Promise<ChildAccessContext | null> {
+  const profile = await prisma.childProfile.findFirst({
+    where: { accessToken, enabled: true },
+    select: {
+      id: true,
+      displayName: true,
+      familyId: true
+    }
+  });
+
+  return profile
+    ? {
+        childId: profile.id,
+        displayName: profile.displayName,
+        familyId: profile.familyId
+      }
+    : null;
 }
 
 async function createWithUniqueToken(

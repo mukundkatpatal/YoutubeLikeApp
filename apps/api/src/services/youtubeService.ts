@@ -47,7 +47,12 @@ type YouTubeChannelsResponse = {
 };
 
 type YouTubePlaylistItemsResponse = {
+  nextPageToken?: string;
   items?: Array<{
+    contentDetails?: {
+      videoId?: string;
+      videoPublishedAt?: string;
+    };
     snippet?: {
       resourceId?: { videoId?: string };
       channelId?: string;
@@ -94,28 +99,43 @@ export class GoogleYouTubeService implements YouTubeService {
       return [];
     }
 
-    const data = await this.fetchJson<YouTubePlaylistItemsResponse>("/playlistItems", {
-      part: "snippet",
-      playlistId: channel.uploadsPlaylist,
-      maxResults: String(Math.min(Math.max(maxResults, 1), 50))
-    });
-
+    const requestedResults = Math.min(Math.max(maxResults, 1), 250);
+    let pageToken = "";
     const videos: YouTubeVideoResult[] = [];
-    for (const item of data.items ?? []) {
-      const snippet = item.snippet;
-      const videoId = snippet?.resourceId?.videoId;
-      if (!videoId || !snippet?.title || !snippet.publishedAt) {
-        continue;
+    while (videos.length < requestedResults) {
+      const pageSize = Math.min(requestedResults - videos.length, 50);
+      const params: Record<string, string> = {
+        part: "snippet,contentDetails",
+        playlistId: channel.uploadsPlaylist,
+        maxResults: String(pageSize)
+      };
+      if (pageToken) {
+        params.pageToken = pageToken;
+      }
+      const data = await this.fetchJson<YouTubePlaylistItemsResponse>("/playlistItems", params);
+
+      for (const item of data.items ?? []) {
+        const snippet = item.snippet;
+        const videoId = item.contentDetails?.videoId ?? snippet?.resourceId?.videoId;
+        const publishedAt = item.contentDetails?.videoPublishedAt ?? snippet?.publishedAt;
+        if (!videoId || !snippet?.title || !publishedAt) {
+          continue;
+        }
+
+        const thumbnailUrl = snippet.thumbnails?.medium?.url ?? snippet.thumbnails?.default?.url;
+        videos.push(removeUndefined({
+          videoId,
+          channelId,
+          title: snippet.title,
+          thumbnailUrl,
+          publishedAt
+        }));
       }
 
-      const thumbnailUrl = snippet.thumbnails?.medium?.url ?? snippet.thumbnails?.default?.url;
-      videos.push(removeUndefined({
-        videoId,
-        channelId,
-        title: snippet.title,
-        thumbnailUrl,
-        publishedAt: snippet.publishedAt
-      }));
+      if (!data.nextPageToken || !(data.items ?? []).length) {
+        break;
+      }
+      pageToken = data.nextPageToken;
     }
 
     await this.cacheVideos(videos);
