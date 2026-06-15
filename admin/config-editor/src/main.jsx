@@ -4,6 +4,7 @@ import defaultConfig from "./default-config.json";
 import "./styles.css";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+const kidsAppBaseUrl = import.meta.env.VITE_KIDS_APP_BASE_URL || "https://sane-videos-kids.onrender.com";
 
 function createEmptyChannel() {
   return {
@@ -75,6 +76,12 @@ function channelUrl(channelId) {
   return looksLikeChannelId(channelId)
     ? `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`
     : "https://www.youtube.com/";
+}
+
+function childInstallLink(accessToken) {
+  const url = new URL("/setup", kidsAppBaseUrl);
+  url.searchParams.set("token", accessToken);
+  return url.toString();
 }
 
 function parseChannelInput(value) {
@@ -175,6 +182,7 @@ function App() {
   const [parent, setParent] = useState(null);
   const [authStatus, setAuthStatus] = useState("");
   const [isBooting, setIsBooting] = useState(true);
+  const [activeView, setActiveView] = useState("channels");
   const [config, setConfig] = useState(() => normalizeConfig(defaultConfig));
   const [message, setMessage] = useState("Loading approved channels...");
   const [isSaving, setIsSaving] = useState(false);
@@ -182,6 +190,12 @@ function App() {
   const [resolverStatus, setResolverStatus] = useState("");
   const [resolverResults, setResolverResults] = useState([]);
   const [isResolving, setIsResolving] = useState(false);
+  const [children, setChildren] = useState([]);
+  const [childrenStatus, setChildrenStatus] = useState("");
+  const [newChildName, setNewChildName] = useState("");
+  const [isLoadingChildren, setIsLoadingChildren] = useState(false);
+  const [childActionId, setChildActionId] = useState("");
+  const [latestChildToken, setLatestChildToken] = useState(null);
   const errors = useMemo(() => validateConfig(config), [config]);
   const channelIdSet = useMemo(
     () => new Set(config.channels.map((channel) => channel.channelId).filter(Boolean)),
@@ -205,6 +219,7 @@ function App() {
         }
         setConfig(loaded);
         setMessage("Loaded approved channels.");
+        await loadChildren();
       } catch (error) {
         if (cancelled) {
           return;
@@ -227,6 +242,19 @@ function App() {
       cancelled = true;
     };
   }, []);
+
+  async function loadChildren() {
+    setIsLoadingChildren(true);
+    try {
+      const data = await apiFetch("/admin/children");
+      setChildren(data.items || []);
+      setChildrenStatus("Loaded child profiles.");
+    } catch (error) {
+      setChildrenStatus(`Could not load children: ${error.message}`);
+    } finally {
+      setIsLoadingChildren(false);
+    }
+  }
 
   function updateConfig(patch) {
     setConfig((current) => {
@@ -350,6 +378,80 @@ function App() {
     setAuthStatus("You have signed out.");
   }
 
+  async function createChild() {
+    const displayName = newChildName.trim();
+    if (!displayName) {
+      setChildrenStatus("Enter a child name first.");
+      return;
+    }
+
+    setChildActionId("create");
+    try {
+      const child = await apiFetch("/admin/children", {
+        method: "POST",
+        body: JSON.stringify({ displayName })
+      });
+      setChildren((current) => [...current, stripAccessToken(child)]);
+      setLatestChildToken({ childId: child.id, displayName: child.displayName, accessToken: child.accessToken });
+      setNewChildName("");
+      setChildrenStatus(`Created ${child.displayName}. Copy the install link now.`);
+    } catch (error) {
+      setChildrenStatus(`Create failed: ${error.message}`);
+    } finally {
+      setChildActionId("");
+    }
+  }
+
+  async function updateChild(childId, patch) {
+    setChildActionId(childId);
+    try {
+      const child = await apiFetch(`/admin/children/${encodeURIComponent(childId)}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch)
+      });
+      setChildren((current) => current.map((item) => (item.id === child.id ? child : item)));
+      setChildrenStatus(`Updated ${child.displayName}.`);
+    } catch (error) {
+      setChildrenStatus(`Update failed: ${error.message}`);
+    } finally {
+      setChildActionId("");
+    }
+  }
+
+  async function rotateChildToken(childId) {
+    const child = children.find((item) => item.id === childId);
+    const confirmed = window.confirm(
+      `Rotate the install token for ${child?.displayName || "this child"}? Existing installed apps using the old token will stop working until set up again.`
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    setChildActionId(childId);
+    try {
+      const rotated = await apiFetch(`/admin/children/${encodeURIComponent(childId)}/rotate-token`, {
+        method: "POST"
+      });
+      setChildren((current) => current.map((item) => (item.id === rotated.id ? stripAccessToken(rotated) : item)));
+      setLatestChildToken({ childId: rotated.id, displayName: rotated.displayName, accessToken: rotated.accessToken });
+      setChildrenStatus(`Rotated token for ${rotated.displayName}. Copy the new install link now.`);
+    } catch (error) {
+      setChildrenStatus(`Rotate failed: ${error.message}`);
+    } finally {
+      setChildActionId("");
+    }
+  }
+
+  async function copyChildInstallLink(accessToken) {
+    const link = childInstallLink(accessToken);
+    try {
+      await navigator.clipboard.writeText(link);
+      setChildrenStatus("Copied child install link.");
+    } catch {
+      setChildrenStatus(link);
+    }
+  }
+
   if (isBooting) {
     return <LoadingScreen />;
   }
@@ -363,35 +465,67 @@ function App() {
       <header className="topbar">
         <div>
           <p className="eyebrow">Parent YouTube Admin</p>
-          <h1>Approved channels</h1>
+          <h1>{activeView === "children" ? "Children" : "Approved channels"}</h1>
           <p className="signed-in">Signed in as {parent.email}</p>
         </div>
         <div className="actions">
+          <button
+            type="button"
+            className={activeView === "channels" ? "active-tab" : ""}
+            onClick={() => setActiveView("channels")}
+          >
+            Channels
+          </button>
+          <button
+            type="button"
+            className={activeView === "children" ? "active-tab" : ""}
+            onClick={() => setActiveView("children")}
+          >
+            Children
+          </button>
           <button type="button" onClick={logout}>
             Logout
           </button>
         </div>
       </header>
 
-      <section className="save-bar">
-        <div>
-          <strong>{errors.length === 0 ? "Ready to save" : `${errors.length} issue(s) to fix`}</strong>
-          <span>{message}</span>
-        </div>
-        <button type="button" className="primary" onClick={saveConfig} disabled={isSaving || errors.length > 0}>
-          {isSaving && <span className="spinner" aria-hidden="true" />}
-          {isSaving ? "Saving..." : "Save changes"}
-        </button>
-        {errors.length > 0 && (
-          <ul>
-            {errors.map((error) => (
-              <li key={error}>{error}</li>
-            ))}
-          </ul>
-        )}
-      </section>
+      {activeView === "channels" && (
+        <section className="save-bar">
+          <div>
+            <strong>{errors.length === 0 ? "Ready to save" : `${errors.length} issue(s) to fix`}</strong>
+            <span>{message}</span>
+          </div>
+          <button type="button" className="primary" onClick={saveConfig} disabled={isSaving || errors.length > 0}>
+            {isSaving && <span className="spinner" aria-hidden="true" />}
+            {isSaving ? "Saving..." : "Save changes"}
+          </button>
+          {errors.length > 0 && (
+            <ul>
+              {errors.map((error) => (
+                <li key={error}>{error}</li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <div className="layout">
+        {activeView === "children" ? (
+          <ChildrenPanel
+            children={children}
+            childrenStatus={childrenStatus}
+            newChildName={newChildName}
+            setNewChildName={setNewChildName}
+            isLoadingChildren={isLoadingChildren}
+            childActionId={childActionId}
+            latestChildToken={latestChildToken}
+            createChild={createChild}
+            updateChild={updateChild}
+            rotateChildToken={rotateChildToken}
+            copyChildInstallLink={copyChildInstallLink}
+            reloadChildren={loadChildren}
+          />
+        ) : (
         <section className="panel">
           <div className="section-head">
             <div>
@@ -492,9 +626,131 @@ function App() {
             ))}
           </div>
         </section>
+        )}
       </div>
     </main>
   );
+}
+
+function ChildrenPanel({
+  children,
+  childrenStatus,
+  newChildName,
+  setNewChildName,
+  isLoadingChildren,
+  childActionId,
+  latestChildToken,
+  createChild,
+  updateChild,
+  rotateChildToken,
+  copyChildInstallLink,
+  reloadChildren
+}) {
+  return (
+    <section className="panel">
+      <div className="section-head">
+        <div>
+          <h2>Child access</h2>
+          <p className="section-note">Create one profile per child or device, then open the install link on the child device.</p>
+        </div>
+        <button type="button" onClick={reloadChildren} disabled={isLoadingChildren}>
+          {isLoadingChildren ? "Loading..." : "Refresh"}
+        </button>
+      </div>
+
+      <div className="resolver child-create">
+        <label>
+          Child name
+          <input
+            value={newChildName}
+            onChange={(event) => setNewChildName(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                createChild();
+              }
+            }}
+            placeholder="Aarav"
+          />
+        </label>
+        <button type="button" className="primary" onClick={createChild} disabled={childActionId === "create"}>
+          {childActionId === "create" ? "Creating..." : "Create child"}
+        </button>
+      </div>
+
+      <p className="helper-text">{childrenStatus}</p>
+
+      {latestChildToken && (
+        <section className="install-link-panel">
+          <div>
+            <p className="eyebrow">New install link</p>
+            <h3>{latestChildToken.displayName}</h3>
+            <p>Copy this now. For safety, the full token is only shown after create or rotate.</p>
+            <code>{childInstallLink(latestChildToken.accessToken)}</code>
+          </div>
+          <button type="button" className="primary" onClick={() => copyChildInstallLink(latestChildToken.accessToken)}>
+            Copy link
+          </button>
+        </section>
+      )}
+
+      <div className="children-list">
+        {children.length === 0 ? (
+          <p className="empty-state">No children created yet.</p>
+        ) : (
+          children.map((child) => (
+            <article className={`child-row${child.enabled ? "" : " disabled-channel"}`} key={child.id}>
+              <label className="switch" title={child.enabled ? "Child app access enabled" : "Child app access disabled"}>
+                <input
+                  type="checkbox"
+                  checked={child.enabled}
+                  onChange={(event) => updateChild(child.id, { enabled: event.target.checked })}
+                  disabled={childActionId === child.id}
+                  aria-label={`${child.enabled ? "Disable" : "Enable"} ${child.displayName}`}
+                />
+                <span aria-hidden="true" />
+              </label>
+              <div className="child-main">
+                <strong>{child.displayName}</strong>
+                <span>{child.enabled ? "Enabled" : "Disabled"} • token {child.tokenPreview}</span>
+              </div>
+              <div className="child-meta">
+                <span>Updated {formatDate(child.updatedAt)}</span>
+              </div>
+              <div className="row-actions">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const displayName = window.prompt("Child name", child.displayName);
+                    if (displayName?.trim()) {
+                      updateChild(child.id, { displayName: displayName.trim() });
+                    }
+                  }}
+                  disabled={childActionId === child.id}
+                >
+                  Rename
+                </button>
+                <button type="button" className="danger" onClick={() => rotateChildToken(child.id)} disabled={childActionId === child.id}>
+                  Rotate link
+                </button>
+              </div>
+            </article>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function stripAccessToken(child) {
+  const { accessToken, ...summary } = child;
+  return summary;
+}
+
+function formatDate(value) {
+  if (!value) {
+    return "unknown";
+  }
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
 createRoot(document.getElementById("root")).render(<App />);

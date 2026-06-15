@@ -73,6 +73,12 @@ button.danger {
   color: var(--danger);
 }
 
+button.active-tab {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #0f0f0f;
+}
+
 main {
   min-height: 100vh;
 }
@@ -262,6 +268,11 @@ h2 {
   grid-template-columns: minmax(280px, 1fr) auto;
 }
 
+.resolver.child-create {
+  grid-template-columns: minmax(280px, 0.5fr) auto;
+  max-width: 660px;
+}
+
 .candidate-list {
   display: grid;
   gap: 10px;
@@ -369,7 +380,8 @@ textarea:focus {
   gap: 10px;
 }
 
-.channel-row {
+.channel-row,
+.child-row {
   display: grid;
   grid-template-columns: 58px minmax(220px, 1fr) minmax(180px, 0.75fr) auto;
   gap: 12px;
@@ -382,6 +394,85 @@ textarea:focus {
 
 .channel-row.disabled-channel {
   opacity: 0.62;
+}
+
+.child-row.disabled-channel {
+  opacity: 0.62;
+}
+
+.children-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.child-main,
+.child-meta {
+  min-width: 0;
+}
+
+.child-main {
+  display: grid;
+  gap: 4px;
+}
+
+.child-main strong {
+  font-size: 15px;
+}
+
+.child-main span,
+.child-meta {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.install-link-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  margin-top: 16px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid rgba(255, 180, 84, 0.5);
+  border-radius: 8px;
+  background: rgba(255, 180, 84, 0.08);
+}
+
+.install-link-panel h3,
+.install-link-panel p {
+  margin: 0;
+}
+
+.install-link-panel h3 {
+  margin-top: 2px;
+  font-size: 18px;
+}
+
+.install-link-panel p:not(.eyebrow) {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.install-link-panel code {
+  display: block;
+  max-width: 100%;
+  margin-top: 10px;
+  overflow: hidden;
+  color: #ffe4b7;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 26px 0;
+  color: var(--muted);
 }
 
 .switch {
@@ -522,6 +613,7 @@ textarea:focus {
   }
 
   .channel-row,
+  .child-row,
   .candidate-card {
     grid-template-columns: 1fr;
   }
@@ -537,7 +629,9 @@ textarea:focus {
   }
 
   .resolver,
-  .resolver.api-resolver {
+  .resolver.api-resolver,
+  .resolver.child-create,
+  .install-link-panel {
     grid-template-columns: minmax(0, 1fr);
   }
 

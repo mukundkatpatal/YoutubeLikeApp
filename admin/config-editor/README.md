@@ -8,6 +8,7 @@ The app talks to the API configured by:
 
 ```text
 VITE_API_BASE_URL=http://localhost:4000
+VITE_KIDS_APP_BASE_URL=http://localhost:5174
 ```
 
 Run the editor:
@@ -22,7 +23,7 @@ npm run dev
 Open:
 
 ```text
-http://127.0.0.1:5173/admin
+http://localhost:5173/admin
 ```
 
 The editor can:
@@ -34,6 +35,17 @@ The editor can:
 - open test links for approved channels
 - add, remove, reorder, enable, and disable channels
 - validate IDs using the same basic rules as the WPF app
+- create child profiles
+- enable or disable child app access
+- rotate child install links
+- copy child PWA setup links
 
 Do not put YouTube API keys in this app. The YouTube API key belongs only in
 `apps/api/.env`.
+
+For production Render deployment, set:
+
+```text
+VITE_API_BASE_URL=https://sane-videos-api.onrender.com
+VITE_KIDS_APP_BASE_URL=https://sane-videos-kids.onrender.com
+```

@@ -11,6 +11,8 @@ Parent:
 - blocks specific videos
 - pins specific videos
 - controls API keys and remote config
+- signs in to the hosted admin app with Google
+- creates child profiles and install links
 - installs updates
 - decides whether future AI suggestions are accepted
 
@@ -38,6 +40,9 @@ Child:
 - Block WebView2 navigation outside the local player surface.
 - Check a remote update manifest and block browsing when an update is required.
 - Provide a browser preview for development checks.
+- Provide a hosted parent admin app for approved-channel management.
+- Let parents create child profiles, disable child access, rotate child access
+  tokens, and copy child PWA install links.
 
 ## Permission Model
 
@@ -51,6 +56,9 @@ Parent-controlled:
 - update manifest URL
 - future AI curation approvals
 - production settings file
+- child profiles
+- child install links
+- child access token rotation
 
 Child-allowed:
 
@@ -58,11 +66,13 @@ Child-allowed:
 - view approved videos
 - play approved videos
 - move between home, channel, and video list states
+- use a parent-issued pairing token stored by the child app
 
 Child-disallowed:
 
 - search
 - sign in
+- sign in with Google
 - open external links
 - edit settings
 - add channels
@@ -101,6 +111,16 @@ Config failure:
 1. Reject invalid remote config.
 2. Use last valid cached config when available.
 3. Show a clear status message when no usable config exists.
+
+Child pairing:
+
+1. Parent signs into the admin app.
+2. Parent creates a child profile.
+3. Admin app returns an install link containing a one-time-copy child token.
+4. Parent opens the install link on the child device.
+5. Child app stores the token locally and uses it to fetch that family's
+   approved channels and videos.
+6. Parent can disable the profile or rotate the token to revoke old access.
 
 ## Future PRD Questions
 
