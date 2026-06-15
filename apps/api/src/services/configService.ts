@@ -18,6 +18,28 @@ export async function ensureDefaultFamilyForParent(
   parentUserId: string,
   parentEmail: string
 ): Promise<string> {
+  const seededFamily = await prisma.family.findUnique({
+    where: { id: "default-family" },
+    select: { id: true }
+  });
+  if (seededFamily) {
+    await prisma.familyMember.upsert({
+      where: {
+        familyId_parentUserId: {
+          familyId: seededFamily.id,
+          parentUserId
+        }
+      },
+      create: {
+        familyId: seededFamily.id,
+        parentUserId,
+        role: "OWNER"
+      },
+      update: {}
+    });
+    return seededFamily.id;
+  }
+
   const existing = await prisma.familyMember.findFirst({
     where: { parentUserId },
     select: { familyId: true },

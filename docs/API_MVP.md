@@ -17,8 +17,10 @@ YouTube Data API metadata cache
 ```
 
 The API owns Google parent auth, config persistence, YouTube metadata fetches,
-and legacy config JSON generation. YouTube playback remains a client concern and
-must use the official iframe player.
+and legacy config JSON generation. The first frontend client is
+`admin/config-editor`, which now loads and saves config through this API instead
+of editing GitHub raw JSON. YouTube playback remains a client concern and must
+use the official iframe player.
 
 ## Database Model
 
@@ -73,6 +75,7 @@ deploying the same API elsewhere and changing `DATABASE_URL`.
 ## Guardrails For Future AI/Agent Changes
 
 - Do not expose the YouTube API key to frontend clients.
+- Do not reintroduce browser-local YouTube API key storage in the admin app.
 - Do not add child-facing search, comments, subscriptions, uploads, sign-in, or
   open browsing.
 - Do not scrape, download, proxy, or modify YouTube playback.

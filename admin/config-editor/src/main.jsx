@@ -1,12 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import defaultConfig from "./default-config.json";
 import "./styles.css";
 
-const rawConfigUrl = "https://raw.githubusercontent.com/mukundkatpatal/son-youtube-config/main/config.json";
-const githubEditUrl = "https://github.com/mukundkatpatal/son-youtube-config/edit/main/config.json";
-const youtubeApiBaseUrl = "https://www.googleapis.com/youtube/v3";
-const apiKeyStorageKey = "youtube-beta-config-editor-api-key";
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
 function createEmptyChannel() {
   return {
@@ -50,27 +47,8 @@ function formatConfig(config) {
   );
 }
 
-function splitVideoIds(value) {
-  return value
-    .split(/[\s,]+/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function validateConfig(config) {
   const errors = [];
-
-  if (config.version !== 1) {
-    errors.push("Only config version 1 is supported.");
-  }
-
-  if (config.refreshIntervalMinutes < 1 || config.refreshIntervalMinutes > 1440) {
-    errors.push("Refresh interval must be between 1 and 1440 minutes.");
-  }
-
-  if (config.maxVideosPerChannel < 1 || config.maxVideosPerChannel > 500) {
-    errors.push("Max videos per channel must be between 1 and 500.");
-  }
 
   const channelIds = new Set();
   config.channels.forEach((channel, index) => {
@@ -86,33 +64,17 @@ function validateConfig(config) {
     channelIds.add(channel.channelId);
   });
 
-  validateVideoIds(config.blockedVideoIds, "Blocked video", errors);
-  validateVideoIds(config.pinnedVideoIds, "Pinned video", errors);
-
   return errors;
 }
 
 function looksLikeChannelId(value) {
-  return /^UC[A-Za-z0-9_-]{18,38}$/.test(value);
-}
-
-function validateVideoIds(videoIds, label, errors) {
-  const seen = new Set();
-  videoIds.forEach((videoId) => {
-    if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
-      errors.push(`${label} '${videoId}' must be an 11-character YouTube video ID.`);
-    }
-
-    if (seen.has(videoId)) {
-      errors.push(`${label} '${videoId}' is duplicated.`);
-    }
-
-    seen.add(videoId);
-  });
+  return /^UC[A-Za-z0-9_-]{20,30}$/.test(value);
 }
 
 function channelUrl(channelId) {
-  return `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`;
+  return looksLikeChannelId(channelId)
+    ? `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`
+    : "https://www.youtube.com/";
 }
 
 function parseChannelInput(value) {
@@ -126,7 +88,7 @@ function parseChannelInput(value) {
   }
 
   if (trimmed.startsWith("@")) {
-    return { kind: "handle", value: trimmed };
+    return { kind: "search", value: trimmed.replace(/^@/, "") };
   }
 
   try {
@@ -141,11 +103,11 @@ function parseChannelInput(value) {
     }
 
     if (pathParts[0]?.startsWith("@")) {
-      return { kind: "handle", value: pathParts[0] };
+      return { kind: "search", value: pathParts[0].replace(/^@/, "") };
     }
 
     if (userIndex >= 0 && pathParts[userIndex + 1]) {
-      return { kind: "username", value: pathParts[userIndex + 1] };
+      return { kind: "search", value: pathParts[userIndex + 1] };
     }
 
     if (customIndex >= 0 && pathParts[customIndex + 1]) {
@@ -158,69 +120,64 @@ function parseChannelInput(value) {
   return { kind: "search", value: trimmed.replace(/^@/, "") };
 }
 
-async function getJson(url) {
-  const response = await fetch(url);
-  const body = await response.text();
+async function apiFetch(path, options = {}) {
+  const response = await fetch(`${apiBaseUrl}${path}`, {
+    ...options,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+
   if (!response.ok) {
-    throw new Error(`YouTube API returned ${response.status}: ${body}`);
+    const error = new Error(data?.error || `API returned ${response.status}.`);
+    error.status = response.status;
+    throw error;
   }
 
-  return JSON.parse(body);
+  return data;
 }
 
-function toCandidate(item) {
-  const snippet = item.snippet || {};
-  return {
-    channelId: item.id?.channelId || item.id || "",
-    title: snippet.title || "",
-    description: snippet.description || "",
-    thumbnailUrl:
-      snippet.thumbnails?.default?.url ||
-      snippet.thumbnails?.medium?.url ||
-      snippet.thumbnails?.high?.url ||
-      "",
-    source: item.source || ""
-  };
+function LoginScreen({ status }) {
+  return (
+    <main className="auth-shell">
+      <section className="auth-panel">
+        <p className="eyebrow">Parent YouTube Admin</p>
+        <h1>Parent sign-in</h1>
+        <p className="auth-copy">
+          Sign in with the parent Google account allowed for this app.
+        </p>
+        {status && <p className="helper-text">{status}</p>}
+        <button type="button" className="primary" onClick={() => (window.location.href = `${apiBaseUrl}/auth/google`)}>
+          Sign in with Google
+        </button>
+      </section>
+    </main>
+  );
 }
 
-async function resolveExactChannel(parsed, apiKey) {
-  const params = new URLSearchParams({
-    part: "snippet",
-    key: apiKey
-  });
-
-  if (parsed.kind === "id") {
-    params.set("id", parsed.value);
-  } else if (parsed.kind === "handle") {
-    params.set("forHandle", parsed.value);
-  } else if (parsed.kind === "username") {
-    params.set("forUsername", parsed.value);
-  } else {
-    return [];
-  }
-
-  const data = await getJson(`${youtubeApiBaseUrl}/channels?${params.toString()}`);
-  return (data.items || []).map((item) => toCandidate({ ...item, source: parsed.kind }));
-}
-
-async function searchChannels(query, apiKey) {
-  const params = new URLSearchParams({
-    part: "snippet",
-    type: "channel",
-    maxResults: "6",
-    q: query,
-    key: apiKey
-  });
-
-  const data = await getJson(`${youtubeApiBaseUrl}/search?${params.toString()}`);
-  return (data.items || []).map((item) => toCandidate({ ...item, source: "search" }));
+function LoadingScreen() {
+  return (
+    <main className="auth-shell">
+      <section className="auth-panel">
+        <p className="eyebrow">Parent YouTube Admin</p>
+        <h1>Loading</h1>
+        <p className="auth-copy">Checking your parent session and loading approved channels.</p>
+      </section>
+    </main>
+  );
 }
 
 function App() {
+  const [parent, setParent] = useState(null);
+  const [authStatus, setAuthStatus] = useState("");
+  const [isBooting, setIsBooting] = useState(true);
   const [config, setConfig] = useState(() => normalizeConfig(defaultConfig));
-  const [jsonDraft, setJsonDraft] = useState(() => formatConfig(normalizeConfig(defaultConfig)));
-  const [message, setMessage] = useState("Loaded downloaded GitHub config.");
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem(apiKeyStorageKey) || "");
+  const [message, setMessage] = useState("Loading approved channels...");
+  const [isSaving, setIsSaving] = useState(false);
   const [channelInput, setChannelInput] = useState("");
   const [resolverStatus, setResolverStatus] = useState("");
   const [resolverResults, setResolverResults] = useState([]);
@@ -232,11 +189,48 @@ function App() {
   );
   const enabledCount = config.channels.filter((channel) => channel.enabled).length;
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function boot() {
+      try {
+        const me = await apiFetch("/me");
+        if (cancelled) {
+          return;
+        }
+        setParent(me.parent);
+        const loaded = normalizeConfig(await apiFetch("/admin/config"));
+        if (cancelled) {
+          return;
+        }
+        setConfig(loaded);
+        setMessage("Loaded approved channels.");
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+        if (error.status === 401) {
+          setAuthStatus("You are not signed in.");
+        } else {
+          setAuthStatus(error.message);
+        }
+        setParent(null);
+      } finally {
+        if (!cancelled) {
+          setIsBooting(false);
+        }
+      }
+    }
+
+    boot();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function updateConfig(patch) {
     setConfig((current) => {
-      const next = { ...current, ...patch };
-      setJsonDraft(formatConfig(next));
-      return next;
+      return { ...current, ...patch };
     });
   }
 
@@ -270,15 +264,6 @@ function App() {
     updateConfig({ channels: [...config.channels, createEmptyChannel()] });
   }
 
-  function saveApiKey(value) {
-    setApiKey(value);
-    if (value.trim()) {
-      localStorage.setItem(apiKeyStorageKey, value.trim());
-    } else {
-      localStorage.removeItem(apiKeyStorageKey);
-    }
-  }
-
   async function resolveChannel() {
     const parsed = parseChannelInput(channelInput);
     if (parsed.kind === "empty") {
@@ -287,33 +272,21 @@ function App() {
       return;
     }
 
-    if (!apiKey.trim()) {
-      setResolverStatus("Paste a YouTube Data API key first.");
-      setResolverResults([]);
-      return;
-    }
-
     setIsResolving(true);
-    setResolverStatus("Resolving channel...");
+    setResolverStatus("Resolving channel through API...");
     setResolverResults([]);
 
     try {
-      let results = await resolveExactChannel(parsed, apiKey.trim());
-      if (results.length === 0 && parsed.kind !== "search") {
-        setResolverStatus("No exact match found. Searching channels...");
-        results = await searchChannels(parsed.value.replace(/^@/, ""), apiKey.trim());
-      } else if (parsed.kind === "search") {
-        results = await searchChannels(parsed.value, apiKey.trim());
+      if (parsed.kind === "id") {
+        setResolverResults([{ channelId: parsed.value, title: parsed.value, thumbnailUrl: "", source: "manual" }]);
+        setResolverStatus("Review the channel ID before adding it.");
+        return;
       }
 
+      const data = await apiFetch(`/admin/youtube/channels/search?q=${encodeURIComponent(parsed.value)}`);
+      const results = data.items || [];
       setResolverResults(results);
-      setResolverStatus(
-        results.length === 0
-          ? "No channels found."
-          : parsed.kind === "search"
-            ? "Choose the correct channel from the search results."
-            : "Review the resolved channel before adding it."
-      );
+      setResolverStatus(results.length === 0 ? "No channels found." : "Choose the correct channel from the search results.");
     } catch (error) {
       setResolverStatus(error.message);
     } finally {
@@ -328,7 +301,7 @@ function App() {
     }
 
     if (channelIdSet.has(candidate.channelId)) {
-      setResolverStatus(`${candidate.title || candidate.channelId} is already in the config.`);
+      setResolverStatus(`${candidate.title || candidate.channelId} is already approved.`);
       return;
     }
 
@@ -345,95 +318,70 @@ function App() {
     setResolverStatus(`Added ${candidate.title || candidate.channelId}.`);
   }
 
-  function applyJsonDraft() {
-    try {
-      const parsed = normalizeConfig(JSON.parse(jsonDraft));
-      setConfig(parsed);
-      setJsonDraft(formatConfig(parsed));
-      setMessage("JSON applied.");
-    } catch (error) {
-      setMessage(`Could not parse JSON: ${error.message}`);
-    }
-  }
-
-  async function importFile(event) {
-    const file = event.target.files?.[0];
-    if (!file) {
+  async function saveConfig() {
+    if (errors.length > 0) {
+      setMessage("Fix validation issues before saving.");
       return;
     }
 
-    const text = await file.text();
+    setIsSaving(true);
     try {
-      const parsed = normalizeConfig(JSON.parse(text));
-      setConfig(parsed);
-      setJsonDraft(formatConfig(parsed));
-      setMessage(`Imported ${file.name}.`);
+      const saved = normalizeConfig(
+        await apiFetch("/admin/config", {
+          method: "PUT",
+          body: formatConfig({
+            ...config,
+            updatedAt: new Date().toISOString()
+          })
+        })
+      );
+      setConfig(saved);
+      setMessage("Saved approved channels.");
     } catch (error) {
-      setMessage(`Could not import ${file.name}: ${error.message}`);
+      setMessage(`Save failed: ${error.message}`);
+    } finally {
+      setIsSaving(false);
     }
   }
 
-  async function copyJson() {
-    await navigator.clipboard.writeText(formatConfig(config));
-    setMessage("Config JSON copied to clipboard.");
+  async function logout() {
+    await apiFetch("/auth/logout", { method: "POST" }).catch(() => null);
+    setParent(null);
+    setAuthStatus("You have signed out.");
   }
 
-  function downloadJson() {
-    const blob = new Blob([formatConfig(config), "\n"], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "config.json";
-    link.click();
-    URL.revokeObjectURL(url);
-    setMessage("Downloaded config.json.");
+  if (isBooting) {
+    return <LoadingScreen />;
+  }
+
+  if (!parent) {
+    return <LoginScreen status={authStatus} />;
   }
 
   return (
     <main>
       <header className="topbar">
         <div>
-          <p className="eyebrow">Youtube Beta Admin</p>
-          <h1>Config editor</h1>
+          <p className="eyebrow">Parent YouTube Admin</p>
+          <h1>Approved channels</h1>
+          <p className="signed-in">Signed in as {parent.email}</p>
         </div>
         <div className="actions">
-          <a className="button ghost" href={rawConfigUrl} target="_blank" rel="noreferrer">
-            Raw config
-          </a>
-          <a className="button ghost" href={githubEditUrl} target="_blank" rel="noreferrer">
-            Edit on GitHub
-          </a>
-          <button type="button" onClick={copyJson}>
-            Copy JSON
-          </button>
-          <button type="button" className="primary" onClick={downloadJson}>
-            Download config.json
+          <button type="button" onClick={logout}>
+            Logout
           </button>
         </div>
       </header>
 
-      <section className="status-grid">
-        <article>
-          <span>{config.channels.length}</span>
-          <p>Channels</p>
-        </article>
-        <article>
-          <span>{enabledCount}</span>
-          <p>Enabled</p>
-        </article>
-        <article>
-          <span>{config.blockedVideoIds.length}</span>
-          <p>Blocked videos</p>
-        </article>
-        <article>
-          <span>{config.pinnedVideoIds.length}</span>
-          <p>Pinned videos</p>
-        </article>
-      </section>
-
-      <section className="notice">
-        <strong>{errors.length === 0 ? "Config is valid" : `${errors.length} issue(s) to fix`}</strong>
-        <span>{message}</span>
+      <section className="save-bar">
+        <div>
+          <strong>{errors.length === 0 ? "Ready to save" : `${errors.length} issue(s) to fix`}</strong>
+          <span>{message}</span>
+        </div>
+        <button type="button" className="primary" onClick={saveConfig} disabled={isSaving || errors.length > 0}>
+          {isSaving && <span className="spinner" aria-hidden="true" />}
+          {isSaving ? "Saving..." : "Save changes"}
+        </button>
         {errors.length > 0 && (
           <ul>
             {errors.map((error) => (
@@ -446,63 +394,12 @@ function App() {
       <div className="layout">
         <section className="panel">
           <div className="section-head">
-            <h2>General</h2>
-          </div>
-          <div className="form-grid">
-            <label>
-              Version
-              <input
-                type="number"
-                min="1"
-                value={config.version}
-                onChange={(event) => updateConfig({ version: Number(event.target.value) })}
-              />
-            </label>
-            <label>
-              Updated at
-              <input
-                value={config.updatedAt}
-                onChange={(event) => updateConfig({ updatedAt: event.target.value })}
-              />
-            </label>
-            <label>
-              Refresh interval minutes
-              <input
-                type="number"
-                min="1"
-                max="1440"
-                value={config.refreshIntervalMinutes}
-                onChange={(event) => updateConfig({ refreshIntervalMinutes: Number(event.target.value) })}
-              />
-            </label>
-            <label>
-              Max videos per channel
-              <input
-                type="number"
-                min="1"
-                max="500"
-                value={config.maxVideosPerChannel}
-                onChange={(event) => updateConfig({ maxVideosPerChannel: Number(event.target.value) })}
-              />
-            </label>
-          </div>
-
-          <div className="section-head spaced">
             <div>
-              <h2>Add channel from YouTube</h2>
-              <p className="section-note">Paste a channel URL, @handle, UC channel ID, legacy user URL, or search text.</p>
+              <h2>Add a channel</h2>
+              <p className="section-note">Paste a channel URL, @handle, channel ID, or search text.</p>
             </div>
           </div>
-          <div className="resolver">
-            <label>
-              YouTube Data API key
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(event) => saveApiKey(event.target.value)}
-                placeholder="Stored in this browser only"
-              />
-            </label>
+          <div className="resolver api-resolver">
             <label>
               Public channel input
               <input
@@ -527,11 +424,11 @@ function App() {
                 const exists = channelIdSet.has(candidate.channelId);
                 return (
                   <article className="candidate-card" key={candidate.channelId}>
-                    <img src={candidate.thumbnailUrl} alt="" />
+                    {candidate.thumbnailUrl ? <img src={candidate.thumbnailUrl} alt="" /> : <div className="avatar-fallback" />}
                     <div>
                       <strong>{candidate.title || "Untitled channel"}</strong>
                       <span>{candidate.channelId}</span>
-                      <p>{candidate.description}</p>
+                      {candidate.description && <p>{candidate.description}</p>}
                     </div>
                     <div className="candidate-actions">
                       <a className="button ghost" href={channelUrl(candidate.channelId)} target="_blank" rel="noreferrer">
@@ -548,37 +445,35 @@ function App() {
           )}
 
           <div className="section-head spaced">
-            <h2>Channels</h2>
-            <button type="button" onClick={addChannel}>
-              Add channel
-            </button>
+            <div>
+              <h2>Channels</h2>
+              <p className="section-note">{config.channels.length} total, {enabledCount} enabled</p>
+            </div>
+            <button type="button" onClick={addChannel}>Add channel</button>
           </div>
           <div className="channel-list">
             {config.channels.map((channel, index) => (
-              <article className="channel-row" key={`${channel.channelId}-${index}`}>
-                <label className="toggle">
+              <article className={`channel-row${channel.enabled ? "" : " disabled-channel"}`} key={`${channel.channelId}-${index}`}>
+                <label className="switch" title={channel.enabled ? "Allowed in the child app" : "Hidden from the child app"}>
                   <input
                     type="checkbox"
                     checked={channel.enabled}
                     onChange={(event) => updateChannel(index, { enabled: event.target.checked })}
+                    aria-label={`${channel.enabled ? "Hide" : "Allow"} ${channel.title || "channel"}`}
                   />
-                  Enabled
+                  <span aria-hidden="true" />
                 </label>
-                <label>
-                  Title
+                <label className="channel-title-field">
+                  Channel name
                   <input
                     value={channel.title}
                     onChange={(event) => updateChannel(index, { title: event.target.value })}
                   />
                 </label>
-                <label>
-                  Channel ID
-                  <input
-                    value={channel.channelId}
-                    onChange={(event) => updateChannel(index, { channelId: event.target.value.trim() })}
-                    placeholder="UC..."
-                  />
-                </label>
+                <div className="channel-meta">
+                  <span>{channel.channelId}</span>
+                  <strong>{channel.enabled ? "Allowed" : "Hidden"}</strong>
+                </div>
                 <div className="row-actions">
                   <a className="button ghost" href={channelUrl(channel.channelId)} target="_blank" rel="noreferrer">
                     Test
@@ -597,45 +492,6 @@ function App() {
             ))}
           </div>
         </section>
-
-        <aside className="panel">
-          <div className="section-head">
-            <h2>Video rules</h2>
-          </div>
-          <label>
-            Blocked video IDs
-            <textarea
-              value={config.blockedVideoIds.join("\n")}
-              onChange={(event) => updateConfig({ blockedVideoIds: splitVideoIds(event.target.value) })}
-              placeholder="One YouTube video ID per line"
-            />
-          </label>
-          <label>
-            Pinned video IDs
-            <textarea
-              value={config.pinnedVideoIds.join("\n")}
-              onChange={(event) => updateConfig({ pinnedVideoIds: splitVideoIds(event.target.value) })}
-              placeholder="One YouTube video ID per line"
-            />
-          </label>
-
-          <div className="section-head spaced">
-            <h2>Import / JSON</h2>
-            <label className="file-button">
-              Import file
-              <input type="file" accept="application/json,.json" onChange={importFile} />
-            </label>
-          </div>
-          <textarea
-            className="json-editor"
-            value={jsonDraft}
-            onChange={(event) => setJsonDraft(event.target.value)}
-            spellCheck="false"
-          />
-          <button type="button" className="wide" onClick={applyJsonDraft}>
-            Apply JSON editor
-          </button>
-        </aside>
       </div>
     </main>
   );
