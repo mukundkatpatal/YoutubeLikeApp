@@ -1,0 +1,52 @@
+apps/api/src/routes/kids.ts
+  s_65677feefd0d8f::t_6d4116463a0ad6 1,78-79
+  s_65677feefd0d8f::t_f46c9cf03889e6 2-6,8-9,13,26-77,80-120
+apps/api/README.md
+  s_65677feefd0d8f::t_f6d232c9231539 45-56
+docs/API_MVP.md
+  s_65677feefd0d8f::t_f6d232c9231539 56-57,80-82,100-117
+apps/api/src/services/youtubeService.ts
+  s_65677feefd0d8f::t_ae89ce55672da3 50,52-55,102-103,105-106,108-109,116-132,135-138
+  s_65677feefd0d8f::t_3c39df73929aaa 107,110-115
+apps/api/src/config/schemas.ts
+  s_65677feefd0d8f::t_ae89ce55672da3 46-50,55
+apps/api/tests/kidsRoutes.test.ts
+  s_65677feefd0d8f::t_eb29e2f57ee40a 1-131,133-138,140-299
+  s_65677feefd0d8f::t_70ee1198b319c9 132,139
+docs/ARCHITECTURE.md
+  s_65677feefd0d8f::t_f6d232c9231539 4-6,121-124,126-127,136-154,164-167
+docs/TESTING.md
+  s_65677feefd0d8f::t_f6d232c9231539 41-63,91-92
+apps/api/.env.sample
+  s_65677feefd0d8f::t_ae89ce55672da3 5-7
+apps/api/src/config/env.ts
+  s_65677feefd0d8f::t_ae89ce55672da3 9-11
+apps/api/src/server.ts
+  s_65677feefd0d8f::t_ae89ce55672da3 33
+apps/api/src/services/childProfileService.ts
+  s_65677feefd0d8f::t_ae89ce55672da3 22-27,92-111
+apps/api/src/services/childFeedService.ts
+  s_65677feefd0d8f::t_ce19b5c59adf58 154
+  s_65677feefd0d8f::t_ae89ce55672da3 1-153,155-236
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "5aa4ebac6233b2c58f5148d3d52323097a32385f",
+  "prompts": {},
+  "humans": {
+    "h_e4e43a5e1511e4": {
+      "author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_65677feefd0d8f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5dd5-7e51-7a21-ba90-e7e9ad43f072",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  }
+}
