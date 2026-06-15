@@ -1,0 +1,38 @@
+apps/api/src/config/schemas.ts
+  s_65677feefd0d8f::t_a11a1cf124b1c6 35-45,48-49
+apps/api/tests/adminChildren.test.ts
+  s_65677feefd0d8f::t_a3c4b32536a8e6 1-190
+apps/api/src/routes/adminChildren.ts
+  s_65677feefd0d8f::t_a11a1cf124b1c6 1-70
+apps/api/src/services/childProfileService.ts
+  s_65677feefd0d8f::t_a11a1cf124b1c6 1-163
+apps/api/src/server.ts
+  s_65677feefd0d8f::t_a11a1cf124b1c6 9,59
+apps/api/README.md
+  s_65677feefd0d8f::t_16a397ee7c8b3a 22-44,49
+docs/API_MVP.md
+  s_65677feefd0d8f::t_16a397ee7c8b3a 10,19-23,42-46,53,70-73,81-94,99-100
+docs/PRODUCT_GUARDRAILS.md
+  s_65677feefd0d8f::t_16a397ee7c8b3a 11-12,35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "e36f994c5c4c7fdb084cf0494bbb0262f56107ce",
+  "prompts": {},
+  "humans": {
+    "h_e4e43a5e1511e4": {
+      "author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_65677feefd0d8f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5dd5-7e51-7a21-ba90-e7e9ad43f072",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  }
+}
