@@ -1,0 +1,35 @@
+admin/config-editor/src/main.jsx
+  s_65677feefd0d8f::t_2c8c3df11bbd1b 7,81-86,185,193-198,222,246-258,381-454,468,472-485,492-510,513-528,629,635-753
+admin/config-editor/package.json
+  s_65677feefd0d8f::t_229b3f025ed804 7,9
+admin/config-editor/.env.sample
+  s_65677feefd0d8f::t_abf2123e667b69 2
+docs/PRODUCT_REQUIREMENTS.md
+  s_65677feefd0d8f::t_c30b0086373cb5 14-15,43-45,59-61,69,75,115-123
+admin/config-editor/README.md
+  s_65677feefd0d8f::t_229b3f025ed804 26
+  s_65677feefd0d8f::t_abf2123e667b69 11,38-41,45-51
+admin/config-editor/src/styles.css
+  s_65677feefd0d8f::t_057cd428a75539 76-81,271-275,383-384,399-477,616,632-634
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "7e1a3a7b04ce7a11fa47f5cb6823a9487651776c",
+  "prompts": {},
+  "humans": {
+    "h_e4e43a5e1511e4": {
+      "author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_65677feefd0d8f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5dd5-7e51-7a21-ba90-e7e9ad43f072",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  }
+}
