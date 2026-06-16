@@ -52,6 +52,7 @@ export type ChildVideoItem = {
 export async function buildChildBootstrap(
   prisma: PrismaClient,
   env: AppEnv,
+  youtube: YouTubeService,
   child: { childId: string; displayName: string; familyId: string }
 ): Promise<ChildBootstrap> {
   const family = await prisma.family.findUnique({
@@ -68,6 +69,7 @@ export async function buildChildBootstrap(
   }
 
   const channelIds = family.approvedChannels.map((channel) => channel.channelId);
+  await refreshChannelMetadataIfStale(prisma, youtube, channelIds);
   const [channelCaches, videoCaches] = await Promise.all([
     prisma.youTubeChannelCache.findMany({
       where: { channelId: { in: channelIds } }
@@ -123,6 +125,34 @@ export async function buildChildBootstrap(
         new Date(right.latestPublishedAt ?? 0).getTime() - new Date(left.latestPublishedAt ?? 0).getTime()
       )
   };
+}
+
+async function refreshChannelMetadataIfStale(
+  prisma: PrismaClient,
+  youtube: YouTubeService,
+  channelIds: string[]
+): Promise<void> {
+  if (channelIds.length === 0) {
+    return;
+  }
+
+  const caches = await prisma.youTubeChannelCache.findMany({
+    where: { channelId: { in: channelIds } }
+  });
+  const cacheById = new Map(caches.map((cache) => [cache.channelId, cache]));
+  const staleOrMissing = channelIds.filter((channelId) => {
+    const cache = cacheById.get(channelId);
+    return !cache || Date.now() - cache.fetchedAt.getTime() >= channelCacheTtlMs;
+  });
+  if (staleOrMissing.length === 0) {
+    return;
+  }
+
+  try {
+    await youtube.refreshChannelMetadata(staleOrMissing);
+  } catch {
+    // Bootstrap stays cache-first. Missing thumbnails are better than blocking the child app.
+  }
 }
 
 export async function buildChildVideoPage(

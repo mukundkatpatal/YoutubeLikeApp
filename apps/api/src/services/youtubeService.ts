@@ -17,6 +17,7 @@ export type YouTubeVideoResult = {
 
 export type YouTubeService = {
   searchChannels(query: string): Promise<YouTubeChannelSearchResult[]>;
+  refreshChannelMetadata(channelIds: string[]): Promise<void>;
   listChannelVideos(channelId: string, maxResults?: number): Promise<YouTubeVideoResult[]>;
 };
 
@@ -93,6 +94,42 @@ export class GoogleYouTubeService implements YouTubeService {
     return results;
   }
 
+  async refreshChannelMetadata(channelIds: string[]): Promise<void> {
+    const uniqueChannelIds = [...new Set(channelIds.filter(Boolean))];
+    for (let index = 0; index < uniqueChannelIds.length; index += 50) {
+      const batch = uniqueChannelIds.slice(index, index + 50);
+      const data = await this.fetchJson<YouTubeChannelsResponse>("/channels", {
+        part: "snippet,contentDetails",
+        id: batch.join(",")
+      });
+
+      await Promise.all(
+        (data.items ?? []).map((item) => {
+          const title = item.snippet?.title;
+          if (!item.id || !title) {
+            return Promise.resolve();
+          }
+
+          return this.prisma.youTubeChannelCache.upsert({
+            where: { channelId: item.id },
+            create: {
+              channelId: item.id,
+              title,
+              thumbnailUrl: item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url,
+              uploadsPlaylist: item.contentDetails?.relatedPlaylists?.uploads
+            },
+            update: {
+              title,
+              thumbnailUrl: item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url,
+              uploadsPlaylist: item.contentDetails?.relatedPlaylists?.uploads,
+              fetchedAt: new Date()
+            }
+          });
+        })
+      );
+    }
+  }
+
   async listChannelVideos(channelId: string, maxResults = 25): Promise<YouTubeVideoResult[]> {
     const channel = await this.getChannel(channelId);
     if (!channel.uploadsPlaylist) {
@@ -148,34 +185,13 @@ export class GoogleYouTubeService implements YouTubeService {
       return { uploadsPlaylist: cached.uploadsPlaylist ?? undefined };
     }
 
-    const data = await this.fetchJson<YouTubeChannelsResponse>("/channels", {
-      part: "snippet,contentDetails",
-      id: channelId
-    });
-    const item = data.items?.[0];
-    const title = item?.snippet?.title;
-    const uploadsPlaylist = item?.contentDetails?.relatedPlaylists?.uploads;
-    if (!item?.id || !title) {
+    await this.refreshChannelMetadata([channelId]);
+    const refreshed = await this.prisma.youTubeChannelCache.findUnique({ where: { channelId } });
+    if (!refreshed) {
       return {};
     }
 
-    await this.prisma.youTubeChannelCache.upsert({
-      where: { channelId: item.id },
-      create: {
-        channelId: item.id,
-        title,
-        thumbnailUrl: item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url,
-        uploadsPlaylist
-      },
-      update: {
-        title,
-        thumbnailUrl: item.snippet?.thumbnails?.medium?.url ?? item.snippet?.thumbnails?.default?.url,
-        uploadsPlaylist,
-        fetchedAt: new Date()
-      }
-    });
-
-    return { uploadsPlaylist };
+    return { uploadsPlaylist: refreshed.uploadsPlaylist ?? undefined };
   }
 
   private async cacheVideos(videos: YouTubeVideoResult[]): Promise<void> {

@@ -18,3 +18,4 @@ preview/settings.local.json
 *.appx
 *.appxbundle
 *.msixbundle
+.DS_Store

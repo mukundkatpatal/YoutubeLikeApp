@@ -61,6 +61,28 @@ The API tests should cover:
 - stale YouTube cache refresh attempted server-side with cached fallback
 - child PWA app-version force-update decisions
 
+## Child PWA
+
+Run from `apps/kids`:
+
+```bash
+npm run build
+```
+
+Manual checks:
+
+- open `/setup?token=...` and verify the token is removed from the URL
+- verify approved channels load from `/kids/bootstrap`
+- refresh the page and verify cached channels appear before network refresh
+- open a channel and verify approved videos load
+- refresh a channel after API sleep/offline and verify cached video metadata is
+  still shown when available
+- select a video and verify it uses an official YouTube iframe embed
+- set API minimum supported version above `VITE_APP_VERSION` and verify the PWA
+  blocks browsing with an update screen
+- verify no search, Google sign-in, admin controls, or raw YouTube API key
+  inputs appear in the child app
+
 ## Windows Manual Checks
 
 On a Windows target machine, verify:

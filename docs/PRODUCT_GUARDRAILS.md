@@ -15,6 +15,8 @@ child. These guardrails should shape all product and engineering decisions.
 - Remote parent-controlled config.
 - Playback only for approved or explicitly pinned videos.
 - Clear behavior when config is missing, invalid, or stale.
+- Child PWA should show cached approved metadata when available instead of a
+  blank screen during API cold starts or network failures.
 - Respect for official YouTube player and API requirements.
 
 ## Explicit Non-Goals

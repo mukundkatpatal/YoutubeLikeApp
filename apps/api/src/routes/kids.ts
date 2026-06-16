@@ -30,7 +30,7 @@ export async function registerKidsRoutes(app: FastifyInstance): Promise<void> {
       return reply;
     }
 
-    return buildChildBootstrap(app.api.prisma, app.api.env, child);
+    return buildChildBootstrap(app.api.prisma, app.api.env, app.api.youtube, child);
   });
 
   app.get<{

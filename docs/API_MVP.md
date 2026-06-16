@@ -17,10 +17,10 @@ YouTube Data API metadata cache
 ```
 
 The API owns Google parent auth, child profile pairing, config persistence,
-YouTube metadata fetches, and legacy config JSON generation. The first frontend
-client is `admin/config-editor`, which loads and saves config through this API
-instead of editing GitHub raw JSON. YouTube playback remains a client concern
-and must use the official iframe player.
+YouTube metadata fetches, and legacy config JSON generation. The frontend
+clients are `admin/config-editor` for parents and `apps/kids` for the child PWA.
+YouTube playback remains a client concern and must use the official iframe
+player.
 
 ## Database Model
 
@@ -115,6 +115,19 @@ PWA should use the header after storing its token locally.
 The API uses Postgres YouTube metadata cache first. If channel/video cache is
 stale, it tries a backend YouTube refresh, but child endpoints still return
 cached metadata when YouTube quota or network calls fail.
+
+## Child PWA
+
+`apps/kids` is the installable child-facing React PWA. It stores the
+parent-issued pairing token locally after `/setup?token=...`, calls the child
+API with `x-child-access-token`, and caches last-good bootstrap/video pages in
+IndexedDB. It has no child search, sign-in, admin controls, or browser-local
+YouTube API key.
+
+Current viewer behavior includes approved channel grid, per-channel video grid,
+load-more pagination, official YouTube iframe playback, skeleton loaders,
+cached startup, and app-version blocking when the API minimum supported version
+is higher than the PWA build version.
 
 ## Guardrails For Future AI/Agent Changes
 

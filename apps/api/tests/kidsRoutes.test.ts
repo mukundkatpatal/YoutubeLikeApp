@@ -13,7 +13,7 @@ type ApprovedChannel = {
   sortOrder: number;
 };
 
-function createMockPrisma(options: { stale?: boolean } = {}) {
+function createMockPrisma(options: { stale?: boolean; missingChannelCache?: boolean } = {}) {
   const approvedChannels: ApprovedChannel[] = [
     {
       channelId: "UC1111111111111111111111",
@@ -124,9 +124,28 @@ function createMockPrisma(options: { stale?: boolean } = {}) {
       },
       youTubeChannelCache: {
         findMany: async ({ where }: { where: { channelId: { in: string[] } } }) =>
-          channelCaches.filter((cache) => where.channelId.in.includes(cache.channelId)),
+          options.missingChannelCache
+            ? []
+            : channelCaches.filter((cache) => where.channelId.in.includes(cache.channelId)),
         findUnique: async ({ where }: { where: { channelId: string } }) =>
-          channelCaches.find((cache) => cache.channelId === where.channelId) ?? null
+          channelCaches.find((cache) => cache.channelId === where.channelId) ?? null,
+        upsert: async ({
+          where,
+          create,
+          update
+        }: {
+          where: { channelId: string };
+          create: typeof channelCaches[number];
+          update: Partial<typeof channelCaches[number]>;
+        }) => {
+          const existing = channelCaches.find((cache) => cache.channelId === where.channelId);
+          if (existing) {
+            Object.assign(existing, update);
+            return existing;
+          }
+          channelCaches.push(create);
+          return create;
+        }
       },
       youTubeVideoCache: {
         findMany: async ({ where, take }: { where: { channelId?: string | { in: string[] } }; take?: number }) => {
@@ -176,7 +195,12 @@ describe("kids routes", () => {
         KIDS_LATEST_VERSION: "0.2.0",
         KIDS_MINIMUM_SUPPORTED_VERSION: "0.1.0"
       }),
-      prisma: prisma as never
+      prisma: prisma as never,
+      youtube: {
+        searchChannels: async () => [],
+        refreshChannelMetadata: async () => undefined,
+        listChannelVideos: async () => []
+      }
     });
 
     const response = await app.inject({
@@ -201,11 +225,39 @@ describe("kids routes", () => {
     await app.close();
   });
 
+  it("refreshes channel metadata during bootstrap when channel cache is missing", async () => {
+    const { prisma } = createMockPrisma({ missingChannelCache: true });
+    let refreshCalls = 0;
+    const app = await buildServer({
+      env: loadEnv({ NODE_ENV: "test" }),
+      prisma: prisma as never,
+      youtube: {
+        searchChannels: async () => [],
+        refreshChannelMetadata: async (channelIds: string[]) => {
+          refreshCalls += 1;
+          expect(channelIds).toEqual(["UC1111111111111111111111"]);
+        },
+        listChannelVideos: async () => []
+      }
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/kids/bootstrap",
+      headers: { "x-child-access-token": validToken }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(refreshCalls).toBe(1);
+    await app.close();
+  });
+
   it("returns approved channel videos from cache with blocked videos removed and pinned first", async () => {
     const { prisma } = createMockPrisma();
     let refreshCalls = 0;
     const youtube = {
       searchChannels: async () => [],
+      refreshChannelMetadata: async () => undefined,
       listChannelVideos: async () => {
         refreshCalls += 1;
         return [];
@@ -252,6 +304,7 @@ describe("kids routes", () => {
     let refreshCalls = 0;
     const youtube = {
       searchChannels: async () => [],
+      refreshChannelMetadata: async () => undefined,
       listChannelVideos: async () => {
         refreshCalls += 1;
         throw new Error("quota failed");

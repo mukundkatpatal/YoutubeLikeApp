@@ -11,6 +11,7 @@ describe("server", () => {
     };
     const youtube = {
       searchChannels: async () => [],
+      refreshChannelMetadata: async () => undefined,
       listChannelVideos: async () => []
     };
     const app = await buildServer({

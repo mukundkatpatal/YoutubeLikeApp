@@ -152,6 +152,12 @@ available and attempt backend YouTube refreshes only when channel/video metadata
 is stale. The frontend must not receive YouTube API keys or arbitrary search
 capabilities.
 
+`apps/kids` is the child-facing React/Vite PWA. It handles
+`/setup?token=...`, stores the child token locally, loads `/kids/bootstrap`,
+keeps last-good bootstrap and video pages in IndexedDB, and plays selected
+approved videos through official YouTube iframe embeds. It is intentionally not
+the admin app and must not gain child-facing search or configuration controls.
+
 ## Tests
 
 `tests/YoutubeBeta.Tests` currently covers:
@@ -165,3 +171,6 @@ other logic that can be tested without a real WebView2 instance.
 `apps/api/tests` covers the Node API contracts, including parent auth helpers,
 child profile management, child token access, child video filtering, and
 cache-first behavior.
+
+`apps/kids` is verified with a TypeScript/Vite production build and manual PWA
+checks in browser until the UI grows enough to justify browser automation tests.
