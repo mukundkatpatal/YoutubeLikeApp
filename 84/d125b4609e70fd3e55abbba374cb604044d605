@@ -1,0 +1,72 @@
+docs/PRODUCT_GUARDRAILS.md
+  s_65677feefd0d8f::t_6dc9ca621837d4 18-19
+apps/api/src/routes/kids.ts
+  s_65677feefd0d8f::t_a1027df5e8b35b 33
+apps/api/tests/server.test.ts
+  s_65677feefd0d8f::t_aa37afe972afbf 14
+apps/kids/tsconfig.json
+  s_65677feefd0d8f::t_60117207b85e36 1-20
+apps/kids/src/types.ts
+  s_65677feefd0d8f::t_60117207b85e36 1-43
+apps/kids/src/api.ts
+  s_65677feefd0d8f::t_60117207b85e36 1-35
+apps/kids/src/main.tsx
+  s_65677feefd0d8f::t_60117207b85e36 1-422
+apps/api/src/services/childFeedService.ts
+  s_65677feefd0d8f::t_aa6dab96332071 55,72,130-155
+apps/api/tests/kidsRoutes.test.ts
+  s_65677feefd0d8f::t_6daf4a85942c58 16,127-129,229
+  s_65677feefd0d8f::t_ab036205f8c618 131-148,198-203,228,230-254,260,307
+.gitignore
+  s_65677feefd0d8f::t_60117207b85e36 21
+apps/kids/src/version.ts
+  s_65677feefd0d8f::t_60117207b85e36 1-21
+apps/kids/src/cache.ts
+  s_65677feefd0d8f::t_60117207b85e36 1-54
+apps/kids/.env.sample
+  s_65677feefd0d8f::t_60117207b85e36 1-2
+apps/kids/README.md
+  s_65677feefd0d8f::t_60117207b85e36 1-69
+apps/api/src/services/youtubeService.ts
+  s_65677feefd0d8f::t_40bc3d0f5ca0c8 20,97-132,188-190,194
+apps/kids/package.json
+  s_65677feefd0d8f::t_bfb674b0b7c797 13,20-21
+  s_65677feefd0d8f::t_60117207b85e36 1-12,14-19,22-23
+apps/kids/index.html
+  s_65677feefd0d8f::t_60117207b85e36 1-13
+apps/kids/src/vite-env.d.ts
+  s_65677feefd0d8f::t_60117207b85e36 1-2
+apps/kids/vite.config.ts
+  s_65677feefd0d8f::t_60117207b85e36 1-35
+apps/kids/src/styles.css
+  s_65677feefd0d8f::t_60117207b85e36 1-345
+apps/kids/public/icons/icon.svg
+  s_65677feefd0d8f::t_60117207b85e36 1-5
+docs/ARCHITECTURE.md
+  s_65677feefd0d8f::t_6dc9ca621837d4 155-160,174-176
+docs/TESTING.md
+  s_65677feefd0d8f::t_6dc9ca621837d4 64-85
+docs/API_MVP.md
+  s_65677feefd0d8f::t_6dc9ca621837d4 20-23,119-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "84d125b4609e70fd3e55abbba374cb604044d605",
+  "prompts": {},
+  "humans": {
+    "h_e4e43a5e1511e4": {
+      "author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_65677feefd0d8f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5dd5-7e51-7a21-ba90-e7e9ad43f072",
+        "model": "gpt-5.5"
+      },
+      "human_author": "mukundkatpatal <mukundkatpatal@users.noreply.github.com>"
+    }
+  }
+}
